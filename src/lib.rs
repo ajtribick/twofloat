@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, PartialOrd, Copy, Clone)]
 pub struct TwoFloat {
     hi: f64,
     lo: f64,
@@ -64,33 +64,61 @@ mod tests {
         assert_eq!(a.lo, b.lo);
     });
 
-    randomized_test!(equality_test, |rng: F64Rand| {
-        let a = TwoFloat::new(rng(), rng());
-        let b = a.clone();
-        assert_eq!(a, b);
-    });
+    macro_rules! equality_test {
+        ($val_test: ident, $ref_test: ident, $create_values: expr, $assertion: tt) => {
+            randomized_test!($val_test, |rng: F64Rand| {
+                let (a, b) = $create_values(rng);
+                $assertion!(a, b);
+            });
 
-    randomized_test!(equality_ref_test, |rng: F64Rand| {
-        let a = TwoFloat::new(rng(), rng());
-        let b = a.clone();
-        assert_eq!(&a, &b);
-    });
+            randomized_test!($ref_test, |rng: F64Rand| {
+                let (a, b) = $create_values(rng);
+                $assertion!(&a, &b);
+            });
+        };
+    }
 
-    randomized_test!(inequality_test, |rng: F64Rand| {
+    equality_test!(equality_test, equality_ref_test, |rng: F64Rand| {
         let a = TwoFloat::new(rng(), rng());
-        let b = loop {
+        (a, a.clone())
+    }, assert_eq);
+
+    equality_test!(inequality_test, inequality_ref_test, |rng: F64Rand| {
+        let a = TwoFloat::new(rng(), rng());
+        (a, loop {
             let b = TwoFloat::new(rng(), rng());
             if b.hi != a.hi || b.lo != a.lo { break b; };
-        };
-        assert_ne!(a, b);
-    });
+        })
+    }, assert_ne);
 
-    randomized_test!(inequality_ref_test, |rng: F64Rand| {
-        let a = TwoFloat::new(rng(), rng());
-        let b = loop {
-            let b = TwoFloat::new(rng(), rng());
-            if b.hi != a.hi || b.lo != a.lo { break b; };
+    macro_rules! comparison_test {
+        ($val_test: ident, $ref_test: ident, $op: tt, $allow_equal: expr) => {
+            randomized_test!($val_test, |rng: F64Rand| {
+                let a = TwoFloat::new(rng(), rng());
+                assert_eq!($allow_equal, a $op a);
+        
+                let b = TwoFloat::new(a.hi, rng());
+                assert_eq!(a.lo $op b.lo, a $op b);
+        
+                let c = TwoFloat::new(rng(), b.lo);
+                assert_eq!(a.hi $op c.hi, a $op c);
+            });
+
+            randomized_test!($ref_test, |rng: F64Rand| {
+                let a = TwoFloat::new(rng(), rng());
+                assert_eq!($allow_equal, &a $op &a);
+        
+                let b = TwoFloat::new(a.hi, rng());
+                assert_eq!(a.lo $op b.lo, &a $op &b);
+        
+                let c = TwoFloat::new(rng(), b.lo);
+                assert_eq!(a.hi $op c.hi, &a $op &c);
+            });
         };
-        assert_ne!(&a, &b);
-    });
+    }
+
+    comparison_test!(less_than_test, less_than_ref_test, <, false);
+    comparison_test!(greater_than_test, greater_than_ref_test, >, false);
+    comparison_test!(less_equal_test, less_equal_ref_test, <=, true);
+    comparison_test!(greater_equal_test, greater_equal_ref_test, >=, true);
 }
