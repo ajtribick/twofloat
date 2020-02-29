@@ -1,9 +1,9 @@
 use std::convert::From;
 
-#[derive(Debug, PartialEq, PartialOrd, Copy, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct TwoFloat {
-    hi: f64,
-    lo: f64,
+    pub(crate) hi: f64,
+    pub(crate) lo: f64,
 }
 
 impl From<f64> for TwoFloat {
