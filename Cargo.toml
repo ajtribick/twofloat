@@ -1,0 +1,13 @@
+[package]
+name = "twofloat"
+version = "0.1.0"
+authors = ["Andrew Tribick <ajtribick@googlemail.com>"]
+
+keywords = ["float", "precision", "numerics", "floating-point", "arithmetic"]
+categories = ["algorithms", "mathematics", "science"]
+
+readme = "README.md"
+license = "BSD-3-Clause"
+description = "Double-double arithmetic library."
+
+edition = "2018"
