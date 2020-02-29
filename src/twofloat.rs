@@ -24,7 +24,6 @@ impl<'a> From<&'a TwoFloat> for f64 {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;

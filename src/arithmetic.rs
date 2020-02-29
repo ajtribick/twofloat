@@ -75,99 +75,87 @@ impl Neg for TwoFloat {
     }
 }
 
-macro_rules! op_impl {
-    ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, $code:expr) => {
-        impl $op_assign<f64> for TwoFloat {
-            fn $op_assign_fn(&mut self, other: f64) {
-                let (a, b) = $code(self, other);
+macro_rules! op_fwd_impl {
+    ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, $lhs_i:ident, $rhs_i: ident, $rhs:ty, $code:block) => {
+        impl $op_assign<$rhs> for TwoFloat {
+            fn $op_assign_fn(&mut self, $rhs_i: $rhs) {
+                let $lhs_i = &self;
+                let (a, b) = $code;
                 self.hi = a;
                 self.lo = b;
             }
         }
 
-        impl $op<f64> for TwoFloat {
+        impl $op<$rhs> for TwoFloat {
             type Output = TwoFloat;
 
-            fn $op_fn(mut self, other: f64) -> TwoFloat {
-                let (a, b) = $code(&self, other);
+            fn $op_fn(mut self, $rhs_i: $rhs) -> TwoFloat {
+                let $lhs_i = &mut self;
+                let (a, b) = $code;
                 self.hi = a;
                 self.lo = b;
                 self
             }
         }
 
-        impl<'a> $op<f64> for &'a TwoFloat {
+        impl<'a> $op<$rhs> for &'a TwoFloat {
             type Output = TwoFloat;
 
-            fn $op_fn(self, other: f64) -> TwoFloat {
-                let (a, b) = $code(self, other);
-                TwoFloat { hi: a, lo: b }
-            }
-        }
-
-        impl $op<TwoFloat> for f64 {
-            type Output = TwoFloat;
-
-            fn $op_fn(self, mut other: TwoFloat) -> TwoFloat {
-                other.$op_assign_fn(self);
-                other
-            }
-        }
-
-        impl<'a> $op<&'a TwoFloat> for f64 {
-            type Output = TwoFloat;
-
-            fn $op_fn(self, other: &'a TwoFloat) -> TwoFloat {
-                let (a, b) = $code(other, self);
+            fn $op_fn(self, $rhs_i: $rhs) -> TwoFloat {
+                let $lhs_i = self;
+                let (a, b) = $code;
                 TwoFloat { hi: a, lo: b }
             }
         }
     };
-    ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, $code:expr, $code_rev:expr) => {
-        impl $op_assign<f64> for TwoFloat {
-            fn $op_assign_fn(&mut self, other: f64) {
-                let (a, b) = $code(self, other);
-                self.hi = a;
-                self.lo = b;
+}
+
+macro_rules! op_impl {
+    ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, |$lhs_i:ident : &TwoFloat, $rhs_i:ident : $rhs:ty| $code:block) => {
+        op_fwd_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, $rhs, $code);
+
+        impl $op<TwoFloat> for $rhs {
+            type Output = TwoFloat;
+
+            fn $op_fn(self, mut $lhs_i: TwoFloat) -> TwoFloat {
+                $lhs_i.$op_assign_fn(self);
+                $lhs_i
             }
         }
 
-        impl $op<f64> for TwoFloat {
+        impl<'a> $op<&'a TwoFloat> for $rhs {
             type Output = TwoFloat;
 
-            fn $op_fn(mut self, other: f64) -> TwoFloat {
-                let (a, b) = $code(&self, other);
-                self.hi = a;
-                self.lo = b;
-                self
-            }
-        }
-
-        impl<'a> $op<f64> for &'a TwoFloat {
-            type Output = TwoFloat;
-
-            fn $op_fn(self, other: f64) -> TwoFloat {
-                let (a, b) = $code(self, other);
+            fn $op_fn(self, $lhs_i: &'a TwoFloat) -> TwoFloat {
+                let $rhs_i = self;
+                let (a, b) = $code;
                 TwoFloat { hi: a, lo: b }
             }
         }
+    };
+    ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident,
+        |$lhs_i:ident : &TwoFloat, $rhs_i: ident : $rhs:ty| $code:block,
+        |$lhs_rev_i:ident : $lhs_rev:ty, $rhs_rev_i:ident : &TwoFloat| $code_rev:block) => {
+        op_fwd_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, $rhs, $code);
 
-        impl $op<TwoFloat> for f64 {
+        impl $op<TwoFloat> for $lhs_rev {
             type Output = TwoFloat;
 
-            fn $op_fn(self, mut other: TwoFloat) -> TwoFloat {
-                let (a, b) = $code_rev(self, &other);
-                other.hi = a;
-                other.lo = b;
-                other
+            fn $op_fn(self, mut $rhs_rev_i: TwoFloat) -> TwoFloat {
+                let $lhs_rev_i = self;
+                let (a, b) = $code_rev;
+                $rhs_i.hi = a;
+                $rhs_i.lo = b;
+                $rhs_i
             }
         }
 
-        impl<'a> $op<&'a TwoFloat> for f64 {
+        impl<'a> $op<&'a TwoFloat> for $lhs_rev {
             type Output = TwoFloat;
 
-            fn $op_fn(self, other: &'a TwoFloat) -> TwoFloat {
-                let (a, b) = $code_rev(self, other);
+            fn $op_fn(self, $rhs_rev_i: &'a TwoFloat) -> TwoFloat {
+                let $lhs_rev_i = self;
+                let (a, b) = $code_rev;
                 TwoFloat { hi: a, lo: b }
             }
         }
