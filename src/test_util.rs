@@ -15,11 +15,11 @@ pub fn float_generator() -> Box<dyn FnMut() -> f64> {
 }
 
 macro_rules! randomized_test {
-    ($test_name: ident, $code: expr) => {
+    ($test_name:ident, $code:expr) => {
         #[test]
         fn $test_name() {
             let mut rng = float_generator();
-            for _ in 0..10000 {
+            for _ in 0..100000 {
                 $code(&mut rng);
             };
         }
@@ -85,10 +85,12 @@ macro_rules! assert_eq_ulp {
     ($left:expr, $right:expr, $ulp:expr) => ({
         match (&$left, &$right, &$ulp) {
             (left_val, right_val, ulp_val) => {
-                if !(ulp_diff(*left_val, *right_val).abs() <= *ulp_val) {
+                let diff = ulp_diff(*left_val, *right_val).abs();
+                if !(diff <= *ulp_val) {
                     panic!(r#"assertion failed: `(left == right) ({:?} ulp)`
   left: `{:?}`,
- right: `{:?}`"#, &*ulp_val, &*left_val, &*right_val)
+ right: `{:?}`,
+  diff: `{}`"#, &*ulp_val, &*left_val, &*right_val, diff)
                 }
             }
         }
@@ -99,10 +101,12 @@ macro_rules! assert_eq_ulp {
     ($left:expr, $right:expr, $ulp:expr, $($arg:tt)+) => ({
         match (&$left, &$right, &$ulp) {
             (left_val, right_val, ulp_val) => {
+                let diff = ulp_diff(*left_val, *right_val).abs();
                 if !(ulp_diff(*left_val, *right_val).abs() <= *ulp_val) {
                     panic!(r#"assertion failed: `(left == right) ({:?} ulp)`
   left: `{:?}`,
- right: `{:?}`: {}"#, &*ulp_val, &*left_val, &*right_val, format_args!($($arg)+))
+ right: `{:?}`,
+  diff: `{}`: {}"#, &*ulp_val, &*left_val, &*right_val, diff, format_args!($($arg)+))
                 }
             }
         }

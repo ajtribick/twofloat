@@ -24,6 +24,7 @@ impl<'a> From<&'a TwoFloat> for f64 {
     }
 }
 
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -32,37 +33,33 @@ mod tests {
     randomized_test!(copy_test, |rng: F64Rand| {
         let a = TwoFloat { hi: rng(), lo: rng() };
         let b = a;
-        assert_eq!(a.hi, b.hi);
-        assert_eq!(a.lo, b.lo);
+        assert_eq!(a.hi, b.hi, "Copy failed for {:?}", a);
+        assert_eq!(a.lo, b.lo, "Copy failed for {:?}", a);
     });
 
     randomized_test!(clone_test, |rng: F64Rand| {
         let a = TwoFloat { hi: rng(), lo: rng() };
         let b = a.clone();
-        assert_eq!(a.hi, b.hi);
-        assert_eq!(a.lo, b.lo);
+        assert_eq!(a.hi, b.hi, "Clone failed for {:?}", a);
+        assert_eq!(a.lo, b.lo, "Clone failed for {:?}", a);
     });
 
     macro_rules! equality_test {
-        ($val_test: ident, $ref_test: ident, $create_values: expr, $assertion: tt) => {
+        ($val_test: ident, $create_values: expr, $assertion: tt) => {
             randomized_test!($val_test, |rng: F64Rand| {
                 let (a, b) = $create_values(rng);
                 $assertion!(a, b);
-            });
-
-            randomized_test!($ref_test, |rng: F64Rand| {
-                let (a, b) = $create_values(rng);
                 $assertion!(&a, &b);
             });
         };
     }
 
-    equality_test!(equality_test, equality_ref_test, |rng: F64Rand| {
+    equality_test!(equality_test, |rng: F64Rand| {
         let a = TwoFloat { hi: rng(), lo: rng() };
         (a, a.clone())
     }, assert_eq);
 
-    equality_test!(inequality_test, inequality_ref_test, |rng: F64Rand| {
+    equality_test!(inequality_test, |rng: F64Rand| {
         let a = TwoFloat { hi: rng(), lo: rng() };
         (a, loop {
             let b = TwoFloat { hi: rng(), lo: rng() };
