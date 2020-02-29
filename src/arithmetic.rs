@@ -75,11 +75,11 @@ impl Neg for TwoFloat {
     }
 }
 
-macro_rules! op_fwd_impl {
+macro_rules! op_common_impl {
     ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, $lhs_i:ident, $rhs_i: ident, $rhs:ty, $code:block) => {
         impl $op_assign<$rhs> for TwoFloat {
             fn $op_assign_fn(&mut self, $rhs_i: $rhs) {
-                let $lhs_i = &self;
+                let $lhs_i = *self;
                 let (a, b) = $code;
                 self.hi = a;
                 self.lo = b;
@@ -90,7 +90,7 @@ macro_rules! op_fwd_impl {
             type Output = TwoFloat;
 
             fn $op_fn(mut self, $rhs_i: $rhs) -> TwoFloat {
-                let $lhs_i = &mut self;
+                let $lhs_i = self;
                 let (a, b) = $code;
                 self.hi = a;
                 self.lo = b;
@@ -111,8 +111,42 @@ macro_rules! op_fwd_impl {
 }
 
 macro_rules! op_impl {
+    ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, |$lhs_i:ident : &TwoFloat, $rhs_i:ident : &TwoFloat| $code:block) => {
+        op_common_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, TwoFloat, $code);
+
+        impl<'a> $op_assign<&'a TwoFloat> for TwoFloat {
+            fn $op_assign_fn(&mut self, $rhs_i: &'a TwoFloat) {
+                let $lhs_i = *self;
+                let (a, b) = $code;
+                self.hi = a;
+                self.lo = b;
+            }
+        }
+
+        impl<'a> $op<&'a TwoFloat> for TwoFloat {
+            type Output = TwoFloat;
+
+            fn $op_fn(mut self, $rhs_i: &'a TwoFloat) -> TwoFloat {
+                let $lhs_i = self;
+                let (a, b) = $code;
+                self.hi = a;
+                self.lo = b;
+                self
+            }
+        }
+
+        impl<'a, 'b> $op<&'b TwoFloat> for &'a TwoFloat {
+            type Output = TwoFloat;
+
+            fn $op_fn(self, $rhs_i: &'b TwoFloat) -> TwoFloat {
+                let $lhs_i = self;
+                let (a, b) = $code;
+                TwoFloat { hi: a, lo: b }
+            }
+        }
+    };
     ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, |$lhs_i:ident : &TwoFloat, $rhs_i:ident : $rhs:ty| $code:block) => {
-        op_fwd_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, $rhs, $code);
+        op_common_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, $rhs, $code);
 
         impl $op<TwoFloat> for $rhs {
             type Output = TwoFloat;
@@ -136,7 +170,7 @@ macro_rules! op_impl {
     ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident,
         |$lhs_i:ident : &TwoFloat, $rhs_i: ident : $rhs:ty| $code:block,
         |$lhs_rev_i:ident : $lhs_rev:ty, $rhs_rev_i:ident : &TwoFloat| $code_rev:block) => {
-        op_fwd_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, $rhs, $code);
+        op_common_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, $rhs, $code);
 
         impl $op<TwoFloat> for $lhs_rev {
             type Output = TwoFloat;
@@ -208,6 +242,49 @@ op_impl!(DivAssign, div_assign, Div, div, |lhs: &TwoFloat, rhs: f64| {
     let (ch, cl1) = two_prod(m.hi, lhs);
     let cl3 = m.lo.mul_add(lhs, cl1);
     fast_two_sum(ch, cl3)
+});
+
+op_impl!(AddAssign, add_assign, Add, add, |lhs: &TwoFloat, rhs: &TwoFloat| {
+    // Joldes et al. (2017) Algorithm 6
+    let (sh, sl) = two_sum(lhs.hi, rhs.hi);
+    let (th, tl) = two_sum(lhs.lo, rhs.lo);
+    let c = sl + th;
+    let (vh, vl) = fast_two_sum(sh, c);
+    let w = tl + vl;
+    fast_two_sum(vh, w)
+});
+
+op_impl!(SubAssign, sub_assign, Sub, sub, |lhs: &TwoFloat, rhs: &TwoFloat| {
+    // Joldes et al. (2017) Algorithm 6 for negative rhs
+    let (sh, sl) = two_diff(lhs.hi, rhs.hi);
+    let (th, tl) = two_diff(lhs.lo, rhs.lo);
+    let c = sl + th;
+    let (vh, vl) = fast_two_sum(sh, c);
+    let w = tl + vl;
+    fast_two_sum(vh, w)
+});
+
+op_impl!(MulAssign, mul_assign, Mul, mul, |lhs: &TwoFloat, rhs: &TwoFloat| {
+    // Joldes et al. (2017) Algorithm 12
+    let (ch, cl1) = two_prod(lhs.hi, rhs.hi);
+    let tl0 = lhs.lo * rhs.lo;
+    let tl1 = lhs.hi.mul_add(rhs.lo, tl0);
+    let cl2 = lhs.lo.mul_add(rhs.hi, tl1);
+    let cl3 = cl1 + cl2;
+    fast_two_sum(ch, cl3)
+});
+
+op_impl!(DivAssign, div_assign, Div, div, |lhs: &TwoFloat, rhs: &TwoFloat| {
+    // Joldes et al. (2017) Algorithm 18
+    let th = 1.0 / rhs.hi;
+    let rh = 1.0 - rhs.hi * th;
+    let rl = -(rhs.lo * th);
+    let (eh, el) = fast_two_sum(rh, rl);
+    let e = TwoFloat { hi: eh, lo: el };
+    let d = e * th;
+    let m = d + th;
+    let z = lhs * &m;
+    (z.hi, z.lo)
 });
 
 #[cfg(test)]
@@ -298,7 +375,7 @@ mod tests {
         assert_eq!(c.lo, a.lo);
     });
 
-    macro_rules! op_test {
+    macro_rules! op_test_f64 {
         ($test_name:ident, $op:tt, $op_assign:tt, $reversible:expr) => {
             randomized_test!($test_name, |rng: F64Rand| {
                 let is_reversible = $reversible;
@@ -331,8 +408,37 @@ mod tests {
         };
     }
 
-    op_test!(add_f64_test, +, +=, true);
-    op_test!(sub_f64_test, -, -=, false);
-    op_test!(mul_f64_test, *, *=, true);
-    op_test!(div_f64_test, /, /=, false);
+    op_test_f64!(add_f64_test, +, +=, true);
+    op_test_f64!(sub_f64_test, -, -=, false);
+    op_test_f64!(mul_f64_test, *, *=, true);
+    op_test_f64!(div_f64_test, /, /=, false);
+
+    macro_rules! op_test {
+        ($test_name:ident, $op:tt, $op_assign:tt) => {
+            randomized_test!($test_name, |rng: F64Rand| {
+                let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a, b).unwrap_or(false) });
+                let (c, d) = get_valid_pair(rng, |c: f64, d: f64| { (a $op c).is_finite() && no_overlap(c, d).unwrap_or(false) });
+
+                let value1 = TwoFloat { hi: a, lo: b };
+                let value2 = TwoFloat { hi: c, lo: d };
+
+                let result1 = value1 $op value2;
+                let result2 = &value1 $op value2;
+                let result3 = value1 $op &value2;
+                let result4 = &value1 $op &value2;
+
+                assert_eq!(result1, result2, "Mismatch between TwoFloat {0} TwoFloat and &TwoFloat {0} TwoFloat", stringify!($op));
+                assert_eq!(result1, result3, "Mismatch between TwoFloat {0} TwoFloat and TwoFloat {0} &TwoFloat", stringify!($op));
+                assert_eq!(result1, result4, "Mismatch between TwoFloat {0} TwoFloat and &TwoFloat {0} &TwoFloat", stringify!($op));
+
+                let check = TwoFloat::from(a) $op TwoFloat::from(c);
+                assert_eq_ulp!(check.hi, a $op c, 10);
+            });
+        };
+    }
+
+    op_test!(add_test, +, +=);
+    op_test!(sub_test, -, -=);
+    op_test!(mul_test, *, *=);
+    op_test!(div_test, /, /=);
 }
