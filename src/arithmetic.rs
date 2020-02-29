@@ -1,3 +1,5 @@
+use std::ops::Neg;
+
 use crate::twofloat::TwoFloat;
 
 // Joldes et al. (2017) Algorithm 1
@@ -61,6 +63,14 @@ impl TwoFloat {
         let tl = d / y;
         let (a, b) = fast_two_sum(th, tl);
         TwoFloat { hi: a, lo: b }
+    }
+}
+
+impl Neg for TwoFloat {
+    type Output = TwoFloat;
+
+    fn neg(self) -> TwoFloat {
+        TwoFloat { hi: -self.hi, lo: -self.lo }
     }
 }
 
@@ -139,5 +149,16 @@ mod tests {
         let ef = |a: f64, b: f64| -> u64 { let ab = a.to_bits(); let bb = b.to_bits(); if ab > bb { ab - bb } else { bb - ab }};
         assert_eq_ulp!(actual.hi, a / b, 1, "Incorrect result of new_div({}, {}) - {}", a, b, ef(actual.hi, a / b));
         assert!(no_overlap(actual.hi, actual.lo).unwrap_or(false), "Overlapping bits in new_div({}, {})", a, b);
+    });
+
+    randomized_test!(neg_test, |rng: F64Rand| {
+        let a = TwoFloat { hi: rng(), lo: rng() };
+        let b = -a;
+        assert_eq!(b.hi, -a.hi);
+        assert_eq!(b.lo, -a.lo);
+
+        let c = -b;
+        assert_eq!(c.hi, a.hi);
+        assert_eq!(c.lo, a.lo);
     });
 }
