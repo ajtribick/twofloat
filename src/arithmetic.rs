@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-use crate::twofloat::TwoFloat;
+use crate::base::TwoFloat;
 
 fn fast_two_sum(a: f64, b: f64) -> (f64, f64) {
     // Joldes et al. (2017) Algorithm 1

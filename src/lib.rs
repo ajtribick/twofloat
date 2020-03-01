@@ -1,5 +1,7 @@
 #[cfg(test)]
 mod test_util;
 
-pub mod twofloat;
-pub mod arithmetic;
+mod base;
+mod arithmetic;
+
+pub use base::TwoFloat;
