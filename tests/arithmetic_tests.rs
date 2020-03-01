@@ -24,8 +24,8 @@ fn cube_root() {
     let solved = loop {
         let old_x = x;
         x = x - (x * x * x - 7.0) / (3.0 * x * x);
-        if (x - old_x).abs() < 1e-50.into() { break x; };
+        if (x - old_x).abs() < 1e-50 { break x; };
     };
 
-    assert!(solved - 7f64.cbrt() < std::f64::EPSILON.into());
+    assert!(solved - 7f64.cbrt() < std::f64::EPSILON);
 }
