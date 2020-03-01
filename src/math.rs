@@ -1,7 +1,7 @@
 use crate::base::TwoFloat;
 
 impl TwoFloat {
-    /// Returns the absolute value root of this TwoFloat
+    /// Returns the absolute value root of this TwoFloat.
     /// 
     /// # Examples:
     ///
@@ -13,7 +13,7 @@ impl TwoFloat {
         if self.hi > 0.0 || (self.hi == 0.0 && self.hi.is_sign_positive() && self.lo.is_sign_positive()) { self.clone() } else { -self }
     }
 
-    /// Returns `true` if `self` has a positive sign, including `+0.0`
+    /// Returns `true` if `self` has a positive sign, including `+0.0`.
     /// 
     /// # Examples:
     ///
@@ -26,7 +26,7 @@ impl TwoFloat {
         self.hi > 0.0 || (self.hi == 0.0 && self.hi.is_sign_positive())
     }
 
-    /// Returns `true` if `self` has a negative sign, including `-0.0`
+    /// Returns `true` if `self` has a negative sign, including `-0.0`.
     /// 
     /// # Examples:
     ///
@@ -39,7 +39,8 @@ impl TwoFloat {
         self.hi < 0.0 || (self.hi == 0.0 && self.hi.is_sign_negative())
     }
 
-    /// Checks if `self` is finite, i.e. both components are finite
+    /// Returns `true` if `self` is a valid value, where both components are
+    /// finite (not infinity or NaN).
     /// 
     /// # Examples:
     /// 

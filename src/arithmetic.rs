@@ -36,27 +36,32 @@ fn two_prod(a: f64, b: f64) -> (f64, f64) {
 }
 
 impl TwoFloat {
-    /// Creates a TwoFloat by adding two f64 values
+    /// Creates a new `TwoFloat` by adding two `f64` values using Algorithm 2
+    /// from Joldes et al. (2017).
     pub fn new_add(x: f64, y: f64) -> TwoFloat {
         let (a, b) = two_sum(x, y);
         TwoFloat { hi: a, lo: b }
     }
 
-    /// Creates a TwoFloat by subtracting two f64 values
+    /// Creates a new `TwoFloat` by subtracting two `f64` values using
+    /// Algorithm 2 from Joldes et al. (2017) modified for negative right-hand
+    /// side.
     pub fn new_sub(x: f64, y: f64) -> TwoFloat {
         let (a, b) = two_diff(x, y);
         TwoFloat { hi: a, lo: b }
     }
 
-    /// Creates a TwoFloat by multiplying two f64 values
+    /// Creates a new `TwoFloat` by multiplying two `f64` values using
+    /// Algorithm 3 from Joldes et al. (2017).
     pub fn new_mul(x: f64, y: f64) -> TwoFloat {
         let (a, b) = two_prod(x, y);
         TwoFloat { hi: a, lo: b }
     }
 
-    /// Creates a TwoFloat by dividing two f64 values
+    /// Creates a new `TwoFloat` by dividing two `f64` values using Algorithm
+    /// 15 from Joldes et al. (2017) modified for the left-hand-side having a
+    /// zero value in the low word.
     pub fn new_div(x: f64, y: f64) -> TwoFloat {
-        // Joldes et al. (2017) Algorithm 15 with xl=0
         let th = x / y;
         let (ph, pl) = two_prod(th, y);
         let dh = x - ph;
@@ -70,6 +75,7 @@ impl TwoFloat {
 impl Neg for TwoFloat {
     type Output = TwoFloat;
 
+    /// Returns a new `TwoFloat` with the negated value of `self`.
     fn neg(self) -> TwoFloat {
         TwoFloat { hi: -self.hi, lo: -self.lo }
     }
@@ -78,14 +84,16 @@ impl Neg for TwoFloat {
 impl<'a> Neg for &'a TwoFloat {
     type Output = TwoFloat;
 
+    /// Returns a new `TwoFloat` with the negated value of `self`.
     fn neg(self) -> TwoFloat {
         TwoFloat { hi: -self.hi, lo: -self.lo }
     }
 }
 
 macro_rules! op_common_impl {
-    ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, $lhs_i:ident, $rhs_i: ident, $rhs:ty, $code:block) => {
+    ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, $lhs_i:ident, $rhs_i: ident, $rhs:ty, $code:block, $($meta:meta)*) => {
         impl $op_assign<$rhs> for TwoFloat {
+            $(#[$meta])*
             fn $op_assign_fn(&mut self, $rhs_i: $rhs) {
                 let $lhs_i = *self;
                 let (a, b) = $code;
@@ -97,6 +105,7 @@ macro_rules! op_common_impl {
         impl $op<$rhs> for TwoFloat {
             type Output = TwoFloat;
 
+            $(#[$meta])*
             fn $op_fn(mut self, $rhs_i: $rhs) -> TwoFloat {
                 let $lhs_i = self;
                 let (a, b) = $code;
@@ -109,6 +118,7 @@ macro_rules! op_common_impl {
         impl<'a> $op<$rhs> for &'a TwoFloat {
             type Output = TwoFloat;
 
+            $(#[$meta])*
             fn $op_fn(self, $rhs_i: $rhs) -> TwoFloat {
                 let $lhs_i = self;
                 let (a, b) = $code;
@@ -119,10 +129,11 @@ macro_rules! op_common_impl {
 }
 
 macro_rules! op_impl {
-    ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, |$lhs_i:ident : &TwoFloat, $rhs_i:ident : &TwoFloat| $code:block) => {
-        op_common_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, TwoFloat, $code);
+    ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, $(#[$meta:meta])* |$lhs_i:ident : &TwoFloat, $rhs_i:ident : &TwoFloat| $code:block) => {
+        op_common_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, TwoFloat, $code, $($meta)*);
 
         impl<'a> $op_assign<&'a TwoFloat> for TwoFloat {
+            $(#[$meta])*
             fn $op_assign_fn(&mut self, $rhs_i: &'a TwoFloat) {
                 let $lhs_i = *self;
                 let (a, b) = $code;
@@ -134,6 +145,7 @@ macro_rules! op_impl {
         impl<'a> $op<&'a TwoFloat> for TwoFloat {
             type Output = TwoFloat;
 
+            $(#[$meta])*
             fn $op_fn(mut self, $rhs_i: &'a TwoFloat) -> TwoFloat {
                 let $lhs_i = self;
                 let (a, b) = $code;
@@ -146,6 +158,7 @@ macro_rules! op_impl {
         impl<'a, 'b> $op<&'b TwoFloat> for &'a TwoFloat {
             type Output = TwoFloat;
 
+            $(#[$meta])*
             fn $op_fn(self, $rhs_i: &'b TwoFloat) -> TwoFloat {
                 let $lhs_i = self;
                 let (a, b) = $code;
@@ -153,12 +166,13 @@ macro_rules! op_impl {
             }
         }
     };
-    ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, |$lhs_i:ident : &TwoFloat, $rhs_i:ident : $rhs:ty| $code:block) => {
-        op_common_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, $rhs, $code);
+    ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, $(#[$meta:meta])* |$lhs_i:ident : &TwoFloat, $rhs_i:ident : $rhs:ty| $code:block) => {
+        op_common_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, $rhs, $code, $($meta)*);
 
         impl $op<TwoFloat> for $rhs {
             type Output = TwoFloat;
 
+            $(#[$meta])*
             fn $op_fn(self, mut $lhs_i: TwoFloat) -> TwoFloat {
                 $lhs_i.$op_assign_fn(self);
                 $lhs_i
@@ -168,6 +182,7 @@ macro_rules! op_impl {
         impl<'a> $op<&'a TwoFloat> for $rhs {
             type Output = TwoFloat;
 
+            $(#[$meta])*
             fn $op_fn(self, $lhs_i: &'a TwoFloat) -> TwoFloat {
                 let $rhs_i = self;
                 let (a, b) = $code;
@@ -176,13 +191,14 @@ macro_rules! op_impl {
         }
     };
     ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident,
-        |$lhs_i:ident : &TwoFloat, $rhs_i: ident : $rhs:ty| $code:block,
-        |$lhs_rev_i:ident : $lhs_rev:ty, $rhs_rev_i:ident : &TwoFloat| $code_rev:block) => {
-        op_common_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, $rhs, $code);
+        $(#[$fwd:meta])* |$lhs_i:ident : &TwoFloat, $rhs_i: ident : $rhs:ty| $code:block,
+        $(#[$rev:meta])* |$lhs_rev_i:ident : $lhs_rev:ty, $rhs_rev_i:ident : &TwoFloat| $code_rev:block) => {
+        op_common_impl!($op_assign, $op_assign_fn, $op, $op_fn, $lhs_i, $rhs_i, $rhs, $code, $($fwd)*);
 
         impl $op<TwoFloat> for $lhs_rev {
             type Output = TwoFloat;
 
+            $(#[$rev])*
             fn $op_fn(self, mut $rhs_rev_i: TwoFloat) -> TwoFloat {
                 let $lhs_rev_i = self;
                 let (a, b) = $code_rev;
@@ -195,6 +211,7 @@ macro_rules! op_impl {
         impl<'a> $op<&'a TwoFloat> for $lhs_rev {
             type Output = TwoFloat;
 
+            $(#[$rev])*
             fn $op_fn(self, $rhs_rev_i: &'a TwoFloat) -> TwoFloat {
                 let $lhs_rev_i = self;
                 let (a, b) = $code_rev;
@@ -204,42 +221,56 @@ macro_rules! op_impl {
     };
 }
 
-op_impl!(AddAssign, add_assign, Add, add, |lhs: &TwoFloat, rhs: f64| {
-    // Joldes et al. (2017) Algorithm 4
-    let (sh, sl) = two_sum(lhs.hi, rhs);
-    let v = lhs.lo + sl;
-    fast_two_sum(sh, v)
-});
+op_impl!(AddAssign, add_assign, Add, add,
+    /// Implements addition of `TwoFloat` and `f64` using Joldes et al.
+    /// (2017) Algorithm 4.
+    |lhs: &TwoFloat, rhs: f64| {
+        let (sh, sl) = two_sum(lhs.hi, rhs);
+        let v = lhs.lo + sl;
+        fast_two_sum(sh, v)
+    });
 
-op_impl!(SubAssign, sub_assign, Sub, sub, |lhs: &TwoFloat, rhs: f64| {
-    // Joldes et al. (2017) Algorithm 4 for negative rhs
-    let (sh, sl) = two_diff(lhs.hi, rhs);
-    let v = lhs.lo + sl;
-    fast_two_sum(sh, v)
-}, |lhs: f64, rhs: &TwoFloat| {
-    let (sh, sl) = two_diff(lhs, rhs.hi);
-    let v = sl - rhs.lo;
-    fast_two_sum(sh, v)
-});
+op_impl!(SubAssign, sub_assign, Sub, sub,
+    /// Implements subtraction of `TwoFloat` and `f64` using Joldes et al.
+    /// (2017) Algorithm 4 modified for negative right-hand side.
+    |lhs: &TwoFloat, rhs: f64| {
+        let (sh, sl) = two_diff(lhs.hi, rhs);
+        let v = lhs.lo + sl;
+        fast_two_sum(sh, v)
+    },
+    /// Implements subtraction of `f64` and `TwoFloat` using Joldes et al.
+    /// (2017) Algorithm 4 modified for negative left-hand side.
+    |lhs: f64, rhs: &TwoFloat| {
+        let (sh, sl) = two_diff(lhs, rhs.hi);
+        let v = sl - rhs.lo;
+        fast_two_sum(sh, v)
+    });
 
-op_impl!(MulAssign, mul_assign, Mul, mul, |lhs: &TwoFloat, rhs: f64| {
-    // Joldes et al. (2017) Algorithm 9
-    let (ch, cl1) = two_prod(lhs.hi, rhs);
-    let cl3 = lhs.lo.mul_add(rhs, cl1);
-    fast_two_sum(ch, cl3)
-});
+op_impl!(MulAssign, mul_assign, Mul, mul,
+    /// Implements multiplication of `TwoFloat` and `f64` using Joldes et al.
+    /// (2017) Algorithm 9.
+    |lhs: &TwoFloat, rhs: f64| {
+        let (ch, cl1) = two_prod(lhs.hi, rhs);
+        let cl3 = lhs.lo.mul_add(rhs, cl1);
+        fast_two_sum(ch, cl3)
+    });
 
-op_impl!(DivAssign, div_assign, Div, div, |lhs: &TwoFloat, rhs: f64| {
-    // Joldes et al. (2017) Algorithm 15
-    let th = lhs.hi / rhs;
-    let (ph, pl) = two_prod(th, rhs);
-    let dh = lhs.hi - ph;
-    let dt = dh - pl;
-    let d = dt + lhs.lo;
-    let tl = d / rhs;
-    fast_two_sum(th, tl)
-}, |lhs: f64, rhs: &TwoFloat| {
-    // Joldes et al. (2017) Algorithm 18 with xl = 0
+op_impl!(DivAssign, div_assign, Div, div,
+    /// Implements division of `TwoFloat` and `f64` using Joldes et al. (2017)
+    /// Algorithm 15 
+    |lhs: &TwoFloat, rhs: f64| {
+        let th = lhs.hi / rhs;
+        let (ph, pl) = two_prod(th, rhs);
+        let dh = lhs.hi - ph;
+        let dt = dh - pl;
+        let d = dt + lhs.lo;
+        let tl = d / rhs;
+        fast_two_sum(th, tl)
+    },
+    /// Implements division of `f64` and `TwoFloat` using Joldes et al. (2017)
+    /// Algorithm 18 modified for the left-hand side having a zero value in
+    /// the low word.
+    |lhs: f64, rhs: &TwoFloat| {
     let th = 1.0 / rhs.hi;
     let rh = 1.0 - rhs.hi * th;
     let rl = -(rhs.lo * th);
@@ -252,48 +283,56 @@ op_impl!(DivAssign, div_assign, Div, div, |lhs: &TwoFloat, rhs: f64| {
     fast_two_sum(ch, cl3)
 });
 
-op_impl!(AddAssign, add_assign, Add, add, |lhs: &TwoFloat, rhs: &TwoFloat| {
-    // Joldes et al. (2017) Algorithm 6
-    let (sh, sl) = two_sum(lhs.hi, rhs.hi);
-    let (th, tl) = two_sum(lhs.lo, rhs.lo);
-    let c = sl + th;
-    let (vh, vl) = fast_two_sum(sh, c);
-    let w = tl + vl;
-    fast_two_sum(vh, w)
-});
+op_impl!(AddAssign, add_assign, Add, add,
+    /// Implements addition of two `TwoFloat` values using Joldes et al.
+    /// (2017) Algorithm 6.
+    |lhs: &TwoFloat, rhs: &TwoFloat| {
+        let (sh, sl) = two_sum(lhs.hi, rhs.hi);
+        let (th, tl) = two_sum(lhs.lo, rhs.lo);
+        let c = sl + th;
+        let (vh, vl) = fast_two_sum(sh, c);
+        let w = tl + vl;
+        fast_two_sum(vh, w)
+    });
 
-op_impl!(SubAssign, sub_assign, Sub, sub, |lhs: &TwoFloat, rhs: &TwoFloat| {
-    // Joldes et al. (2017) Algorithm 6 for negative rhs
-    let (sh, sl) = two_diff(lhs.hi, rhs.hi);
-    let (th, tl) = two_diff(lhs.lo, rhs.lo);
-    let c = sl + th;
-    let (vh, vl) = fast_two_sum(sh, c);
-    let w = tl + vl;
-    fast_two_sum(vh, w)
-});
+op_impl!(SubAssign, sub_assign, Sub, sub,
+    /// Implements subtraction of two `TwoFloat` values using Joldes et al.
+    /// (2017) Algorithm 6 modified for a negative right-hand side.
+    |lhs: &TwoFloat, rhs: &TwoFloat| {
+        let (sh, sl) = two_diff(lhs.hi, rhs.hi);
+        let (th, tl) = two_diff(lhs.lo, rhs.lo);
+        let c = sl + th;
+        let (vh, vl) = fast_two_sum(sh, c);
+        let w = tl + vl;
+        fast_two_sum(vh, w)
+    });
 
-op_impl!(MulAssign, mul_assign, Mul, mul, |lhs: &TwoFloat, rhs: &TwoFloat| {
-    // Joldes et al. (2017) Algorithm 12
-    let (ch, cl1) = two_prod(lhs.hi, rhs.hi);
-    let tl0 = lhs.lo * rhs.lo;
-    let tl1 = lhs.hi.mul_add(rhs.lo, tl0);
-    let cl2 = lhs.lo.mul_add(rhs.hi, tl1);
-    let cl3 = cl1 + cl2;
-    fast_two_sum(ch, cl3)
-});
+op_impl!(MulAssign, mul_assign, Mul, mul,
+    /// Implements multiplication of two `TwoFloat` values using Joldes et al.
+    /// (2017) Algorithm 12.
+    |lhs: &TwoFloat, rhs: &TwoFloat| {
+        let (ch, cl1) = two_prod(lhs.hi, rhs.hi);
+        let tl0 = lhs.lo * rhs.lo;
+        let tl1 = lhs.hi.mul_add(rhs.lo, tl0);
+        let cl2 = lhs.lo.mul_add(rhs.hi, tl1);
+        let cl3 = cl1 + cl2;
+        fast_two_sum(ch, cl3)
+    });
 
-op_impl!(DivAssign, div_assign, Div, div, |lhs: &TwoFloat, rhs: &TwoFloat| {
-    // Joldes et al. (2017) Algorithm 18
-    let th = 1.0 / rhs.hi;
-    let rh = 1.0 - rhs.hi * th;
-    let rl = -(rhs.lo * th);
-    let (eh, el) = fast_two_sum(rh, rl);
-    let e = TwoFloat { hi: eh, lo: el };
-    let d = e * th;
-    let m = d + th;
-    let z = lhs * &m;
-    (z.hi, z.lo)
-});
+op_impl!(DivAssign, div_assign, Div, div,
+    /// Implements division of two `TwoFloat` values using Joldes et al.
+    /// (2017) Algorithm 18.
+    |lhs: &TwoFloat, rhs: &TwoFloat| {
+        let th = 1.0 / rhs.hi;
+        let rh = 1.0 - rhs.hi * th;
+        let rl = -(rhs.lo * th);
+        let (eh, el) = fast_two_sum(rh, rl);
+        let e = TwoFloat { hi: eh, lo: el };
+        let d = e * th;
+        let m = d + th;
+        let z = lhs * &m;
+        (z.hi, z.lo)
+    });
 
 #[cfg(test)]
 mod tests {
