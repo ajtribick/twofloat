@@ -8,7 +8,7 @@ categories = ["algorithms", "mathematics", "science"]
 
 readme = "README.md"
 license = "BSD-3-Clause"
-description = "Double-double arithmetic library."
+description = "A double-double arithmetic library."
 
 edition = "2018"
 
