@@ -1,5 +1,7 @@
 use std::convert::From;
 
+/// Represents a two-word floating point type, represented as the sum of two
+/// non-overlapping f64 values.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct TwoFloat {
     pub(crate) hi: f64,
