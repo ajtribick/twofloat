@@ -12,8 +12,5 @@ description = "Double-double arithmetic library."
 
 edition = "2018"
 
-[lib]
-doctest = false
-
 [dev-dependencies]
 rand = "0.7"
