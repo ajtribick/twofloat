@@ -75,6 +75,14 @@ impl Neg for TwoFloat {
     }
 }
 
+impl<'a> Neg for &'a TwoFloat {
+    type Output = TwoFloat;
+
+    fn neg(self) -> TwoFloat {
+        TwoFloat { hi: -self.hi, lo: -self.lo }
+    }
+}
+
 macro_rules! op_common_impl {
     ($op_assign:ident, $op_assign_fn:ident, $op:ident, $op_fn:ident, $lhs_i:ident, $rhs_i: ident, $rhs:ty, $code:block) => {
         impl $op_assign<$rhs> for TwoFloat {
@@ -292,20 +300,12 @@ mod tests {
     use super::*;
     use crate::test_util::*;
 
-    fn get_valid_pair<F : Fn(f64, f64) -> bool>(rng: F64Rand, pred: F) -> (f64, f64) {
-        loop {
-            let a = rng();
-            let b = rng();
-            if pred(a, b) { return (a, b); };
-        }
-    }
-
     randomized_test!(fast_two_sum_test, |rng: F64Rand| {
         let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { (a + b).is_finite() });
         let (hi, lo) = if a.abs() >= b.abs() { fast_two_sum(a, b) } else { fast_two_sum(b, a) };
 
         assert_eq_ulp!(hi, a + b, 1, "Incorrect result of fast_two_sum({}, {})", a, b);
-        assert!(no_overlap(hi, lo).unwrap_or(false), "Overlapping bits in two_sum({}, {})", a, b);
+        assert!(no_overlap(hi, lo), "Overlapping bits in two_sum({}, {})", a, b);
     });
 
     randomized_test!(two_sum_test, |rng: F64Rand| {
@@ -313,7 +313,7 @@ mod tests {
         let (hi, lo) = two_sum(a, b);
         
         assert_eq_ulp!(hi, a + b, 1, "Incorrect result of two_sum({}, {})", a, b);
-        assert!(no_overlap(hi, lo).unwrap_or(false), "Overlapping bits in two_sum({}, {})", a, b);
+        assert!(no_overlap(hi, lo), "Overlapping bits in two_sum({}, {})", a, b);
     });
 
     randomized_test!(two_diff_test, |rng: F64Rand| {
@@ -321,7 +321,7 @@ mod tests {
         let (hi, lo) = two_diff(a, b);
 
         assert_eq_ulp!(hi, a - b, 1, "Incorrect resut of two_diff({}, {})", a, b);
-        assert!(no_overlap(hi, lo).unwrap_or(false), "Overlapping bits in two_diff({}, {})", a, b);
+        assert!(no_overlap(hi, lo), "Overlapping bits in two_diff({}, {})", a, b);
     });
 
     randomized_test!(two_prod_test, |rng: F64Rand| {
@@ -329,7 +329,7 @@ mod tests {
         let (hi, lo) = two_prod(a, b);
 
         assert_eq_ulp!(hi, a * b, 1, "Incorrect result of two_prod({}, {})", a, b);
-        assert!(no_overlap(hi, lo).unwrap_or(false), "Overlapping bits in two_prod({}, {})", a, b);
+        assert!(no_overlap(hi, lo), "Overlapping bits in two_prod({}, {})", a, b);
     });
 
     randomized_test!(new_add_test, |rng: F64Rand| {
@@ -361,18 +361,20 @@ mod tests {
         let actual = TwoFloat::new_div(a, b);
         let ef = |a: f64, b: f64| -> u64 { let ab = a.to_bits(); let bb = b.to_bits(); if ab > bb { ab - bb } else { bb - ab }};
         assert_eq_ulp!(actual.hi, a / b, 10, "Incorrect result of new_div({}, {}) - {}", a, b, ef(actual.hi, a / b));
-        assert!(no_overlap(actual.hi, actual.lo).unwrap_or(false), "Overlapping bits in new_div({}, {})", a, b);
+        assert!(no_overlap(actual.hi, actual.lo), "Overlapping bits in new_div({}, {})", a, b);
     });
 
     randomized_test!(neg_test, |rng: F64Rand| {
         let a = TwoFloat { hi: rng(), lo: rng() };
         let b = -a;
-        assert_eq!(b.hi, -a.hi);
-        assert_eq!(b.lo, -a.lo);
+        assert_eq!(b.hi, -a.hi, "Negation does not negate high word");
+        assert_eq!(b.lo, -a.lo, "Negation does not negate low word");
 
         let c = -b;
-        assert_eq!(c.hi, a.hi);
-        assert_eq!(c.lo, a.lo);
+        assert_eq!(c, a, "Double negation does not result in original value");
+
+        let b2 = -&a;
+        assert_eq!(b, b2, "Mismatch between -TwoFloat and -&TwoFloat");
     });
 
     macro_rules! op_test_f64 {
@@ -382,7 +384,7 @@ mod tests {
 
                 let c = rng();
 
-                let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { ((a + b) $op c).is_finite() && (c $op (a + b)).is_finite() && no_overlap(a, b).unwrap_or(false) });
+                let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { ((a + b) $op c).is_finite() && (c $op (a + b)).is_finite() && no_overlap(a, b) });
                 let value = TwoFloat { hi: a, lo: b };
 
                 let result1 = value $op c;
@@ -398,11 +400,12 @@ mod tests {
                 assert_eq!(result4, result5, "Mismatch between f64 {0} TwoFloat and f64 {0} &TwoFloat", stringify!($op));
 
                 let check1 = TwoFloat::from(a) $op c;
-                assert_eq_ulp!(check1.hi, a $op c, 10);
+                assert_eq_ulp!(check1.hi, a $op c, 10, "Mismatch in result of TwoFloat({}) {} {}", a, stringify!($op), c);
 
                 if !is_reversible {
                     let check2 = c $op TwoFloat::from(a);
                     assert_eq_ulp!(check2.hi, c $op a, 10);
+                    assert_eq_ulp!(check1.hi, a $op c, 10, "Mismatch in result of {} {} TwoFloat({})", c, stringify!($op), a);
                 }
             });
         };
@@ -416,8 +419,8 @@ mod tests {
     macro_rules! op_test {
         ($test_name:ident, $op:tt, $op_assign:tt) => {
             randomized_test!($test_name, |rng: F64Rand| {
-                let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a, b).unwrap_or(false) });
-                let (c, d) = get_valid_pair(rng, |c: f64, d: f64| { (a $op c).is_finite() && no_overlap(c, d).unwrap_or(false) });
+                let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a, b) });
+                let (c, d) = get_valid_pair(rng, |c: f64, d: f64| { (a $op c).is_finite() && no_overlap(c, d) });
 
                 let value1 = TwoFloat { hi: a, lo: b };
                 let value2 = TwoFloat { hi: c, lo: d };
@@ -432,7 +435,7 @@ mod tests {
                 assert_eq!(result1, result4, "Mismatch between TwoFloat {0} TwoFloat and &TwoFloat {0} &TwoFloat", stringify!($op));
 
                 let check = TwoFloat::from(a) $op TwoFloat::from(c);
-                assert_eq_ulp!(check.hi, a $op c, 10);
+                assert_eq_ulp!(check.hi, a $op c, 10, "Mismatch in result of TwoFloat({}) {} TwoFloat({})", a, stringify!($op), c);
             });
         };
     }

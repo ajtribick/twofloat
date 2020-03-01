@@ -70,24 +70,24 @@ mod tests {
         ($val_test: ident, $ref_test: ident, $op: tt, $allow_equal: expr) => {
             randomized_test!($val_test, |rng: F64Rand| {
                 let a = TwoFloat { hi: rng(), lo: rng() };
-                assert_eq!($allow_equal, a $op a);
+                assert_eq!($allow_equal, a $op a, "Self-comparison using {} failed", stringify!($op));
         
                 let b = TwoFloat { hi: a.hi, lo: rng() };
-                assert_eq!(a.lo $op b.lo, a $op b);
+                assert_eq!(a.lo $op b.lo, a $op b, "Comparison using {} failed", stringify!($op));
         
                 let c = TwoFloat { hi: rng(), lo: a.lo };
-                assert_eq!(a.hi $op c.hi, a $op c);
+                assert_eq!(a.hi $op c.hi, a $op c, "Comparison using {} failed", stringify!($op));
             });
 
             randomized_test!($ref_test, |rng: F64Rand| {
                 let a = TwoFloat { hi: rng(), lo: rng() };
-                assert_eq!($allow_equal, &a $op &a);
+                assert_eq!($allow_equal, &a $op &a, "Self-comparison using {} failed", stringify!($op));
         
                 let b = TwoFloat { hi: a.hi, lo: rng() };
-                assert_eq!(a.lo $op b.lo, &a $op &b);
+                assert_eq!(a.lo $op b.lo, &a $op &b, "Comparison using {} failed", stringify!($op));
         
                 let c = TwoFloat { hi: rng(), lo: a.lo };
-                assert_eq!(a.hi $op c.hi, &a $op &c);
+                assert_eq!(a.hi $op c.hi, &a $op &c, "Comparison using {} failed", stringify!($op));
             });
         };
     }
@@ -100,20 +100,20 @@ mod tests {
     randomized_test!(from_f64_test, |rng: F64Rand| {
         let source = rng();
         let result: TwoFloat = source.into();
-        assert_eq!(result.hi, source);
-        assert_eq!(result.lo, 0f64);
+        assert_eq!(result.hi, source, "Conversion from f64 failed: mismatch in high word");
+        assert_eq!(result.lo, 0f64, "Conversion from f64 failed: low word non-zero");
     });
 
     randomized_test!(into_f64_test, |rng: F64Rand| {
         let source = TwoFloat { hi: rng(), lo: rng() };
         let result: f64 = source.into();
-        assert_eq!(result, source.hi);
+        assert_eq!(result, source.hi, "Conversion from TwoFloat to f64 failed");
     });
 
     randomized_test!(into_f64_ref_test, |rng: F64Rand| {
         let source = TwoFloat { hi: rng(), lo: rng() };
         let source_ref = &source;
         let result: f64 = source_ref.into();
-        assert_eq!(result, source.hi);
+        assert_eq!(result, source.hi, "Conversion from &TwoFloat to f64 failed");
     });
 }

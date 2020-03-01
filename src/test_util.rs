@@ -28,6 +28,14 @@ macro_rules! randomized_test {
 
 pub type F64Rand<'a> = &'a mut dyn FnMut() -> f64;
 
+pub fn get_valid_pair<F : Fn(f64, f64) -> bool>(rng: F64Rand, pred: F) -> (f64, f64) {
+    loop {
+        let a = rng();
+        let b = rng();
+        if pred(a, b) { return (a, b); };
+    }
+}
+
 /// Returns the rightmost set bit of a floating point number
 fn right_bit(f: f64) -> Option<i16> {
     let fbits = f.to_bits();
@@ -67,10 +75,10 @@ fn left_bit(f: f64) -> Option<i16> {
     }
 }
 
-pub fn no_overlap(a: f64, b: f64) -> Option<bool> {
+pub fn no_overlap(a: f64, b: f64) -> bool {
     match (right_bit(a), left_bit(b)) {
-        (Some(r), Some(l)) => Some(r > l),
-        _ => None,
+        (Some(r), Some(l)) => r > l,
+        _ => false,
     }
 }
 
