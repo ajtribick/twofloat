@@ -8,7 +8,7 @@ categories = ["algorithms", "mathematics", "science"]
 
 readme = "README.md"
 license = "BSD-3-Clause"
-description = "A double-double arithmetic library."
+description = "A library providing double-double arithmetic."
 repository = "https://github.com/ajtribick/twofloat"
 
 edition = "2018"
