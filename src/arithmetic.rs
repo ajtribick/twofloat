@@ -76,7 +76,7 @@ impl Neg for TwoFloat {
     type Output = TwoFloat;
 
     /// Returns a new `TwoFloat` with the negated value of `self`.
-    fn neg(self) -> TwoFloat {
+    fn neg(self) -> Self::Output {
         TwoFloat { hi: -self.hi, lo: -self.lo }
     }
 }
@@ -85,7 +85,7 @@ impl<'a> Neg for &'a TwoFloat {
     type Output = TwoFloat;
 
     /// Returns a new `TwoFloat` with the negated value of `self`.
-    fn neg(self) -> TwoFloat {
+    fn neg(self) -> Self::Output {
         TwoFloat { hi: -self.hi, lo: -self.lo }
     }
 }
@@ -106,7 +106,7 @@ macro_rules! op_common_impl {
             type Output = TwoFloat;
 
             $(#[$meta])*
-            fn $op_fn(mut self, $rhs_i: $rhs) -> TwoFloat {
+            fn $op_fn(mut self, $rhs_i: $rhs) -> Self::Output {
                 let $lhs_i = self;
                 let (a, b) = $code;
                 self.hi = a;
@@ -119,7 +119,7 @@ macro_rules! op_common_impl {
             type Output = TwoFloat;
 
             $(#[$meta])*
-            fn $op_fn(self, $rhs_i: $rhs) -> TwoFloat {
+            fn $op_fn(self, $rhs_i: $rhs) -> Self::Output {
                 let $lhs_i = self;
                 let (a, b) = $code;
                 TwoFloat { hi: a, lo: b }
@@ -146,7 +146,7 @@ macro_rules! op_impl {
             type Output = TwoFloat;
 
             $(#[$meta])*
-            fn $op_fn(mut self, $rhs_i: &'a TwoFloat) -> TwoFloat {
+            fn $op_fn(mut self, $rhs_i: &'a TwoFloat) -> Self::Output {
                 let $lhs_i = self;
                 let (a, b) = $code;
                 self.hi = a;
@@ -159,7 +159,7 @@ macro_rules! op_impl {
             type Output = TwoFloat;
 
             $(#[$meta])*
-            fn $op_fn(self, $rhs_i: &'b TwoFloat) -> TwoFloat {
+            fn $op_fn(self, $rhs_i: &'b TwoFloat) -> Self::Output {
                 let $lhs_i = self;
                 let (a, b) = $code;
                 TwoFloat { hi: a, lo: b }
@@ -173,7 +173,7 @@ macro_rules! op_impl {
             type Output = TwoFloat;
 
             $(#[$meta])*
-            fn $op_fn(self, mut $lhs_i: TwoFloat) -> TwoFloat {
+            fn $op_fn(self, mut $lhs_i: TwoFloat) -> Self::Output {
                 $lhs_i.$op_assign_fn(self);
                 $lhs_i
             }
@@ -183,7 +183,7 @@ macro_rules! op_impl {
             type Output = TwoFloat;
 
             $(#[$meta])*
-            fn $op_fn(self, $lhs_i: &'a TwoFloat) -> TwoFloat {
+            fn $op_fn(self, $lhs_i: &'a TwoFloat) -> Self::Output {
                 let $rhs_i = self;
                 let (a, b) = $code;
                 TwoFloat { hi: a, lo: b }
@@ -199,7 +199,7 @@ macro_rules! op_impl {
             type Output = TwoFloat;
 
             $(#[$rev])*
-            fn $op_fn(self, mut $rhs_rev_i: TwoFloat) -> TwoFloat {
+            fn $op_fn(self, mut $rhs_rev_i: TwoFloat) -> Self::Output {
                 let $lhs_rev_i = self;
                 let (a, b) = $code_rev;
                 $rhs_i.hi = a;
@@ -212,7 +212,7 @@ macro_rules! op_impl {
             type Output = TwoFloat;
 
             $(#[$rev])*
-            fn $op_fn(self, $rhs_rev_i: &'a TwoFloat) -> TwoFloat {
+            fn $op_fn(self, $rhs_rev_i: &'a TwoFloat) -> Self::Output {
                 let $lhs_rev_i = self;
                 let (a, b) = $code_rev;
                 TwoFloat { hi: a, lo: b }
