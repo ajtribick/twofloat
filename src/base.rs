@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::convert::From;
+use std::convert::{From, TryFrom};
 
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
@@ -43,28 +43,70 @@ impl PartialOrd<TwoFloat> for f64 {
     }
 }
 
-impl From<f64> for TwoFloat {
-    fn from(value: f64) -> TwoFloat {
-        TwoFloat { hi: value, lo: 0f64 }
+macro_rules! float_convert {
+    ($type:tt) => {
+        impl From<$type> for TwoFloat {
+            fn from(value: $type) -> Self {
+                TwoFloat { hi: value as f64, lo: 0f64 }
+            }
+        }
+
+        impl From<TwoFloat> for $type {
+            fn from(value: TwoFloat) -> Self {
+                value.hi as $type
+            }
+        }
+
+        impl<'a> From<&'a TwoFloat> for $type {
+            fn from(value: &'a TwoFloat) -> Self {
+                value.hi as $type
+            }
+        }
     }
 }
 
-impl From<TwoFloat> for f64 {
-    fn from(value: TwoFloat) -> f64 {
-        value.hi
-    }
+float_convert!(f64);
+float_convert!(f32);
+
+macro_rules! int_convert {
+    ($type:tt) => {
+        impl From<$type> for TwoFloat {
+            fn from(value: $type) -> Self {
+                TwoFloat { hi: value as f64, lo: 0f64 }
+            }
+        }
+
+        impl TryFrom<TwoFloat> for $type {
+            type Error = ();
+
+            fn try_from(value: TwoFloat) -> Result<Self, Self::Error> {
+                if value.hi >= std::$type::MIN as f64 - 1.0 && value.hi <= std::$type::MAX as f64 + 1.0 { Ok(value.hi as $type) } else { Err(()) }
+            }
+        }
+
+        impl<'a> TryFrom<&'a TwoFloat> for $type {
+            type Error = ();
+
+            fn try_from(value: &'a TwoFloat) -> Result<Self, Self::Error> {
+                if value.hi >= std::$type::MIN as f64 - 1.0 && value.hi <= std::$type::MAX as f64 + 1.0 { Ok(value.hi as $type) } else { Err(()) }
+            }
+        }
+    };
 }
 
-impl<'a> From<&'a TwoFloat> for f64 {
-    fn from(value: &'a TwoFloat) -> f64 {
-        value.hi
-    }
-}
+int_convert!(i32);
+int_convert!(i16);
+int_convert!(i8);
+int_convert!(u32);
+int_convert!(u16);
+int_convert!(u8);
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::test_util::*;
+
+    use rand::Rng;
 
     randomized_test!(copy_test, |rng: F64Rand| {
         let a = TwoFloat { hi: rng(), lo: rng() };
@@ -185,23 +227,124 @@ mod tests {
         }
     });
 
-    randomized_test!(from_f64_test, |rng: F64Rand| {
-        let source = rng();
-        let result: TwoFloat = source.into();
-        assert_eq!(result.hi, source, "Conversion from f64 failed: mismatch in high word");
-        assert_eq!(result.lo, 0f64, "Conversion from f64 failed: low word non-zero");
-    });
+    macro_rules! float_test {
+        ($type:tt, $from_test:ident, $into_test:ident) => {
+            randomized_test!($from_test, |rng: F64Rand| {
+                let source = loop {
+                    let source = rng() as $type;
+                    if source.is_finite() { break source; };
+                };
 
-    randomized_test!(into_f64_test, |rng: F64Rand| {
-        let source = TwoFloat { hi: rng(), lo: rng() };
-        let result: f64 = source.into();
-        assert_eq!(result, source.hi, "Conversion from TwoFloat to f64 failed");
-    });
+                let result: TwoFloat = source.into();
 
-    randomized_test!(into_f64_ref_test, |rng: F64Rand| {
-        let source = TwoFloat { hi: rng(), lo: rng() };
-        let source_ref = &source;
-        let result: f64 = source_ref.into();
-        assert_eq!(result, source.hi, "Conversion from &TwoFloat to f64 failed");
-    });
+                assert_eq!(result.hi, source as f64, "Float conversion failed: mismatch in high word");
+                assert_eq!(result.lo, 0f64, "Float conversion failed: non-zero low word");
+            });
+
+            randomized_test!($into_test, |rng: F64Rand| {
+                let source = TwoFloat { hi: rng(), lo: rng() };
+                let source_ref = &source;
+
+                let result: $type = source.into();
+                assert_eq!(result, source.hi as $type, "Float conversion from TwoFloat failed");
+
+                let result_ref: $type = source_ref.into();
+
+                assert_eq!(result, result_ref, "Value and reference float conversion give different results");
+            });
+        };
+    }
+
+    float_test!(f64, from_f64_test, into_f64_test);
+    float_test!(f32, from_f32_test, into_f32_test);
+
+    macro_rules! into_int_test {
+        ($type:tt, $into_test:ident) => {
+            #[test]
+            fn $into_test() {
+                let mut rng = rand::thread_rng();
+                let lower_bound = f64::from_bits((std::$type::MIN as f64 - 1.0).to_bits() - 1);
+                let upper_bound = f64::from_bits((std::$type::MAX as f64 + 1.0).to_bits() - 1);
+                let valid_dist = rand::distributions::Uniform::new_inclusive(lower_bound, upper_bound);
+                let mantissa_dist = rand::distributions::Uniform::new(0, 1u64 << 52);
+                let exponent_dist = rand::distributions::Uniform::new(0, 2047u64);
+
+                let mut get_f64 = move || {
+                    let x_pos = f64::from_bits(rng.sample(mantissa_dist) | (rng.sample(exponent_dist) << 52));
+                    return if rng.gen() { x_pos } else { -x_pos }
+                };
+
+                for _ in 0..TEST_ITERS {
+                    let in_range: bool = rng.gen();
+
+                    let a = if in_range {
+                        rng.sample(valid_dist)
+                    } else {
+                        loop {
+                            let x = get_f64();
+                            if x < lower_bound || x > upper_bound { break x; }
+                        }
+                    };
+
+                    let b = loop {
+                        let x = get_f64();
+                        if no_overlap(a, x) { break x; }
+                    };
+
+                    let source = TwoFloat { hi: a, lo: b };
+                    let result = $type::try_from(source);
+
+                    if in_range {
+                        assert!(result.is_ok(), "Conversion to integer failed");
+                        assert_eq!(result.unwrap(), a as $type, "Conversion to integer failed: value mismatch");
+                    } else {
+                        assert!(result.is_err(), "Conversion from out-of-range value did not produce error case");
+                    }
+                }
+            }
+        };
+    }
+
+    macro_rules! int_test {
+        ($type:tt, $from_test:ident, $into_test:ident, false) => {
+            #[test]
+            fn $from_test() {
+                let mut rng = rand::thread_rng();
+                let dist = rand::distributions::Uniform::new_inclusive(std::$type::MIN, std::$type::MAX);
+                for _ in 0..TEST_ITERS {
+                    let source = rng.sample(dist);
+                    let result: TwoFloat = source.into();
+
+                    assert_eq!(result.hi, source as f64, "Integer conversion failed: mismatch in high word");
+                    assert_eq!(result.lo, 0f64, "Integer conversion failed: non-zero low word");
+                }
+            }
+
+            into_int_test!($type, $into_test);
+        };
+        ($type:tt, $from_test:ident, $into_test:ident, true) => {
+            #[test]
+            fn $from_test() {
+                let mut source = std::$type::MIN;
+                loop {
+                    let result: TwoFloat = source.into();
+
+                    assert_eq!(result.hi, source as f64, "Integer conversion failed: mismatch in high word");
+                    assert_eq!(result.lo, 0f64, "Integer conversion failed: non-zero low word");
+
+                    if source == std::$type::MAX { break; }
+                    source += 1;
+                }
+            }
+
+            into_int_test!($type, $into_test);
+        }
+    }
+
+    int_test!(i32, from_i32_test, into_i32_test, false);
+    int_test!(i16, from_i16_test, into_i16_test, true);
+    int_test!(i8, from_i8_test, into_i8_test, true);
+    int_test!(u32, from_u32_test, into_u32_test, false);
+    int_test!(u16, from_u16_test, into_u16_test, true);
+    int_test!(u8, from_u8_test, into_u8_test, true);
 }

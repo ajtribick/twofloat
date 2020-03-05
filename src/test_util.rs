@@ -3,6 +3,8 @@
 
 use rand::Rng;
 
+pub const TEST_ITERS:usize = 100000;
+
 pub fn float_generator() -> Box<dyn FnMut() -> f64> {
     let mut engine = rand::thread_rng();
     let mantissa_dist = rand::distributions::Uniform::new(0, 1u64 << 52);
@@ -19,7 +21,7 @@ macro_rules! randomized_test {
         #[test]
         fn $test_name() {
             let mut rng = float_generator();
-            for _ in 0..100000 {
+            for _ in 0..TEST_ITERS {
                 $code(&mut rng);
             };
         }
