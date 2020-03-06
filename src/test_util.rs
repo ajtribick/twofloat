@@ -34,33 +34,32 @@ pub fn get_valid_pair<F : Fn(f64, f64) -> bool>(rng: F64Rand, pred: F) -> (f64, 
     loop {
         let a = rng();
         let b = rng();
-        if pred(a, b) { return (a, b); };
+        if pred(a, b) { return (a, b); }
     }
 }
 
-/// Returns the rightmost set bit of a floating point number
-fn right_bit(f: f64) -> Option<i16> {
+/// Returns the rightmost included bit of a floating point number
+pub fn right_bit(f: f64) -> Option<i16> {
     let fbits = f.to_bits();
     let exponent = ((fbits >> 52) & 0x7ff) as i16 - 1023;
     match exponent {
         -1023 => {
             let mantissa = fbits & 0xfffffffffffff;
             if mantissa == 0 {
-                Some(std::i16::MAX)
+                Some(std::i16::MIN)
             } else {
-                Some(mantissa.trailing_zeros() as i16 - 1074)
+                Some(-1074)
             }
         }
         1024 => None,
         _ => {
-            let mantissa = fbits & 0xfffffffffffff | 0x10000000000000;
-            Some(mantissa.trailing_zeros() as i16 - 52 + exponent)
+            Some(exponent - 52)
         },
     }
 }
 
 /// Returns the leftmost set bit of a floating point number
-fn left_bit(f: f64) -> Option<i16> {
+pub fn left_bit(f: f64) -> Option<i16> {
     let fbits = f.to_bits();
     let exponent = ((fbits >> 52) & 0x7ff) as i16 - 1023;
     match exponent {
@@ -78,7 +77,7 @@ fn left_bit(f: f64) -> Option<i16> {
 }
 
 pub fn no_overlap(a: f64, b: f64) -> bool {
-    match (right_bit(a), left_bit(b)) {
+    (a == 0.0 && b == 0.0) || match (right_bit(a), left_bit(b)) {
         (Some(r), Some(l)) => r > l,
         _ => false,
     }
@@ -128,13 +127,13 @@ fn right_bit_test() {
     assert_eq!(right_bit(std::f64::INFINITY), None);
     assert_eq!(right_bit(std::f64::NEG_INFINITY), None);
     assert_eq!(right_bit(std::f64::NAN), None);
-    assert_eq!(right_bit(1f64), Some(0));
-    assert_eq!(right_bit(2f64), Some(1));
-    assert_eq!(right_bit(0.5f64), Some(-1));
-    assert_eq!(right_bit(2.2250738585072014e-308), Some(-1022));
+    assert_eq!(right_bit(1f64), Some(-52));
+    assert_eq!(right_bit(2f64), Some(-51));
+    assert_eq!(right_bit(0.5f64), Some(-53));
+    assert_eq!(right_bit(2.2250738585072014e-308), Some(-1074));
     assert_eq!(right_bit(2.2250738585072009e-308), Some(-1074));
     assert_eq!(right_bit(4.9406564584124654e-324), Some(-1074));
-    assert!(right_bit(0f64).unwrap_or(0) > 1024);
+    assert!(right_bit(0f64).unwrap_or(0) < -1074);
 }
 
 #[test]
@@ -145,7 +144,7 @@ fn left_bit_test() {
     assert_eq!(left_bit(1f64), Some(0));
     assert_eq!(left_bit(2f64), Some(1));
     assert_eq!(left_bit(0.5f64), Some(-1));
-    assert_eq!(right_bit(2.2250738585072014e-308), Some(-1022));
+    assert_eq!(left_bit(2.2250738585072014e-308), Some(-1022));
     assert_eq!(left_bit(2.2250738585072009e-308), Some(-1023));
     assert_eq!(left_bit(4.9406564584124654e-324), Some(-1074));
     assert!(left_bit(0f64).unwrap_or(0) < -1074);
