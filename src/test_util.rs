@@ -44,7 +44,7 @@ pub fn right_bit(f: f64) -> Option<i16> {
     let exponent = ((fbits >> 52) & 0x7ff) as i16 - 1023;
     match exponent {
         -1023 => {
-            let mantissa = fbits & 0xfffffffffffff;
+            let mantissa = fbits & ((1 << 52) - 1);
             if mantissa == 0 {
                 Some(std::i16::MIN)
             } else {
@@ -64,7 +64,7 @@ pub fn left_bit(f: f64) -> Option<i16> {
     let exponent = ((fbits >> 52) & 0x7ff) as i16 - 1023;
     match exponent {
         -1023 => {
-            let mantissa = fbits & 0xfffffffffffff;
+            let mantissa = fbits & ((1 << 52) - 1);
             if mantissa == 0 {
                 Some(std::i16::MIN)
             } else {
@@ -86,7 +86,7 @@ pub fn no_overlap(a: f64, b: f64) -> bool {
 pub fn ulp_diff(a: f64, b: f64) -> i64 {
     let a_bits = a.to_bits();
     let b_bits = b.to_bits();
-    let fix_sign = |x: u64| { if x & 0x8000000000000000 == 0 { x } else { x ^ 0x7fffffffffffffff } };
+    let fix_sign = |x: u64| { if x & (1 << 63) == 0 { x } else { x ^ ((1 << 63) - 1) } };
     (fix_sign(a_bits) as i64).saturating_sub(fix_sign(b_bits) as i64)
 }
 
