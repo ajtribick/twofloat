@@ -3,17 +3,17 @@
 
 use rand::Rng;
 
-pub const TEST_ITERS:usize = 100000;
+pub const TEST_ITERS: usize = 100000;
 
-pub fn float_generator() -> Box<dyn FnMut() -> f64> {
+pub fn float_generator() -> impl FnMut() -> f64 {
     let mut engine = rand::thread_rng();
     let mantissa_dist = rand::distributions::Uniform::new(0, 1u64 << 52);
     let exponent_dist = rand::distributions::Uniform::new(0, 2047u64);
-    Box::new(move || {
+    move || {
         let x = f64::from_bits(engine.sample(mantissa_dist)
                                | (engine.sample(exponent_dist) << 52));
         if engine.gen() { x } else { -x }
-    })
+    }
 }
 
 macro_rules! randomized_test {
