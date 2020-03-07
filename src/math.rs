@@ -1,8 +1,8 @@
 use crate::base::TwoFloat;
 
 impl TwoFloat {
-    /// Returns the absolute value root of this TwoFloat.
-    /// 
+    /// Returns the absolute value root of `self`.
+    ///
     /// # Examples:
     ///
     /// ```
@@ -14,7 +14,7 @@ impl TwoFloat {
     }
 
     /// Returns `true` if `self` has a positive sign, including `+0.0`.
-    /// 
+    ///
     /// # Examples:
     ///
     /// ```
@@ -27,7 +27,7 @@ impl TwoFloat {
     }
 
     /// Returns `true` if `self` has a negative sign, including `-0.0`.
-    /// 
+    ///
     /// # Examples:
     ///
     /// ```
@@ -41,9 +41,9 @@ impl TwoFloat {
 
     /// Returns `true` if `self` is a valid value, where both components are
     /// finite (not infinity or NaN).
-    /// 
+    ///
     /// # Examples:
-    /// 
+    ///
     /// ```
     /// # use twofloat::TwoFloat;
     /// assert!(TwoFloat::new_add(1.0, 1.0e-300).is_valid());
