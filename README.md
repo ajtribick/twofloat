@@ -1,6 +1,7 @@
 # twofloat
 
 [![Build Status](https://travis-ci.org/ajtribick/twofloat.svg?branch=master)](https://travis-ci.org/ajtribick/twofloat)
+[![Crate](https://img.shields.io/crates/v/twofloat)](https://crates.io/crates/twofloat)
 
 **A double-double arithmetic library for Rust.**
 
