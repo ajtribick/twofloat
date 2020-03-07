@@ -86,6 +86,7 @@ int_convert!(u8);
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::base::*;
     use crate::test_util::*;
 
     use rand::Rng;

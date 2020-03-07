@@ -257,7 +257,7 @@ op_impl!(MulAssign, mul_assign, Mul, mul,
 
 op_impl!(DivAssign, div_assign, Div, div,
     /// Implements division of `TwoFloat` and `f64` using Joldes et al. (2017)
-    /// Algorithm 15 
+    /// Algorithm 15
     |lhs: &TwoFloat, rhs: f64| {
         let th = lhs.hi / rhs;
         let (ph, pl) = two_prod(th, rhs);
@@ -337,6 +337,8 @@ op_impl!(DivAssign, div_assign, Div, div,
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use crate::base::*;
     use crate::test_util::*;
 
     randomized_test!(fast_two_sum_test, |rng: F64Rand| {
@@ -350,7 +352,7 @@ mod tests {
     randomized_test!(two_sum_test, |rng: F64Rand| {
         let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { (a + b).is_finite() });
         let (hi, lo) = two_sum(a, b);
-        
+
         assert_eq_ulp!(hi, a + b, 1, "Incorrect result of two_sum({}, {})", a, b);
         assert!(no_overlap(hi, lo), "Overlapping bits in two_sum({}, {})", a, b);
     });

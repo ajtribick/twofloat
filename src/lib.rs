@@ -45,4 +45,4 @@ mod convert;
 mod arithmetic;
 mod math;
 
-pub use base::TwoFloat;
+pub use base::{TwoFloat, no_overlap};

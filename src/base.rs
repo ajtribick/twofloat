@@ -8,7 +8,82 @@ pub struct TwoFloat {
     pub(crate) lo: f64,
 }
 
+/// Returns the rightmost included bit of a floating point number
+pub(crate) fn right_bit(f: f64) -> Option<i16> {
+    let fbits = f.to_bits();
+    let exponent = ((fbits >> 52) & 0x7ff) as i16 - 1023;
+    match exponent {
+        -1023 => {
+            let mantissa = fbits & ((1 << 52) - 1);
+            if mantissa == 0 {
+                Some(std::i16::MIN)
+            } else {
+                Some(-1074)
+            }
+        }
+        1024 => None,
+        _ => {
+            Some(exponent - 52)
+        },
+    }
+}
+
+/// Returns the leftmost set bit of a floating point number
+pub(crate) fn left_bit(f: f64) -> Option<i16> {
+    let fbits = f.to_bits();
+    let exponent = ((fbits >> 52) & 0x7ff) as i16 - 1023;
+    match exponent {
+        -1023 => {
+            let mantissa = fbits & ((1 << 52) - 1);
+            if mantissa == 0 {
+                Some(std::i16::MIN)
+            } else {
+                Some(-1011 - mantissa.leading_zeros() as i16)
+            }
+        }
+        1024 => None,
+        _ => Some(exponent),
+    }
+}
+
+/// Checks if two `f64` values do not overlap, with the first value being the
+/// more significant.
+///
+/// # Examples:
+///
+/// ```
+/// # use twofloat::no_overlap;
+/// assert!(no_overlap(1.0, -1e-200));
+/// assert!(!no_overlap(1e-200, 1.0));
+/// assert!(!no_overlap(1.0, 0.25));
+pub fn no_overlap(a: f64, b: f64) -> bool {
+    (a == 0.0 && b == 0.0) || match (right_bit(a), left_bit(b)) {
+        (Some(r), Some(l)) => r > l,
+        _ => false,
+    }
+}
+
 impl TwoFloat {
+    /// Attempts to construct a new `TwoFloat` from two `f64` values. In the
+    /// case of non-overlapping values, a new `TwoFloat` will be returned. If
+    /// the values overlap, the error case will be returned. This can be used
+    /// to reconstitute a `TwoFloat` from the values returned by the `data`
+    /// method.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = 1.0f64;
+    /// let b = 1.0e-200f64;
+    /// let result = TwoFloat::try_new(a, b);
+    /// assert_eq!(result.unwrap().data(), (a, b));
+    ///
+    /// assert!(TwoFloat::try_new(1.0, 2.0).is_err());
+    pub fn try_new(a: f64, b: f64) -> Result<TwoFloat, ()> {
+        if no_overlap(a, b) { Ok(TwoFloat { hi: a, lo: b }) } else { Err(()) }
+    }
+
     /// Returns the high and low words of `self` as a tuple.
     ///
     /// # Examples:
@@ -60,6 +135,34 @@ impl PartialOrd<TwoFloat> for f64 {
 mod tests {
     use super::*;
     use crate::test_util::*;
+
+    #[test]
+    fn right_bit_test() {
+        assert_eq!(right_bit(std::f64::INFINITY), None);
+        assert_eq!(right_bit(std::f64::NEG_INFINITY), None);
+        assert_eq!(right_bit(std::f64::NAN), None);
+        assert_eq!(right_bit(1f64), Some(-52));
+        assert_eq!(right_bit(2f64), Some(-51));
+        assert_eq!(right_bit(0.5f64), Some(-53));
+        assert_eq!(right_bit(2.2250738585072014e-308), Some(-1074));
+        assert_eq!(right_bit(2.2250738585072009e-308), Some(-1074));
+        assert_eq!(right_bit(4.9406564584124654e-324), Some(-1074));
+        assert!(right_bit(0f64).unwrap_or(0) < -1074);
+    }
+
+    #[test]
+    fn left_bit_test() {
+        assert_eq!(left_bit(std::f64::INFINITY), None);
+        assert_eq!(left_bit(std::f64::NEG_INFINITY), None);
+        assert_eq!(left_bit(std::f64::NAN), None);
+        assert_eq!(left_bit(1f64), Some(0));
+        assert_eq!(left_bit(2f64), Some(1));
+        assert_eq!(left_bit(0.5f64), Some(-1));
+        assert_eq!(left_bit(2.2250738585072014e-308), Some(-1022));
+        assert_eq!(left_bit(2.2250738585072009e-308), Some(-1023));
+        assert_eq!(left_bit(4.9406564584124654e-324), Some(-1074));
+        assert!(left_bit(0f64).unwrap_or(0) < -1074);
+    }
 
     randomized_test!(copy_test, |rng: F64Rand| {
         let a = TwoFloat { hi: rng(), lo: rng() };
@@ -186,5 +289,19 @@ mod tests {
         let source = TwoFloat { hi: a, lo: b };
         let result = source.data();
         assert_eq!(result, (a, b));
+    });
+
+    randomized_test!(try_new_no_overlap_test, |rng: F64Rand| {
+        let (a, b) = get_valid_pair(rng, &|x: f64, y: f64| { no_overlap(x, y) });
+        let expected = TwoFloat { hi: a, lo: b };
+        let result = TwoFloat::try_new(a, b);
+        assert!(result.is_ok(), "Creation from non-overlapping pair {}, {} resulted in error", a, b);
+        assert_eq!(result.unwrap(), expected, "Value mismatch in creation of TwoFloat");
+    });
+
+    randomized_test!(try_new_overlap_test, |rng: F64Rand| {
+        let (a, b) = get_valid_pair(rng, &|x: f64, y: f64| { !no_overlap(x, y) });
+        let result = TwoFloat::try_new(a, b);
+        assert!(result.is_err(), "Creation from overlapping pair {}, {} resulted in value", a, b);
     });
 }
