@@ -8,6 +8,20 @@ pub struct TwoFloat {
     pub(crate) lo: f64,
 }
 
+impl TwoFloat {
+    /// Returns the high and low words of `self` as a tuple.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let value = TwoFloat::new_add(1.0, 1.0e-200);
+    /// assert_eq!(value.data(), (1.0, 1.0e-200));
+    pub fn data(&self) -> (f64, f64) {
+        (self.hi, self.lo)
+    }
+}
+
 impl PartialEq<f64> for TwoFloat {
     fn eq(&self, other: &f64) -> bool {
         self.hi.eq(other) && self.lo == 0.0
@@ -164,5 +178,13 @@ mod tests {
             assert!(ab < c, "Comparison of TwoFloat < f64 failed");
             assert!(ab <= c, "Comparison of TwoFloat <= f64 failed");
         }
+    });
+
+    randomized_test!(data_test, |rng: F64Rand| {
+        let a = rng();
+        let b = rng();
+        let source = TwoFloat { hi: a, lo: b };
+        let result = source.data();
+        assert_eq!(result, (a, b));
     });
 }
