@@ -65,22 +65,28 @@ pub fn no_overlap(a: f64, b: f64) -> bool {
 }
 
 impl TwoFloat {
-    /// Attempts to construct a new `TwoFloat` from two `f64` values. In the
-    /// case of non-overlapping values, a new `TwoFloat` will be returned. If
-    /// the values overlap, the error case will be returned. This can be used
-    /// to reconstitute a `TwoFloat` from the values returned by the `data`
-    /// method.
+    /// Attempts to construct a new `TwoFloat` from two `f64` values. This can
+    /// be used to reconstitute a `TwoFloat` from the values returned by the
+    /// `data` method.
+    ///
+    /// # Errors:
+    ///
+    /// An error will be returned if the supplied `f64` values overlap.
     ///
     /// # Examples:
     ///
     /// ```
     /// # use twofloat::TwoFloat;
+    /// #
+    /// # fn main() -> Result<(), ()> {
     /// let a = 1.0f64;
     /// let b = 1.0e-200f64;
-    /// let result = TwoFloat::try_new(a, b);
-    /// assert_eq!(result.unwrap().data(), (a, b));
+    /// let result = TwoFloat::try_new(a, b)?;
+    /// assert_eq!(result.data(), (a, b));
     ///
     /// assert!(TwoFloat::try_new(1.0, 2.0).is_err());
+    /// #     Ok(())
+    /// # }
     pub fn try_new(a: f64, b: f64) -> Result<TwoFloat, ()> {
         if no_overlap(a, b) { Ok(TwoFloat { hi: a, lo: b }) } else { Err(()) }
     }
