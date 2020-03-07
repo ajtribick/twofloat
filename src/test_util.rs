@@ -30,6 +30,13 @@ macro_rules! randomized_test {
 
 pub type F64Rand<'a> = &'a mut dyn FnMut() -> f64;
 
+pub fn get_valid_f64<F: Fn(f64) -> bool>(rng: F64Rand, pred: F) -> f64 {
+    loop {
+        let a = rng();
+        if pred(a) { return a; }
+    }
+}
+
 pub fn get_valid_pair<F : Fn(f64, f64) -> bool>(rng: F64Rand, pred: F) -> (f64, f64) {
     loop {
         let a = rng();
