@@ -1,4 +1,7 @@
 # twofloat
+
+[![Build Status](https://travis-ci.org/ajtribick/twofloat.svg?branch=master)](https://travis-ci.org/ajtribick/twofloat)
+
 **A double-double arithmetic library for Rust.**
 
 This library provides an implementation of double-double arithmetic for the
