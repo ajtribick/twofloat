@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::fmt;
 
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
@@ -94,6 +95,12 @@ impl TwoFloat {
     /// assert_eq!(value.data(), (1.0, 1.0e-200));
     pub fn data(&self) -> (f64, f64) {
         (self.hi, self.lo)
+    }
+}
+
+impl fmt::Display for TwoFloat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "[{} ({:+})]", self.hi, self.lo)
     }
 }
 
