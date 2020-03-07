@@ -5,13 +5,13 @@ authors = ["Andrew Tribick <ajtribick@googlemail.com>"]
 
 keywords = ["float", "precision", "numerics", "floating-point", "arithmetic"]
 categories = ["algorithms", "mathematics", "science"]
+exclude = ["/.travis.yml", ".gitignore"]
+edition = "2018"
 
 readme = "README.md"
 license = "BSD-3-Clause"
-description = "A library providing double-double arithmetic."
+description = "Double-double arithmetic functionality."
 repository = "https://github.com/ajtribick/twofloat"
-
-edition = "2018"
 
 [dev-dependencies]
 rand = "0.7"
