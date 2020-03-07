@@ -41,6 +41,7 @@ purpose.
 mod test_util;
 
 mod base;
+mod convert;
 mod arithmetic;
 mod math;
 
