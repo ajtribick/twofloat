@@ -2,14 +2,14 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssi
 
 use crate::base::TwoFloat;
 
-fn fast_two_sum(a: f64, b: f64) -> (f64, f64) {
+pub(crate) fn fast_two_sum(a: f64, b: f64) -> (f64, f64) {
     // Joldes et al. (2017) Algorithm 1
     let s = a + b;
     let z = s - a;
     (s, b - z)
 }
 
-fn two_sum(a: f64, b: f64) -> (f64, f64) {
+pub(crate) fn two_sum(a: f64, b: f64) -> (f64, f64) {
     // Joldes et al. (2017) Algorithm 2
     let s = a + b;
     let aa = s - b;
@@ -19,7 +19,7 @@ fn two_sum(a: f64, b: f64) -> (f64, f64) {
     (s, da + db)
 }
 
-fn two_diff(a: f64, b: f64) -> (f64, f64) {
+pub(crate) fn two_diff(a: f64, b: f64) -> (f64, f64) {
     // Joldes et al. (2017) Algorithm 2 for negative rhs
     let s = a - b;
     let aa = s + b;
@@ -29,7 +29,7 @@ fn two_diff(a: f64, b: f64) -> (f64, f64) {
     (s, da - db)
 }
 
-fn two_prod(a: f64, b: f64) -> (f64, f64) {
+pub(crate) fn two_prod(a: f64, b: f64) -> (f64, f64) {
     // Joldes et al. (2017) Algorithm 3
     let p = a * b;
     (p, a.mul_add(b, -p))
