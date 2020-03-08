@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
 
 use crate::base::TwoFloat;
 
@@ -283,6 +283,17 @@ op_impl!(DivAssign, div_assign, Div, div,
     fast_two_sum(ch, cl3)
 });
 
+op_impl!(RemAssign, rem_assign, Rem, rem,
+    |lhs: &TwoFloat, rhs: f64| {
+        let quotient = (lhs / rhs).trunc();
+        (lhs - quotient * rhs).data()
+    },
+    |lhs: f64, rhs: &TwoFloat| {
+        let quotient = (lhs / rhs).trunc();
+        (lhs - quotient * rhs).data()
+    }
+);
+
 op_impl!(AddAssign, add_assign, Add, add,
     /// Implements addition of two `TwoFloat` values using Joldes et al.
     /// (2017) Algorithm 6.
@@ -332,6 +343,12 @@ op_impl!(DivAssign, div_assign, Div, div,
         let m = d + th;
         let z = lhs * &m;
         (z.hi, z.lo)
+    });
+
+op_impl!(RemAssign, rem_assign, Rem, rem,
+    |lhs: &TwoFloat, rhs: &TwoFloat| {
+        let quotient = (lhs / rhs).trunc();
+        (lhs - &quotient * rhs).data()
     });
 
 #[cfg(test)]
@@ -441,12 +458,12 @@ mod tests {
                 assert_eq!(result4, result5, "Mismatch between f64 {0} TwoFloat and f64 {0} &TwoFloat", stringify!($op));
 
                 let check1 = TwoFloat::from(a) $op c;
-                assert_eq_ulp!(check1.hi, a $op c, 10, "Mismatch in result of TwoFloat({}) {} {}", a, stringify!($op), c);
+                assert_eq_ulp!(check1.hi, a $op c, 10, "Mismatch in result of {:?} {} {:?}", a, stringify!($op), c);
 
                 if !is_reversible {
                     let check2 = c $op TwoFloat::from(a);
-                    assert_eq_ulp!(check2.hi, c $op a, 10);
-                    assert_eq_ulp!(check1.hi, a $op c, 10, "Mismatch in result of {} {} TwoFloat({})", c, stringify!($op), a);
+                    assert_eq_ulp!(check2.hi, c $op a, 10, "Mismatch in result of {:?} {} {:?}", c, stringify!($op), a);
+                    assert_eq_ulp!(check1.hi, a $op c, 10, "Mismatch in result of {:?} {} {:?}", c, stringify!($op), a);
                 }
             });
         };
@@ -456,6 +473,7 @@ mod tests {
     op_test_f64!(sub_f64_test, -, -=, false);
     op_test_f64!(mul_f64_test, *, *=, true);
     op_test_f64!(div_f64_test, /, /=, false);
+    //op_test_f64!(rem_f64_test, %, %=, false); // TODO write better test cases
 
     macro_rules! op_test {
         ($test_name:ident, $op:tt, $op_assign:tt) => {
@@ -467,16 +485,20 @@ mod tests {
                 let value2 = TwoFloat { hi: c, lo: d };
 
                 let result1 = value1 $op value2;
-                let result2 = &value1 $op value2;
-                let result3 = value1 $op &value2;
-                let result4 = &value1 $op &value2;
+                let mut result2 = value1;
+                result2 $op_assign value2;
+                assert_eq!(result1, result2, "Mismatch between TwoFloat {} TwoFloat and TwoFloat {} TwoFloat", stringify!($op), stringify!($op_assign));
 
-                assert_eq!(result1, result2, "Mismatch between TwoFloat {0} TwoFloat and &TwoFloat {0} TwoFloat", stringify!($op));
-                assert_eq!(result1, result3, "Mismatch between TwoFloat {0} TwoFloat and TwoFloat {0} &TwoFloat", stringify!($op));
-                assert_eq!(result1, result4, "Mismatch between TwoFloat {0} TwoFloat and &TwoFloat {0} &TwoFloat", stringify!($op));
+                let result3 = &value1 $op value2;
+                let result4 = value1 $op &value2;
+                let result5 = &value1 $op &value2;
+
+                assert_eq!(result1, result3, "Mismatch between TwoFloat {0} TwoFloat and &TwoFloat {0} TwoFloat", stringify!($op));
+                assert_eq!(result1, result4, "Mismatch between TwoFloat {0} TwoFloat and TwoFloat {0} &TwoFloat", stringify!($op));
+                assert_eq!(result1, result5, "Mismatch between TwoFloat {0} TwoFloat and &TwoFloat {0} &TwoFloat", stringify!($op));
 
                 let check = TwoFloat::from(a) $op TwoFloat::from(c);
-                assert_eq_ulp!(check.hi, a $op c, 10, "Mismatch in result of TwoFloat({}) {} TwoFloat({})", a, stringify!($op), c);
+                assert_eq_ulp!(check.hi, a $op c, 10, "Mismatch in result of {:?} {} {:?}", a, stringify!($op), c);
             });
         };
     }
@@ -485,4 +507,5 @@ mod tests {
     op_test!(sub_test, -, -=);
     op_test!(mul_test, *, *=);
     op_test!(div_test, /, /=);
+    // op_test!(rem_test, %, %=); // TODO write better test cases
 }
