@@ -311,16 +311,19 @@ mod tests {
     randomized_test!(powi_0_test, |rng: F64Rand| {
         let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a != 0.0 && no_overlap(a, b) });
         let source = TwoFloat { hi: a, lo: b };
-        let result = source.powi(0);
         let expected = TwoFloat { hi: 1f64, lo: 0f64 };
-        assert_eq!(result, expected, "Power of 0 did not return 1");
+        let result = source.powi(0);
+
+        assert!(no_overlap(result.hi, result.lo), "Result of {:?}.powi(0) contained overlap", source);
+        assert_eq!(result, expected, "{:?}.powi(0) did not return 1", source);
     });
 
     randomized_test!(powi_1_test, |rng: F64Rand| {
         let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a, b) });
         let source = TwoFloat { hi: a, lo: b };
         let result = source.powi(1);
-        assert_eq!(result, source, "Power of 1 did not return same number");
+        assert!(no_overlap(result.hi, result.lo), "{:?}.powi(1) contained overlap", source);
+        assert_eq!(result, source, "{:?}.powi(1) did not return same number", source);
     });
 
     #[test]
@@ -335,6 +338,8 @@ mod tests {
             }
 
             let result = source.powi(exponent);
+            assert!(no_overlap(result.hi, result.lo), "{:?}.powi({}) contained overlap", source, exponent);
+
             let difference = (result - expected) / expected;
             assert!(difference.abs() < 1e-10, "Value mismatch in {:?}.powi({})", source, exponent);
         }
@@ -348,7 +353,8 @@ mod tests {
             let exponent = rng.gen_range(1i32, 20i32);
             let expected = 1.0f64 / source.powi(exponent);
             let result = source.powi(-exponent);
-            assert_eq!(result, expected, "Negative power did not produce reciprocal");
+            assert!(no_overlap(result.hi, result.lo), "{:?}.powi({}) contained overlap", source, -exponent);
+            assert_eq!(result, expected, "{0:?}.powi({1}) was not reciprocal of {0:?}.powi({2})", source, -exponent, exponent);
         }
     }
 }
