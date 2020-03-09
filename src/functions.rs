@@ -407,7 +407,7 @@ mod tests {
         let source = TwoFloat { hi: a, lo: b };
         let result = source.sqrt();
         assert!(no_overlap(result.hi, result.lo), "Square root of {:?} gave overlap", source);
-        let difference = (result * result - source).abs() / source;
+        let difference = (&result * &result - &source).abs() / &source;
         assert!(difference < 1e-16, "Square root of {:?} ({:?}) squared gives high relative difference {}", source, result, difference.hi);
     });
 
@@ -450,7 +450,7 @@ mod tests {
             let result = source.powi(exponent);
             assert!(no_overlap(result.hi, result.lo), "{:?}.powi({}) contained overlap", source, exponent);
 
-            let difference = (result - expected) / expected;
+            let difference = (&result - &expected) / &expected;
             assert!(difference.abs() < 1e-10, "Value mismatch in {:?}.powi({})", source, exponent);
         }
     }
