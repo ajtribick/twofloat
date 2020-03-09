@@ -271,7 +271,7 @@ op_impl!(DivAssign, div_assign, Div, div,
     /// Algorithm 18 modified for the left-hand side having a zero value in
     /// the low word.
     |lhs: f64, rhs: &TwoFloat| {
-    let th = 1.0 / rhs.hi;
+    let th = rhs.hi.recip();
     let rh = 1.0 - rhs.hi * th;
     let rl = -(rhs.lo * th);
     let (eh, el) = fast_two_sum(rh, rl);
@@ -334,7 +334,7 @@ op_impl!(DivAssign, div_assign, Div, div,
     /// Implements division of two `TwoFloat` values using Joldes et al.
     /// (2017) Algorithm 18.
     |lhs: &TwoFloat, rhs: &TwoFloat| {
-        let th = 1.0 / rhs.hi;
+        let th = rhs.hi.recip();
         let rh = 1.0 - rhs.hi * th;
         let rl = -(rhs.lo * th);
         let (eh, el) = fast_two_sum(rh, rl);

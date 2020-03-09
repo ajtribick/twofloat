@@ -205,7 +205,7 @@ impl TwoFloat {
         } else if self.hi == 0.0 && self.lo == 0.0 {
             TwoFloat { hi: 0f64, lo: 0f64 }
         } else {
-            let x = 1.0 / self.hi.sqrt();
+            let x = self.hi.sqrt().recip();
             let y = self.hi * x;
             TwoFloat::new_add(y, (self - TwoFloat::new_mul(y, y)).hi * (x * 0.5))
         }
@@ -232,7 +232,7 @@ impl TwoFloat {
                 }
             },
             1 => { self.clone() },
-            -1 => { 1f64 / self },
+            -1 => { self.recip() },
             _ => {
                 let mut result: TwoFloat = 1f64.into();
                 let mut n_pos = n.abs();
@@ -242,7 +242,7 @@ impl TwoFloat {
                     value *= value;
                     n_pos >>= 1;
                 }
-                if n > 0 { result } else { 1f64 / result }
+                if n > 0 { result } else { result.recip() }
             }
         }
     }
