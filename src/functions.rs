@@ -67,6 +67,21 @@ impl TwoFloat {
         self.hi.is_finite() && self.lo.is_finite()
     }
 
+    /// Takes the reciprocal (inverse) of the number, `1/x`.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::new_add(67.2, 5.7e-53);
+    /// let b = a.recip();
+    /// let difference = b.recip() - a;
+    ///
+    /// assert!(difference.abs() < 1e-16);
+    pub fn recip(&self) -> TwoFloat {
+        1.0 / self
+    }
+
     /// Returns the fractional part of the number.
     ///
     /// # Examples:
@@ -264,6 +279,17 @@ mod tests {
         assert!(!TwoFloat { hi: 1.0, lo: -1e-300 }.is_sign_negative());
         assert!(TwoFloat { hi: -1.0, lo: -1e-300 }.is_sign_negative());
     }
+
+    randomized_test!(recip_test, |rng: F64Rand| {
+        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a, b) });
+        let source = TwoFloat { hi: a, lo: b };
+        let result = source.recip();
+
+        assert!(no_overlap(a, b), "Reciprocal of {:?} contained overlap", source);
+
+        let difference = (result.recip() - &source) / &source;
+        assert!(difference.abs() < 1e-10, "{:?}.recip().recip() not close to original value", source);
+    });
 
     randomized_test!(fract_hi_fract_test, |rng: F64Rand| {
         let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a.fract() != 0.0 && no_overlap(a, b) });
