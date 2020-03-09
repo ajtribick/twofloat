@@ -128,12 +128,51 @@ impl TwoFloat {
             TwoFloat::new_add(y, (self - TwoFloat::new_mul(y, y)).hi * (x * 0.5))
         }
     }
+
+    /// Raises the number to an integer power. Returns a NAN value for 0^0.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(2f64);
+    /// let b = TwoFloat::from(8f64);
+    /// let c = TwoFloat::from(0f64);
+    ///
+    /// assert!(a.powi(3) - b <= 1e-16);
+    /// assert!(!c.powi(0).is_valid());
+    pub fn powi(&self, n: i32) -> TwoFloat {
+        match n {
+            0 => {
+                if self.hi == 0.0 && self.lo == 0.0 {
+                    TwoFloat { hi: std::f64::NAN, lo: std::f64::NAN }
+                } else {
+                    1f64.into()
+                }
+            },
+            1 => { self.clone() },
+            -1 => { 1f64 / self },
+            _ => {
+                let mut result: TwoFloat = 1f64.into();
+                let mut n_pos = n.abs();
+                let mut value = self.clone();
+                while n_pos > 0 {
+                    if (n_pos & 1) != 0 { result *= &value; }
+                    value *= value;
+                    n_pos >>= 1;
+                }
+                if n > 0 { result } else { 1f64 / result }
+            }
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::test_util::*;
+
+    use rand::Rng;
 
     #[test]
     fn abs_test() {
@@ -246,10 +285,54 @@ mod tests {
         assert!(difference < 1e-16, "Square root of {:?} ({:?}) squared gives high relative difference {}", source, result, difference.hi);
     });
 
-    randomized_test!(sqrt_test_negative, |rng: F64Rand| {
+    randomized_test!(sqrt_negative_test, |rng: F64Rand| {
         let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a < 0.0 && no_overlap(a, b) });
         let source = TwoFloat { hi: a, lo: b };
         let result = source.sqrt();
         assert!(!result.is_valid(), "Square root of negative number {:?} gave non-error result", source);
     });
+
+    randomized_test!(powi_0_test, |rng: F64Rand| {
+        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a != 0.0 && no_overlap(a, b) });
+        let source = TwoFloat { hi: a, lo: b };
+        let result = source.powi(0);
+        let expected = TwoFloat { hi: 1f64, lo: 0f64 };
+        assert_eq!(result, expected, "Power of 0 did not return 1");
+    });
+
+    randomized_test!(powi_1_test, |rng: F64Rand| {
+        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a, b) });
+        let source = TwoFloat { hi: a, lo: b };
+        let result = source.powi(1);
+        assert_eq!(result, source, "Power of 1 did not return same number");
+    });
+
+    #[test]
+    fn powi_value_test() {
+        let mut rng = rand::thread_rng();
+        for _ in 0..TEST_ITERS {
+            let source = TwoFloat::new_add(rng.gen_range(-128f64, 128f64), rng.gen_range(-1.0f64, 1.0f64));
+            let exponent = rng.gen_range(1i32, 20i32);
+            let mut expected = TwoFloat::from(1f64);
+            for _ in 0..exponent {
+                expected *= &source;
+            }
+
+            let result = source.powi(exponent);
+            let difference = (result - expected) / expected;
+            assert!(difference.abs() < 1e-10, "Value mismatch in {:?}.powi({})", source, exponent);
+        }
+    }
+
+    #[test]
+    fn powi_reciprocal_test() {
+        let mut rng = rand::thread_rng();
+        for _ in 0..TEST_ITERS {
+            let source = TwoFloat::new_add(rng.gen_range(-128f64, 128f64), rng.gen_range(-1.0f64, 1.0f64));
+            let exponent = rng.gen_range(1i32, 20i32);
+            let expected = 1.0f64 / source.powi(exponent);
+            let result = source.powi(-exponent);
+            assert_eq!(result, expected, "Negative power did not produce reciprocal");
+        }
+    }
 }
