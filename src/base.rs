@@ -54,9 +54,13 @@ pub(crate) fn left_bit(f: f64) -> Option<i16> {
 ///
 /// ```
 /// # use twofloat::no_overlap;
-/// assert!(no_overlap(1.0, -1e-200));
-/// assert!(!no_overlap(1e-200, 1.0));
-/// assert!(!no_overlap(1.0, 0.25));
+/// let a = no_overlap(1.0, -1e-200);
+/// let b = no_overlap(1e-200, 1.0);
+/// let c = no_overlap(1.0, 0.25);
+///
+/// assert!(a);
+/// assert!(!b);
+/// assert!(!c);
 pub fn no_overlap(a: f64, b: f64) -> bool {
     (a == 0.0 && b == 0.0) || match (right_bit(a), left_bit(b)) {
         (Some(r), Some(l)) => r > l,
@@ -81,10 +85,11 @@ impl TwoFloat {
     /// # fn main() -> Result<(), ()> {
     /// let a = 1.0f64;
     /// let b = 1.0e-200f64;
-    /// let result = TwoFloat::try_new(a, b)?;
-    /// assert_eq!(result.data(), (a, b));
+    /// let result1 = TwoFloat::try_new(a, b)?;
+    /// let result2 = TwoFloat::try_new(1.0, 2.0);
     ///
-    /// assert!(TwoFloat::try_new(1.0, 2.0).is_err());
+    /// assert_eq!(result1.data(), (a, b));
+    /// assert!(result2.is_err());
     /// #     Ok(())
     /// # }
     pub fn try_new(a: f64, b: f64) -> Result<TwoFloat, ()> {

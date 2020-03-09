@@ -8,8 +8,11 @@ impl TwoFloat {
     ///
     /// ```
     /// # use twofloat::TwoFloat;
-    /// assert_eq!(TwoFloat::new_add(1.0, 1.0e-300).abs(), TwoFloat::new_add(1.0, 1.0e-300));
-    /// assert_eq!(TwoFloat::new_add(-1.0, 1.0e-300).abs(), TwoFloat::new_add(1.0, -1.0e-300));
+    /// let a = TwoFloat::new_add(1.0, 1.0e-300).abs();
+    /// let b = TwoFloat::new_add(-1.0, 1.0e-300).abs();
+    ///
+    /// assert_eq!(a, TwoFloat::new_add(1.0, 1.0e-300));
+    /// assert_eq!(b, TwoFloat::new_add(1.0, -1.0e-300));
     pub fn abs(&self) -> TwoFloat {
         if self.hi > 0.0 || (self.hi == 0.0 && self.hi.is_sign_positive() && self.lo.is_sign_positive()) { self.clone() } else { -self }
     }
@@ -20,9 +23,13 @@ impl TwoFloat {
     ///
     /// ```
     /// # use twofloat::TwoFloat;
-    /// assert!(TwoFloat::new_add(0.0, 0.0).is_sign_positive());
-    /// assert!(TwoFloat::new_add(1.0, 1.0e-300).is_sign_positive());
-    /// assert!(!TwoFloat::new_add(-1.0, 1.0e-300).is_sign_positive());
+    /// let a = TwoFloat::new_add(0.0, 0.0).is_sign_positive();
+    /// let b = TwoFloat::new_add(1.0, 1.0e-300).is_sign_positive();
+    /// let c = TwoFloat::new_add(-1.0, 1.0e-300).is_sign_positive();
+    ///
+    /// assert!(a);
+    /// assert!(b);
+    /// assert!(!c);
     pub fn is_sign_positive(&self) -> bool {
         self.hi > 0.0 || (self.hi == 0.0 && self.hi.is_sign_positive())
     }
@@ -33,9 +40,13 @@ impl TwoFloat {
     ///
     /// ```
     /// # use twofloat::TwoFloat;
-    /// assert!(TwoFloat::new_add(-1.0, 1.0e-300).is_sign_negative());
-    /// assert!(!TwoFloat::new_add(0.0, 0.0).is_sign_negative());
-    /// assert!(!TwoFloat::new_add(1.0, 1.0e-300).is_sign_negative());
+    /// let a = TwoFloat::new_add(-1.0, 1.0e-300).is_sign_negative();
+    /// let b = TwoFloat::new_add(0.0, 0.0).is_sign_negative();
+    /// let c = TwoFloat::new_add(1.0, 1.0e-300).is_sign_negative();
+    ///
+    /// assert!(a);
+    /// assert!(!b);
+    /// assert!(!c);
     pub fn is_sign_negative(&self) -> bool {
         self.hi < 0.0 || (self.hi == 0.0 && self.hi.is_sign_negative())
     }
@@ -47,8 +58,11 @@ impl TwoFloat {
     ///
     /// ```
     /// # use twofloat::TwoFloat;
-    /// assert!(TwoFloat::new_add(1.0, 1.0e-300).is_valid());
-    /// assert!(!TwoFloat::new_mul(1.0e300, 1.0e300).is_valid());
+    /// let a = TwoFloat::new_add(1.0, 1.0e-300).is_valid();
+    /// let b = TwoFloat::new_mul(1.0e300, 1.0e300).is_valid();
+    ///
+    /// assert!(a);
+    /// assert!(!b);
     pub fn is_valid(&self) -> bool {
         self.hi.is_finite() && self.lo.is_finite()
     }
@@ -59,10 +73,11 @@ impl TwoFloat {
     ///
     /// ```
     /// # use twofloat::TwoFloat;
-    /// let a = TwoFloat::new_add(1.0, 1e-200);
-    /// let b = TwoFloat::new_add(-1.0, 1e-200);
-    /// assert_eq!(a.fract(), TwoFloat::from(1e-200));
-    /// assert_eq!(b.fract(), b);
+    /// let a = TwoFloat::new_add(1.0, 1e-200).fract();
+    /// let b = TwoFloat::new_add(-1.0, 1e-200).fract();
+    ///
+    /// assert_eq!(a, TwoFloat::from(1e-200));
+    /// assert_eq!(b, TwoFloat::new_add(-1.0, 1e-200));
     pub fn fract(&self) -> TwoFloat {
         let hi_fract = self.hi.fract();
         let lo_fract = self.lo.fract();
@@ -87,10 +102,11 @@ impl TwoFloat {
     ///
     /// ```
     /// # use twofloat::TwoFloat;
-    /// let a = TwoFloat::new_add(1.0, 1e-200);
-    /// let b = TwoFloat::new_add(1.0, -1e-200);
-    /// assert_eq!(a.trunc(), TwoFloat::from(1.0));
-    /// assert_eq!(b.trunc(), TwoFloat::from(0.0));
+    /// let a = TwoFloat::new_add(1.0, 1e-200).trunc();
+    /// let b = TwoFloat::new_add(1.0, -1e-200).trunc();
+    ///
+    /// assert_eq!(a, TwoFloat::from(1.0));
+    /// assert_eq!(b, TwoFloat::from(0.0));
     pub fn trunc(&self) -> TwoFloat {
         let (a, b) = if self.lo.fract() == 0.0 {
             (self.hi.trunc(), self.lo.trunc())
@@ -116,6 +132,7 @@ impl TwoFloat {
     /// # use twofloat::TwoFloat;
     /// let a = TwoFloat::from(2.0f64);
     /// let b = a.sqrt();
+    ///
     /// assert!(b * b - a < 1e-16);
     pub fn sqrt(&self) -> TwoFloat {
         if self.hi < 0.0 || (self.hi == 0.0 && self.lo < 0.0) {
@@ -135,12 +152,11 @@ impl TwoFloat {
     ///
     /// ```
     /// # use twofloat::TwoFloat;
-    /// let a = TwoFloat::from(2f64);
-    /// let b = TwoFloat::from(8f64);
-    /// let c = TwoFloat::from(0f64);
+    /// let a = TwoFloat::from(2f64).powi(3);
+    /// let b = TwoFloat::from(0f64).powi(0);
     ///
-    /// assert!(a.powi(3) - b <= 1e-16);
-    /// assert!(!c.powi(0).is_valid());
+    /// assert!(a - TwoFloat::from(8f64) <= 1e-16);
+    /// assert!(!b.is_valid());
     pub fn powi(&self, n: i32) -> TwoFloat {
         match n {
             0 => {
