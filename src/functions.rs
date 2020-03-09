@@ -123,6 +123,56 @@ impl TwoFloat {
         TwoFloat { hi: a, lo: b }
     }
 
+    /// Returns the smallest integer greater than or equal to the number.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::new_add(1.0, 1e-200).ceil();
+    /// let b = TwoFloat::new_add(1.0, -1e-200).ceil();
+    /// let c = TwoFloat::new_add(-1.0, 1e-200).ceil();
+    ///
+    /// assert_eq!(a, TwoFloat::from(2.0));
+    /// assert_eq!(b, TwoFloat::from(1.0));
+    /// assert_eq!(c, TwoFloat::from(0.0));
+    pub fn ceil(&self) -> TwoFloat {
+        let (a, b) = if self.lo.fract() == 0.0 {
+            (self.hi, self.lo)
+        } else if self.hi.fract() == 0.0 {
+            fast_two_sum(self.hi, self.lo.ceil())
+        } else {
+            (self.hi.ceil(), 0f64)
+        };
+
+        TwoFloat { hi: a, lo: b }
+    }
+
+    /// Returns the smallest integer less than or equal to the number.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::new_add(1.0, 1e-200).floor();
+    /// let b = TwoFloat::new_add(1.0, -1e-200).floor();
+    /// let c = TwoFloat::new_add(-1.0, 1e-200).floor();
+    ///
+    /// assert_eq!(a, TwoFloat::from(1.0));
+    /// assert_eq!(b, TwoFloat::from(0.0));
+    /// assert_eq!(c, TwoFloat::from(-1.0));
+    pub fn floor(&self) -> TwoFloat {
+        let (a, b) = if self.lo.fract() == 0.0 {
+            (self.hi, self.lo)
+        } else if self.hi.fract() == 0.0 {
+            fast_two_sum(self.hi, self.lo.floor())
+        } else {
+            (self.hi.floor(), 0f64)
+        };
+
+        TwoFloat { hi: a, lo: b }
+    }
+
     /// Returns the square root of the number, using equation 4 from Karp &
     /// Markstein (1997).
     ///
@@ -290,6 +340,66 @@ mod tests {
         let expected = source;
         let result = source.trunc();
         assert_eq!(result, expected, "Truncation of integer {:?} returned different value", source);
+    });
+
+    randomized_test!(ceil_hi_fract_test, |rng: F64Rand| {
+        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a.fract() != 0.0 && no_overlap(a, b) });
+        let source = TwoFloat { hi: a, lo: b };
+        let expected = TwoFloat { hi: a.ceil(), lo: 0f64 };
+        let result = source.ceil();
+
+        assert!(no_overlap(result.hi, result.lo), "ceil({:?}) contained overlap", source);
+        assert_eq!(result, expected, "Incorrect value of ceil({:?})", source);
+    });
+
+    randomized_test!(ceil_lo_fract_test, |rng: F64Rand| {
+        let (a_fract, b) = get_valid_pair(rng, |a: f64, b: f64| { b.fract() != 0.0 && no_overlap(a.trunc(), b) });
+        let a = a_fract.trunc();
+        let source = TwoFloat { hi: a, lo: b };
+        let expected = TwoFloat::new_add(a, b.ceil());
+        let result = source.ceil();
+
+        assert!(no_overlap(result.hi, result.lo), "ceil({:?}) contained overlap", source);
+        assert_eq!(result, expected, "Incorrect value of ceil({:?})", source);
+    });
+
+    randomized_test!(ceil_no_fract_test, |rng: F64Rand| {
+        let (a_fract, b_fract) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a.trunc(), b.trunc()) });
+        let source = TwoFloat { hi: a_fract.trunc(), lo: b_fract.trunc() };
+        let expected = source;
+        let result = source.ceil();
+        assert!(no_overlap(result.hi, result.lo), "ceil({:?}) contained overlap", source);
+        assert_eq!(result, expected, "Ceil of integer {:?} returned different value", source);
+    });
+
+    randomized_test!(floor_hi_fract_test, |rng: F64Rand| {
+        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a.fract() != 0.0 && no_overlap(a, b) });
+        let source = TwoFloat { hi: a, lo: b };
+        let expected = TwoFloat { hi: a.floor(), lo: 0f64 };
+        let result = source.floor();
+
+        assert!(no_overlap(result.hi, result.lo), "floor({:?}) contained overlap", source);
+        assert_eq!(result, expected, "Incorrect value of floor({:?})", source);
+    });
+
+    randomized_test!(floor_lo_fract_test, |rng: F64Rand| {
+        let (a_fract, b) = get_valid_pair(rng, |a: f64, b: f64| { b.fract() != 0.0 && no_overlap(a.trunc(), b) });
+        let a = a_fract.trunc();
+        let source = TwoFloat { hi: a, lo: b };
+        let expected = TwoFloat::new_add(a, b.floor());
+        let result = source.floor();
+
+        assert!(no_overlap(result.hi, result.lo), "floor({:?}) contained overlap", source);
+        assert_eq!(result, expected, "Incorrect value of floor({:?})", source);
+    });
+
+    randomized_test!(floor_no_fract_test, |rng: F64Rand| {
+        let (a_fract, b_fract) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a.trunc(), b.trunc()) });
+        let source = TwoFloat { hi: a_fract.trunc(), lo: b_fract.trunc() };
+        let expected = source;
+        let result = source.floor();
+        assert!(no_overlap(result.hi, result.lo), "floor({:?}) contained overlap", source);
+        assert_eq!(result, expected, "Floor of integer value {:?} returned different value", source);
     });
 
     randomized_test!(sqrt_test, |rng: F64Rand| {
