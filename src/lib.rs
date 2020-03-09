@@ -43,6 +43,6 @@ mod test_util;
 mod base;
 mod convert;
 mod arithmetic;
-mod math;
+mod functions;
 
 pub use base::{TwoFloat, no_overlap};
