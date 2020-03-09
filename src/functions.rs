@@ -109,7 +109,7 @@ impl TwoFloat {
     /// assert_eq!(b, TwoFloat::from(0.0));
     pub fn trunc(&self) -> TwoFloat {
         let (a, b) = if self.lo.fract() == 0.0 {
-            (self.hi.trunc(), self.lo.trunc())
+            (self.hi, self.lo)
         } else if self.hi.fract() == 0.0 {
             match (self.hi >= 0.0, self.lo >= 0.0) {
                 (true, false) => fast_two_sum(self.hi, self.lo.trunc() - 1.0),
