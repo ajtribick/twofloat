@@ -2,7 +2,7 @@
 
 ## Version 0.1.1
 
-* Added `fract` and `trunc` functions.
+* Added functions: `fract`, `trunc`, `sqrt`.
 * Added `%` and `%=` operators.
 
 ## Version 0.1.0

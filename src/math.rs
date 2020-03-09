@@ -106,6 +106,28 @@ impl TwoFloat {
 
         TwoFloat { hi: a, lo: b }
     }
+
+    /// Returns the square root of the number, using equation 4 from Karp &
+    /// Markstein (1997).
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(2.0f64);
+    /// let b = a.sqrt();
+    /// assert!(b * b - a < 1e-16);
+    pub fn sqrt(&self) -> TwoFloat {
+        if self.hi < 0.0 || (self.hi == 0.0 && self.lo < 0.0) {
+            TwoFloat { hi: std::f64::NAN, lo: std::f64::NAN }
+        } else if self.hi == 0.0 && self.lo == 0.0 {
+            TwoFloat { hi: 0f64, lo: 0f64 }
+        } else {
+            let x = 1.0 / self.hi.sqrt();
+            let y = self.hi * x;
+            TwoFloat::new_add(y, (self - TwoFloat::new_mul(y, y)).hi * (x * 0.5))
+        }
+    }
 }
 
 #[cfg(test)]
@@ -213,5 +235,21 @@ mod tests {
         let expected = source;
         let result = source.trunc();
         assert_eq!(result, expected, "Truncation of integer {:?} returned different value", source);
+    });
+
+    randomized_test!(sqrt_test, |rng: F64Rand| {
+        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a > 0.0 && no_overlap(a, b) });
+        let source = TwoFloat { hi: a, lo: b };
+        let result = source.sqrt();
+        assert!(no_overlap(result.hi, result.lo), "Square root of {:?} gave overlap", source);
+        let difference = (result * result - source).abs() / source;
+        assert!(difference < 1e-16, "Square root of {:?} ({:?}) squared gives high relative difference {}", source, result, difference.hi);
+    });
+
+    randomized_test!(sqrt_test_negative, |rng: F64Rand| {
+        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a < 0.0 && no_overlap(a, b) });
+        let source = TwoFloat { hi: a, lo: b };
+        let result = source.sqrt();
+        assert!(!result.is_valid(), "Square root of negative number {:?} gave non-error result", source);
     });
 }
