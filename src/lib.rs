@@ -15,7 +15,7 @@ constructor that performs an arithmetic operation on a pair of `f64` values.
 extern crate twofloat;
 use twofloat::TwoFloat;
 
-let a = TwoFloat::from(3.4f64);
+let a = TwoFloat::from(3.4);
 let b = TwoFloat::new_add(1.0, 1.0e-300);
 let c = TwoFloat::new_sub(1.0, 1.0e-300);
 let d = TwoFloat::new_mul(5.0, 0.7);

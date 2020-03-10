@@ -139,12 +139,12 @@ impl TwoFloat {
         let hi_fract = self.hi.fract();
         let lo_fract = self.lo.fract();
         let (a, b) = if lo_fract == 0.0 {
-            (hi_fract, 0f64)
+            (hi_fract, 0.0)
         } else if hi_fract == 0.0 {
             match (self.hi >= 0.0, self.lo >= 0.0) {
                 (true, false) => fast_two_sum(1.0, lo_fract),
                 (false, true) => fast_two_sum(-1.0, lo_fract),
-                _ => (self.lo.fract(), 0f64)
+                _ => (self.lo.fract(), 0.0)
             }
         } else {
             fast_two_sum(self.hi.fract(), self.lo)
@@ -174,7 +174,7 @@ impl TwoFloat {
                 _ => (self.hi, self.lo.trunc())
             }
         } else {
-            (self.hi.trunc(), 0f64)
+            (self.hi.trunc(), 0.0)
         };
 
         TwoFloat { hi: a, lo: b }
@@ -199,7 +199,7 @@ impl TwoFloat {
         } else if self.hi.fract() == 0.0 {
             fast_two_sum(self.hi, self.lo.ceil())
         } else {
-            (self.hi.ceil(), 0f64)
+            (self.hi.ceil(), 0.0)
         };
 
         TwoFloat { hi: a, lo: b }
@@ -224,7 +224,7 @@ impl TwoFloat {
         } else if self.hi.fract() == 0.0 {
             fast_two_sum(self.hi, self.lo.floor())
         } else {
-            (self.hi.floor(), 0f64)
+            (self.hi.floor(), 0.0)
         };
 
         TwoFloat { hi: a, lo: b }
@@ -237,7 +237,7 @@ impl TwoFloat {
     ///
     /// ```
     /// # use twofloat::TwoFloat;
-    /// let a = TwoFloat::from(2.0f64);
+    /// let a = TwoFloat::from(2.0);
     /// let b = a.sqrt();
     ///
     /// assert!(b * b - a < 1e-16);
@@ -245,7 +245,7 @@ impl TwoFloat {
         if self.hi < 0.0 || (self.hi == 0.0 && self.lo < 0.0) {
             TwoFloat { hi: std::f64::NAN, lo: std::f64::NAN }
         } else if self.hi == 0.0 && self.lo == 0.0 {
-            TwoFloat { hi: 0f64, lo: 0f64 }
+            TwoFloat { hi: 0.0, lo: 0.0 }
         } else {
             let x = self.hi.sqrt().recip();
             let y = self.hi * x;
@@ -259,10 +259,10 @@ impl TwoFloat {
     ///
     /// ```
     /// # use twofloat::TwoFloat;
-    /// let a = TwoFloat::from(2f64).powi(3);
-    /// let b = TwoFloat::from(0f64).powi(0);
+    /// let a = TwoFloat::from(2.0).powi(3);
+    /// let b = TwoFloat::from(0.0).powi(0);
     ///
-    /// assert!(a - TwoFloat::from(8f64) <= 1e-16);
+    /// assert!(a - TwoFloat::from(8.0) <= 1e-16);
     /// assert!(!b.is_valid());
     pub fn powi(&self, n: i32) -> TwoFloat {
         match n {
@@ -270,13 +270,13 @@ impl TwoFloat {
                 if self.hi == 0.0 && self.lo == 0.0 {
                     TwoFloat { hi: std::f64::NAN, lo: std::f64::NAN }
                 } else {
-                    1f64.into()
+                    TwoFloat::from(1.0)
                 }
             },
             1 => { self.clone() },
             -1 => { self.recip() },
             _ => {
-                let mut result: TwoFloat = 1f64.into();
+                let mut result = TwoFloat::from(1.0);
                 let mut n_pos = n.abs();
                 let mut value = self.clone();
                 while n_pos > 0 {
@@ -425,7 +425,7 @@ mod tests {
     randomized_test!(trunc_hi_fract_test, |rng: F64Rand| {
         let (a, b) = get_valid_pair(rng, |x, y| { x.fract() != 0.0 && no_overlap(x, y) });
         let source = TwoFloat { hi: a, lo: b };
-        let expected = TwoFloat { hi: a.trunc(), lo: 0f64 };
+        let expected = TwoFloat { hi: a.trunc(), lo: 0.0 };
         let result = source.trunc();
 
         assert!(no_overlap(result.hi, result.lo), "Overlap in trunc({:?})", source);
@@ -462,7 +462,7 @@ mod tests {
     randomized_test!(ceil_hi_fract_test, |rng: F64Rand| {
         let (a, b) = get_valid_pair(rng, |x, y| { x.fract() != 0.0 && no_overlap(x, y) });
         let source = TwoFloat { hi: a, lo: b };
-        let expected = TwoFloat { hi: a.ceil(), lo: 0f64 };
+        let expected = TwoFloat { hi: a.ceil(), lo: 0.0 };
         let result = source.ceil();
 
         assert!(no_overlap(result.hi, result.lo), "ceil({:?}) contained overlap", source);
@@ -492,7 +492,7 @@ mod tests {
     randomized_test!(floor_hi_fract_test, |rng: F64Rand| {
         let (a, b) = get_valid_pair(rng, |x, y| { x.fract() != 0.0 && no_overlap(x, y) });
         let source = TwoFloat { hi: a, lo: b };
-        let expected = TwoFloat { hi: a.floor(), lo: 0f64 };
+        let expected = TwoFloat { hi: a.floor(), lo: 0.0 };
         let result = source.floor();
 
         assert!(no_overlap(result.hi, result.lo), "floor({:?}) contained overlap", source);
@@ -538,7 +538,7 @@ mod tests {
     randomized_test!(powi_0_test, |rng: F64Rand| {
         let (a, b) = get_valid_pair(rng, |x, y| { x != 0.0 && no_overlap(x, y) });
         let source = TwoFloat { hi: a, lo: b };
-        let expected = TwoFloat { hi: 1f64, lo: 0f64 };
+        let expected = TwoFloat { hi: 1.0, lo: 0.0 };
         let result = source.powi(0);
 
         assert!(no_overlap(result.hi, result.lo), "Result of {:?}.powi(0) contained overlap", source);
@@ -557,9 +557,9 @@ mod tests {
     fn powi_value_test() {
         let mut rng = rand::thread_rng();
         for _ in 0..TEST_ITERS {
-            let source = TwoFloat::new_add(rng.gen_range(-128f64, 128f64), rng.gen_range(-1.0f64, 1.0f64));
-            let exponent = rng.gen_range(1i32, 20i32);
-            let mut expected = TwoFloat::from(1f64);
+            let source = TwoFloat::new_add(rng.gen_range(-128.0, 128.0), rng.gen_range(-1.0, 1.0));
+            let exponent = rng.gen_range(1, 20);
+            let mut expected = TwoFloat::from(1.0);
             for _ in 0..exponent {
                 expected *= &source;
             }
@@ -576,9 +576,9 @@ mod tests {
     fn powi_reciprocal_test() {
         let mut rng = rand::thread_rng();
         for _ in 0..TEST_ITERS {
-            let source = TwoFloat::new_add(rng.gen_range(-128f64, 128f64), rng.gen_range(-1.0f64, 1.0f64));
-            let exponent = rng.gen_range(1i32, 20i32);
-            let expected = 1.0f64 / source.powi(exponent);
+            let source = TwoFloat::new_add(rng.gen_range(-128.0, 128.0), rng.gen_range(-1.0, 1.0));
+            let exponent = rng.gen_range(1, 20);
+            let expected = 1.0 / source.powi(exponent);
             let result = source.powi(-exponent);
             assert!(no_overlap(result.hi, result.lo), "{:?}.powi({}) contained overlap", source, -exponent);
             assert_eq!(result, expected, "{0:?}.powi({1}) was not reciprocal of {0:?}.powi({2})", source, -exponent, exponent);

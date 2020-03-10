@@ -484,8 +484,8 @@ mod tests {
             #[test]
             fn value_left_test() {
                 let mut rng = rand::thread_rng();
-                let high_range = rand::distributions::Uniform::new_inclusive(-1e50f64, 1e50f64);
-                let low_range = rand::distributions::Uniform::new_inclusive(-1f64, 1f64);
+                let high_range = rand::distributions::Uniform::new_inclusive(-1e50, 1e50);
+                let low_range = rand::distributions::Uniform::new_inclusive(-1.0, 1.0);
 
                 loop {
                     let a = rng.sample(high_range);
@@ -521,8 +521,8 @@ mod tests {
                 #[test]
                 fn reversible_test() {
                     let mut rng = rand::thread_rng();
-                    let high_range = rand::distributions::Uniform::new_inclusive(-1e50f64, 1e50f64);
-                    let low_range = rand::distributions::Uniform::new_inclusive(-1f64, 1f64);
+                    let high_range = rand::distributions::Uniform::new_inclusive(-1e50, 1e50);
+                    let low_range = rand::distributions::Uniform::new_inclusive(-1.0, 1.0);
                     loop {
                         let a = rng.sample(high_range);
                         let (b, c) = loop {
@@ -553,8 +553,8 @@ mod tests {
                 #[test]
                 fn value_right_test() {
                     let mut rng = rand::thread_rng();
-                    let high_range = rand::distributions::Uniform::new_inclusive(-1e50f64, 1e50f64);
-                    let low_range = rand::distributions::Uniform::new_inclusive(-1f64, 1f64);
+                    let high_range = rand::distributions::Uniform::new_inclusive(-1e50, 1e50);
+                    let low_range = rand::distributions::Uniform::new_inclusive(-1.0, 1.0);
                     loop {
                         let a = rng.sample(high_range);
                         let (b, c) = loop {
@@ -625,8 +625,8 @@ mod tests {
                 #[test]
                 fn value_test() {
                     let mut rng = rand::thread_rng();
-                    let high_range = rand::distributions::Uniform::new_inclusive(-1e50f64, 1e50f64);
-                    let low_range = rand::distributions::Uniform::new_inclusive(-1f64, 1f64);
+                    let high_range = rand::distributions::Uniform::new_inclusive(-1e50, 1e50);
+                    let low_range = rand::distributions::Uniform::new_inclusive(-1.0, 1.0);
 
                     loop {
                         let (a, b) = loop {

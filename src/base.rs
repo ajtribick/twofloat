@@ -159,13 +159,13 @@ mod tests {
         assert_eq!(right_bit(std::f64::INFINITY), None);
         assert_eq!(right_bit(std::f64::NEG_INFINITY), None);
         assert_eq!(right_bit(std::f64::NAN), None);
-        assert_eq!(right_bit(1f64), Some(-52));
-        assert_eq!(right_bit(2f64), Some(-51));
-        assert_eq!(right_bit(0.5f64), Some(-53));
+        assert_eq!(right_bit(1.0), Some(-52));
+        assert_eq!(right_bit(2.0), Some(-51));
+        assert_eq!(right_bit(0.5), Some(-53));
         assert_eq!(right_bit(2.2250738585072014e-308), Some(-1074));
         assert_eq!(right_bit(2.2250738585072009e-308), Some(-1074));
         assert_eq!(right_bit(4.9406564584124654e-324), Some(-1074));
-        assert!(right_bit(0f64).unwrap_or(0) < -1074);
+        assert!(right_bit(0.0).unwrap_or(0) < -1074);
     }
 
     #[test]
@@ -173,13 +173,13 @@ mod tests {
         assert_eq!(left_bit(std::f64::INFINITY), None);
         assert_eq!(left_bit(std::f64::NEG_INFINITY), None);
         assert_eq!(left_bit(std::f64::NAN), None);
-        assert_eq!(left_bit(1f64), Some(0));
-        assert_eq!(left_bit(2f64), Some(1));
-        assert_eq!(left_bit(0.5f64), Some(-1));
+        assert_eq!(left_bit(1.0), Some(0));
+        assert_eq!(left_bit(2.0), Some(1));
+        assert_eq!(left_bit(0.5), Some(-1));
         assert_eq!(left_bit(2.2250738585072014e-308), Some(-1022));
         assert_eq!(left_bit(2.2250738585072009e-308), Some(-1023));
         assert_eq!(left_bit(4.9406564584124654e-324), Some(-1074));
-        assert!(left_bit(0f64).unwrap_or(0) < -1074);
+        assert!(left_bit(0.0).unwrap_or(0) < -1074);
     }
 
     randomized_test!(copy_test, |rng: F64Rand| {

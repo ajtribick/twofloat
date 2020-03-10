@@ -31,7 +31,7 @@ macro_rules! float_convert {
     ($type:tt) => {
         impl From<$type> for TwoFloat {
             fn from(value: $type) -> Self {
-                TwoFloat { hi: value as f64, lo: 0f64 }
+                TwoFloat { hi: value as f64, lo: 0.0 }
             }
         }
 
@@ -48,7 +48,7 @@ macro_rules! int_convert {
     ($type:tt) => {
         impl From<$type> for TwoFloat {
             fn from(value: $type) -> Self {
-                TwoFloat { hi: value as f64, lo: 0f64 }
+                TwoFloat { hi: value as f64, lo: 0.0 }
             }
         }
 
@@ -139,7 +139,7 @@ impl From<u64> for TwoFloat {
 }
 
 from_conversion!(|value: TwoFloat| -> Result<u64, ()> {
-    const LOWER_BOUND: f64 = -1f64;
+    const LOWER_BOUND: f64 = -1.0;
     const UPPER_BOUND: f64 = std::u64::MAX as f64;
 
     if value.hi < LOWER_BOUND || value.hi > UPPER_BOUND {
@@ -186,7 +186,7 @@ mod tests {
                 let result: TwoFloat = source.into();
 
                 assert_eq!(result.hi, source as f64, "Float conversion failed: mismatch in high word");
-                assert_eq!(result.lo, 0f64, "Float conversion failed: non-zero low word");
+                assert_eq!(result.lo, 0.0, "Float conversion failed: non-zero low word");
             });
 
             randomized_test!($into_test, |rng: F64Rand| {
@@ -226,7 +226,7 @@ mod tests {
 
                 for i in 0..TEST_ITERS {
                     let a = LOWER_BOUND;
-                    let b = if i == 0 { 0f64 } else { get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) }) };
+                    let b = if i == 0 { 0.0 } else { get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) }) };
                     let source = TwoFloat { hi: a, lo: b };
                     let expected = if b > 0.0 { Ok(std::$type::MIN) } else { Err(()) };
                     let result = $type::try_from(source);
@@ -244,7 +244,7 @@ mod tests {
 
                 for i in 0..TEST_ITERS {
                     let a = UPPER_BOUND;
-                    let b = if i == 0 { 0f64 } else { get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) }) };
+                    let b = if i == 0 { 0.0 } else { get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) }) };
                     let source = TwoFloat { hi: a, lo: b };
                     let expected = if b < 0.0 { Ok(std::$type::MAX) } else { Err(()) };
                     let result = $type::try_from(source);
@@ -265,7 +265,7 @@ mod tests {
                 for i in 0..TEST_ITERS {
                     let (a, b) = loop {
                         let a = rng.sample(valid_dist).trunc();
-                        let b = if i == 0 { 0f64 } else { get_f64() };
+                        let b = if i == 0 { 0.0 } else { get_f64() };
                         if no_overlap(a, b) { break (a, b); }
                     };
                     let source = TwoFloat { hi: a, lo: b };
@@ -295,7 +295,7 @@ mod tests {
                     let (a, b) = loop {
                         let a = rng.sample(valid_dist);
                         if a.fract() == 0.0 { continue; }
-                        let b = if i == 0 { 0f64 } else { get_f64() };
+                        let b = if i == 0 { 0.0 } else { get_f64() };
                         if no_overlap(a, b) { break (a, b); }
                     };
                     let source = if i == 1 { TwoFloat { hi: -0.4, lo: 0.0 } } else { TwoFloat { hi: a, lo: b } };
@@ -349,7 +349,7 @@ mod tests {
 
                         assert!(no_overlap(result.hi, result.lo), "Conversion of {} produced overlap", source);
                         assert_eq!(result.hi, source as f64, "Conversion of {} failed: mismatch in high word", source);
-                        assert_eq!(result.lo, 0f64, "Conversion of {} failed: non-zero low word", source);
+                        assert_eq!(result.lo, 0.0, "Conversion of {} failed: non-zero low word", source);
                     }
                 }
 
@@ -369,7 +369,7 @@ mod tests {
 
                         assert!(no_overlap(result.hi, result.lo), "Conversion of {} produced overlap", source);
                         assert_eq!(result.hi, source as f64, "Conversion of {} failed: mismatch in high word", source);
-                        assert_eq!(result.lo, 0f64, "Conversion of {} failed: non-zero low word", source);
+                        assert_eq!(result.lo, 0.0, "Conversion of {} failed: non-zero low word", source);
 
                         if source == std::$type::MAX { break; }
                         source += 1;
@@ -409,14 +409,14 @@ mod tests {
 
                         assert!(no_overlap(result.hi, result.lo), "Conversion of {} produced overlap", source);
                         assert!(result.hi >= std::$type::MIN as f64 && result.hi <= std::$type::MAX as f64, "Conversion of {} high word out of range", source);
-                        assert!(result.hi.fract() == 0f64, "Integer conversion of {} produced a fraction", source);
-                        assert!(result.lo.fract() == 0f64, "Integer conversion of {} produced a fraction", source);
+                        assert!(result.hi.fract() == 0.0, "Integer conversion of {} produced a fraction", source);
+                        assert!(result.lo.fract() == 0.0, "Integer conversion of {} produced a fraction", source);
 
                         if result.hi == std::$type::MAX as f64 {
-                            assert!(result.lo < 0f64, "Converted result of {} out of range", source);
+                            assert!(result.lo < 0.0, "Converted result of {} out of range", source);
                             assert_eq!((-result.lo) as $type - 1, std::$type::MAX - source, "Conversion of {} did not produce matching value", source);
                         } else if result.hi == std::$type::MIN as f64 {
-                            assert!(result.lo >= 0f64, "Converted result of {} out of range", source);
+                            assert!(result.lo >= 0.0, "Converted result of {} out of range", source);
                             assert_eq!(result.lo as $type, source - std::$type::MIN, "Conversion of {} did not produce matching value", source);
                         } else if result.lo >= 0.0 {
                             assert_eq!(result.hi as $type + result.lo as $type, source, "Conversion of {} did not produce matching value", source);
@@ -434,7 +434,7 @@ mod tests {
                     let mut get_f64 = float_generator();
                     for i in 0..TEST_ITERS {
                         let a = LOWER_BOUND;
-                        let b = if i == 0 { 0f64 } else { get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) }) };
+                        let b = if i == 0 { 0.0 } else { get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) }) };
                         let source = TwoFloat { hi: a, lo: b };
                         let expected = if b >= 0.0 { Ok(std::$type::MIN + b as $type)} else { Err(()) };
                         let result = $type::try_from(source);
@@ -451,7 +451,7 @@ mod tests {
                     let mut get_f64 = float_generator();
                     for i in 0..TEST_ITERS {
                         let a = UPPER_BOUND;
-                        let b = if i == 0 { 0f64 } else { get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) }) };
+                        let b = if i == 0 { 0.0 } else { get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) }) };
                         let source = TwoFloat { hi: a, lo: b };
                         let expected = if b < 0.0 { Ok(std::$type::MAX - ((-b.floor()) as $type) + 1) } else { Err(()) };
                         let result = $type::try_from(source);
@@ -510,12 +510,12 @@ mod tests {
                         if std::$type::MIN == 0 || rng.gen() { x } else { -x }
                     };
 
-                    let fract_dist = rand::distributions::Uniform::new(f64::from_bits((-1f64).to_bits() - 1), 1f64);
+                    let fract_dist = rand::distributions::Uniform::new(f64::from_bits((-1.0f64).to_bits() - 1), 1.0);
                     for i in 0..TEST_ITERS {
                         let (a, b) = loop {
                             let a = get_valid_f64(&mut gen_f64, |x| { x > LOWER_BOUND && x < UPPER_BOUND }).trunc();
                             if a == 0.0 { continue; }
-                            let b = if i == 0 { 0f64 } else { rng.sample(fract_dist) };
+                            let b = if i == 0 { 0.0 } else { rng.sample(fract_dist) };
                             if no_overlap(a, b) { break (a, b); }
                         };
 
@@ -547,7 +547,7 @@ mod tests {
                             if rb >= 1 { break (a, rb); }
                         };
                         let b = loop {
-                            let b = rng.gen_range(1f64, (1 << rb) as f64);
+                            let b = rng.gen_range(1.0, (1 << rb) as f64);
                             if no_overlap(a, b) { break b; }
                         };
 
