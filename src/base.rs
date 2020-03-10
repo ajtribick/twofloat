@@ -83,8 +83,8 @@ impl TwoFloat {
     /// # use twofloat::TwoFloat;
     /// #
     /// # fn main() -> Result<(), ()> {
-    /// let a = 1.0f64;
-    /// let b = 1.0e-200f64;
+    /// let a = 1.0;
+    /// let b = 1.0e-200;
     /// let result1 = TwoFloat::try_new(a, b)?;
     /// let result2 = TwoFloat::try_new(1.0, 2.0);
     ///
@@ -310,7 +310,7 @@ mod tests {
     });
 
     randomized_test!(try_new_no_overlap_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x: f64, y: f64| { no_overlap(x, y) });
+        let (a, b) = get_valid_pair(rng, |x, y| { no_overlap(x, y) });
         let expected = TwoFloat { hi: a, lo: b };
         let result = TwoFloat::try_new(a, b);
         assert!(result.is_ok(), "Creation from non-overlapping pair {}, {} resulted in error", a, b);
@@ -318,7 +318,7 @@ mod tests {
     });
 
     randomized_test!(try_new_overlap_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x: f64, y: f64| { !no_overlap(x, y) });
+        let (a, b) = get_valid_pair(rng, |x, y| { !no_overlap(x, y) });
         let result = TwoFloat::try_new(a, b);
         assert!(result.is_err(), "Creation from overlapping pair {}, {} resulted in value", a, b);
     });

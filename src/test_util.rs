@@ -48,7 +48,7 @@ pub fn get_valid_pair<F : Fn(f64, f64) -> bool>(rng: F64Rand, pred: F) -> (f64, 
 pub fn ulp_diff(a: f64, b: f64) -> i64 {
     let a_bits = a.to_bits();
     let b_bits = b.to_bits();
-    let fix_sign = |x: u64| { if x & (1 << 63) == 0 { x } else { x ^ ((1 << 63) - 1) } };
+    let fix_sign = |x| { if x & (1 << 63) == 0 { x } else { x ^ ((1 << 63) - 1) } };
     (fix_sign(a_bits) as i64).saturating_sub(fix_sign(b_bits) as i64)
 }
 

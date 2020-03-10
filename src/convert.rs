@@ -226,7 +226,7 @@ mod tests {
 
                 for i in 0..TEST_ITERS {
                     let a = LOWER_BOUND;
-                    let b = if i == 0 { 0f64 } else { get_valid_f64(&mut get_f64, |x: f64| { no_overlap(a, x) }) };
+                    let b = if i == 0 { 0f64 } else { get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) }) };
                     let source = TwoFloat { hi: a, lo: b };
                     let expected = if b > 0.0 { Ok(std::$type::MIN) } else { Err(()) };
                     let result = $type::try_from(source);
@@ -244,7 +244,7 @@ mod tests {
 
                 for i in 0..TEST_ITERS {
                     let a = UPPER_BOUND;
-                    let b = if i == 0 { 0f64 } else { get_valid_f64(&mut get_f64, |x: f64| { no_overlap(a, x) }) };
+                    let b = if i == 0 { 0f64 } else { get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) }) };
                     let source = TwoFloat { hi: a, lo: b };
                     let expected = if b < 0.0 { Ok(std::$type::MAX) } else { Err(()) };
                     let result = $type::try_from(source);
@@ -314,8 +314,8 @@ mod tests {
                 let mut get_f64 = float_generator();
 
                 for _ in 0..TEST_ITERS {
-                    let a = get_valid_f64(&mut get_f64, |x: f64| { x < LOWER_BOUND || x > UPPER_BOUND });
-                    let b = get_valid_f64(&mut get_f64, |x: f64| { no_overlap(a, x) });
+                    let a = get_valid_f64(&mut get_f64, |x| { x < LOWER_BOUND || x > UPPER_BOUND });
+                    let b = get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) });
                     let source = TwoFloat { hi: a, lo: b};
                     let result = $type::try_from(source);
 
@@ -434,7 +434,7 @@ mod tests {
                     let mut get_f64 = float_generator();
                     for i in 0..TEST_ITERS {
                         let a = LOWER_BOUND;
-                        let b = if i == 0 { 0f64 } else { get_valid_f64(&mut get_f64, |x: f64| { no_overlap(a, x) }) };
+                        let b = if i == 0 { 0f64 } else { get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) }) };
                         let source = TwoFloat { hi: a, lo: b };
                         let expected = if b >= 0.0 { Ok(std::$type::MIN + b as $type)} else { Err(()) };
                         let result = $type::try_from(source);
@@ -451,7 +451,7 @@ mod tests {
                     let mut get_f64 = float_generator();
                     for i in 0..TEST_ITERS {
                         let a = UPPER_BOUND;
-                        let b = if i == 0 { 0f64 } else { get_valid_f64(&mut get_f64, |x: f64| { no_overlap(a, x) }) };
+                        let b = if i == 0 { 0f64 } else { get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) }) };
                         let source = TwoFloat { hi: a, lo: b };
                         let expected = if b < 0.0 { Ok(std::$type::MAX - ((-b.floor()) as $type) + 1) } else { Err(()) };
                         let result = $type::try_from(source);
@@ -477,7 +477,7 @@ mod tests {
 
                     for _ in 0..TEST_ITERS {
                         let (a, b) = loop {
-                            let a = get_valid_f64(&mut gen_valid_f64, |x: f64| { x > LOWER_BOUND && x < UPPER_BOUND && x.fract() != 0.0 });
+                            let a = get_valid_f64(&mut gen_valid_f64, |x| { x > LOWER_BOUND && x < UPPER_BOUND && x.fract() != 0.0 });
                             let rb = right_bit(a).unwrap_or(std::i16::MIN);
                             if (rb < -1019) { continue; }
                             let b_exponent = (rng.gen_range(-1022, rb) + 1023) as u64;
@@ -513,7 +513,7 @@ mod tests {
                     let fract_dist = rand::distributions::Uniform::new(f64::from_bits((-1f64).to_bits() - 1), 1f64);
                     for i in 0..TEST_ITERS {
                         let (a, b) = loop {
-                            let a = get_valid_f64(&mut gen_f64, |x: f64| { x > LOWER_BOUND && x < UPPER_BOUND }).trunc();
+                            let a = get_valid_f64(&mut gen_f64, |x| { x > LOWER_BOUND && x < UPPER_BOUND }).trunc();
                             if a == 0.0 { continue; }
                             let b = if i == 0 { 0f64 } else { rng.sample(fract_dist) };
                             if no_overlap(a, b) { break (a, b); }
@@ -570,7 +570,7 @@ mod tests {
                             let a = get_f64();
                             if a < LOWER_BOUND || a > UPPER_BOUND { break a; }
                         };
-                        let b = get_valid_f64(&mut get_f64, |x: f64| { no_overlap(a, x) });
+                        let b = get_valid_f64(&mut get_f64, |x| { no_overlap(a, x) });
                         let source = TwoFloat { hi: a, lo: b };
                         let result = $type::try_from(source);
 

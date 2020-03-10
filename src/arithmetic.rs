@@ -361,7 +361,7 @@ mod tests {
     use rand::Rng;
 
     randomized_test!(fast_two_sum_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { (a + b).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| { (x + y).is_finite() });
         let (hi, lo) = if a.abs() >= b.abs() { fast_two_sum(a, b) } else { fast_two_sum(b, a) };
 
         assert_eq_ulp!(hi, a + b, 1, "Incorrect result of fast_two_sum({}, {})", a, b);
@@ -369,7 +369,7 @@ mod tests {
     });
 
     randomized_test!(two_sum_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { (a + b).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| { (x + y).is_finite() });
         let (hi, lo) = two_sum(a, b);
 
         assert_eq_ulp!(hi, a + b, 1, "Incorrect result of two_sum({}, {})", a, b);
@@ -377,7 +377,7 @@ mod tests {
     });
 
     randomized_test!(two_diff_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { (a - b).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| { (x - y).is_finite() });
         let (hi, lo) = two_diff(a, b);
 
         assert_eq_ulp!(hi, a - b, 1, "Incorrect resut of two_diff({}, {})", a, b);
@@ -385,7 +385,7 @@ mod tests {
     });
 
     randomized_test!(two_prod_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { (a * b).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| { (x * y).is_finite() });
         let (hi, lo) = two_prod(a, b);
 
         assert_eq_ulp!(hi, a * b, 1, "Incorrect result of two_prod({}, {})", a, b);
@@ -393,7 +393,7 @@ mod tests {
     });
 
     randomized_test!(new_add_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { (a + b).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| { (x + y).is_finite() });
         let expected = two_sum(a, b);
         let actual = TwoFloat::new_add(a, b);
         assert_eq!(actual.hi, expected.0, "Incorrect result of new_add({}, {})", a, b);
@@ -401,7 +401,7 @@ mod tests {
     });
 
     randomized_test!(new_sub_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { (a - b).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| { (x - y).is_finite() });
         let expected = two_diff(a, b);
         let actual = TwoFloat::new_sub(a, b);
         assert_eq!(actual.hi, expected.0, "Incorrect result of new_sub({}, {})", a, b);
@@ -409,7 +409,7 @@ mod tests {
     });
 
     randomized_test!(new_mul_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { (a * b).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| { (x * y).is_finite() });
         let expected = two_prod(a, b);
         let actual = TwoFloat::new_mul(a, b);
         assert_eq!(actual.hi, expected.0, "Incorrect result of new_mul({}, {})", a, b);
@@ -417,7 +417,7 @@ mod tests {
     });
 
     randomized_test!(new_div_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { (a / b).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| { (x / y).is_finite() });
         let actual = TwoFloat::new_div(a, b);
         let ef = |a: f64, b: f64| -> u64 { let ab = a.to_bits(); let bb = b.to_bits(); if ab > bb { ab - bb } else { bb - ab }};
         assert_eq_ulp!(actual.hi, a / b, 10, "Incorrect result of new_div({}, {}) - {}", a, b, ef(actual.hi, a / b));

@@ -383,7 +383,7 @@ mod tests {
     }
 
     randomized_test!(fract_hi_fract_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a.fract() != 0.0 && no_overlap(a, b) });
+        let (a, b) = get_valid_pair(rng, |x, y| { x.fract() != 0.0 && no_overlap(x, y) });
         let source = TwoFloat { hi: a, lo: b };
         let expected = a.fract() + b.fract();
         let result = source.fract();
@@ -396,7 +396,7 @@ mod tests {
     });
 
     randomized_test!(fract_lo_fract_test, |rng: F64Rand| {
-        let (a_fract, b) = get_valid_pair(rng, |a: f64, b: f64| { b.fract() != 0.0 && no_overlap(a.trunc(), b) });
+        let (a_fract, b) = get_valid_pair(rng, |x, y| { y.fract() != 0.0 && no_overlap(x.trunc(), y) });
         let a = a_fract.trunc();
         let source = TwoFloat { hi: a, lo: b };
         let expected = match (a >= 0.0, b >= 0.0) {
@@ -415,7 +415,7 @@ mod tests {
     });
 
     randomized_test!(fract_no_fract_test, |rng: F64Rand| {
-        let (a_fract, b_fract) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a.trunc(), b.trunc()) });
+        let (a_fract, b_fract) = get_valid_pair(rng, |x, y| { no_overlap(x.trunc(), y.trunc()) });
         let source = TwoFloat { hi: a_fract.trunc(), lo: b_fract.trunc() };
         let expected = TwoFloat::from(0.0);
         let result = source.fract();
@@ -423,7 +423,7 @@ mod tests {
     });
 
     randomized_test!(trunc_hi_fract_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a.fract() != 0.0 && no_overlap(a, b) });
+        let (a, b) = get_valid_pair(rng, |x, y| { x.fract() != 0.0 && no_overlap(x, y) });
         let source = TwoFloat { hi: a, lo: b };
         let expected = TwoFloat { hi: a.trunc(), lo: 0f64 };
         let result = source.trunc();
@@ -435,7 +435,7 @@ mod tests {
     });
 
     randomized_test!(trunc_lo_fract_test, |rng: F64Rand| {
-        let (a_fract, b) = get_valid_pair(rng, |a: f64, b: f64| { b.fract() != 0.0 && no_overlap(a.trunc(), b) });
+        let (a_fract, b) = get_valid_pair(rng, |x, y| { y.fract() != 0.0 && no_overlap(x.trunc(), y) });
         let a = a_fract.trunc();
         let source = TwoFloat { hi: a, lo: b };
         let (expected_a, expected_b) = match (a >= 0.0, b >= 0.0) {
@@ -452,7 +452,7 @@ mod tests {
     });
 
     randomized_test!(trunc_no_fract_test, |rng: F64Rand| {
-        let (a_fract, b_fract) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a.trunc(), b.trunc()) });
+        let (a_fract, b_fract) = get_valid_pair(rng, |x, y| { no_overlap(x.trunc(), y.trunc()) });
         let source = TwoFloat { hi: a_fract.trunc(), lo: b_fract.trunc() };
         let expected = source;
         let result = source.trunc();
@@ -460,7 +460,7 @@ mod tests {
     });
 
     randomized_test!(ceil_hi_fract_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a.fract() != 0.0 && no_overlap(a, b) });
+        let (a, b) = get_valid_pair(rng, |x, y| { x.fract() != 0.0 && no_overlap(x, y) });
         let source = TwoFloat { hi: a, lo: b };
         let expected = TwoFloat { hi: a.ceil(), lo: 0f64 };
         let result = source.ceil();
@@ -470,7 +470,7 @@ mod tests {
     });
 
     randomized_test!(ceil_lo_fract_test, |rng: F64Rand| {
-        let (a_fract, b) = get_valid_pair(rng, |a: f64, b: f64| { b.fract() != 0.0 && no_overlap(a.trunc(), b) });
+        let (a_fract, b) = get_valid_pair(rng, |x, y| { y.fract() != 0.0 && no_overlap(x.trunc(), y) });
         let a = a_fract.trunc();
         let source = TwoFloat { hi: a, lo: b };
         let expected = TwoFloat::new_add(a, b.ceil());
@@ -481,7 +481,7 @@ mod tests {
     });
 
     randomized_test!(ceil_no_fract_test, |rng: F64Rand| {
-        let (a_fract, b_fract) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a.trunc(), b.trunc()) });
+        let (a_fract, b_fract) = get_valid_pair(rng, |x, y| { no_overlap(x.trunc(), y.trunc()) });
         let source = TwoFloat { hi: a_fract.trunc(), lo: b_fract.trunc() };
         let expected = source;
         let result = source.ceil();
@@ -490,7 +490,7 @@ mod tests {
     });
 
     randomized_test!(floor_hi_fract_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a.fract() != 0.0 && no_overlap(a, b) });
+        let (a, b) = get_valid_pair(rng, |x, y| { x.fract() != 0.0 && no_overlap(x, y) });
         let source = TwoFloat { hi: a, lo: b };
         let expected = TwoFloat { hi: a.floor(), lo: 0f64 };
         let result = source.floor();
@@ -500,7 +500,7 @@ mod tests {
     });
 
     randomized_test!(floor_lo_fract_test, |rng: F64Rand| {
-        let (a_fract, b) = get_valid_pair(rng, |a: f64, b: f64| { b.fract() != 0.0 && no_overlap(a.trunc(), b) });
+        let (a_fract, b) = get_valid_pair(rng, |x, y| { y.fract() != 0.0 && no_overlap(x.trunc(), y) });
         let a = a_fract.trunc();
         let source = TwoFloat { hi: a, lo: b };
         let expected = TwoFloat::new_add(a, b.floor());
@@ -511,7 +511,7 @@ mod tests {
     });
 
     randomized_test!(floor_no_fract_test, |rng: F64Rand| {
-        let (a_fract, b_fract) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a.trunc(), b.trunc()) });
+        let (a_fract, b_fract) = get_valid_pair(rng, |x, y| { no_overlap(x.trunc(), y.trunc()) });
         let source = TwoFloat { hi: a_fract.trunc(), lo: b_fract.trunc() };
         let expected = source;
         let result = source.floor();
@@ -520,7 +520,7 @@ mod tests {
     });
 
     randomized_test!(sqrt_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a > 0.0 && no_overlap(a, b) });
+        let (a, b) = get_valid_pair(rng, |x, y| { x > 0.0 && no_overlap(x, y) });
         let source = TwoFloat { hi: a, lo: b };
         let result = source.sqrt();
         assert!(no_overlap(result.hi, result.lo), "Square root of {:?} gave overlap", source);
@@ -529,14 +529,14 @@ mod tests {
     });
 
     randomized_test!(sqrt_negative_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a < 0.0 && no_overlap(a, b) });
+        let (a, b) = get_valid_pair(rng, |x, y| { x < 0.0 && no_overlap(x, y) });
         let source = TwoFloat { hi: a, lo: b };
         let result = source.sqrt();
         assert!(!result.is_valid(), "Square root of negative number {:?} gave non-error result", source);
     });
 
     randomized_test!(powi_0_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { a != 0.0 && no_overlap(a, b) });
+        let (a, b) = get_valid_pair(rng, |x, y| { x != 0.0 && no_overlap(x, y) });
         let source = TwoFloat { hi: a, lo: b };
         let expected = TwoFloat { hi: 1f64, lo: 0f64 };
         let result = source.powi(0);
@@ -546,7 +546,7 @@ mod tests {
     });
 
     randomized_test!(powi_1_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |a: f64, b: f64| { no_overlap(a, b) });
+        let (a, b) = get_valid_pair(rng, |x, y| { no_overlap(x, y) });
         let source = TwoFloat { hi: a, lo: b };
         let result = source.powi(1);
         assert!(no_overlap(result.hi, result.lo), "{:?}.powi(1) contained overlap", source);
