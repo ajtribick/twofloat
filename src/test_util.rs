@@ -10,9 +10,12 @@ pub fn float_generator() -> impl FnMut() -> f64 {
     let mantissa_dist = rand::distributions::Uniform::new(0, 1u64 << 52);
     let exponent_dist = rand::distributions::Uniform::new(0, 2047u64);
     move || {
-        let x = f64::from_bits(engine.sample(mantissa_dist)
-                               | (engine.sample(exponent_dist) << 52));
-        if engine.gen() { x } else { -x }
+        let x = f64::from_bits(engine.sample(mantissa_dist) | (engine.sample(exponent_dist) << 52));
+        if engine.gen() {
+            x
+        } else {
+            -x
+        }
     }
 }
 
@@ -23,7 +26,7 @@ macro_rules! randomized_test {
             let mut rng = float_generator();
             for _ in 0..TEST_ITERS {
                 $code(&mut rng);
-            };
+            }
         }
     };
 }
@@ -33,22 +36,32 @@ pub type F64Rand<'a> = &'a mut dyn FnMut() -> f64;
 pub fn get_valid_f64<F: Fn(f64) -> bool>(rng: F64Rand, pred: F) -> f64 {
     loop {
         let a = rng();
-        if pred(a) { return a; }
+        if pred(a) {
+            return a;
+        }
     }
 }
 
-pub fn get_valid_pair<F : Fn(f64, f64) -> bool>(rng: F64Rand, pred: F) -> (f64, f64) {
+pub fn get_valid_pair<F: Fn(f64, f64) -> bool>(rng: F64Rand, pred: F) -> (f64, f64) {
     loop {
         let a = rng();
         let b = rng();
-        if pred(a, b) { return (a, b); }
+        if pred(a, b) {
+            return (a, b);
+        }
     }
 }
 
 pub fn ulp_diff(a: f64, b: f64) -> i64 {
     let a_bits = a.to_bits();
     let b_bits = b.to_bits();
-    let fix_sign = |x| { if x & (1 << 63) == 0 { x } else { x ^ ((1 << 63) - 1) } };
+    let fix_sign = |x| {
+        if x & (1 << 63) == 0 {
+            x
+        } else {
+            x ^ ((1 << 63) - 1)
+        }
+    };
     (fix_sign(a_bits) as i64).saturating_sub(fix_sign(b_bits) as i64)
 }
 

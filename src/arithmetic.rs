@@ -1,4 +1,6 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
+use std::ops::{
+    Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
+};
 
 use crate::base::TwoFloat;
 
@@ -77,7 +79,10 @@ impl Neg for TwoFloat {
 
     /// Returns a new `TwoFloat` with the negated value of `self`.
     fn neg(self) -> Self::Output {
-        TwoFloat { hi: -self.hi, lo: -self.lo }
+        TwoFloat {
+            hi: -self.hi,
+            lo: -self.lo,
+        }
     }
 }
 
@@ -86,7 +91,10 @@ impl<'a> Neg for &'a TwoFloat {
 
     /// Returns a new `TwoFloat` with the negated value of `self`.
     fn neg(self) -> Self::Output {
-        TwoFloat { hi: -self.hi, lo: -self.lo }
+        TwoFloat {
+            hi: -self.hi,
+            lo: -self.lo,
+        }
     }
 }
 
@@ -221,16 +229,25 @@ macro_rules! op_impl {
     };
 }
 
-op_impl!(AddAssign, add_assign, Add, add,
+op_impl!(
+    AddAssign,
+    add_assign,
+    Add,
+    add,
     /// Implements addition of `TwoFloat` and `f64` using Joldes et al.
     /// (2017) Algorithm 4.
     |lhs: &TwoFloat, rhs: f64| {
         let (sh, sl) = two_sum(lhs.hi, rhs);
         let v = lhs.lo + sl;
         fast_two_sum(sh, v)
-    });
+    }
+);
 
-op_impl!(SubAssign, sub_assign, Sub, sub,
+op_impl!(
+    SubAssign,
+    sub_assign,
+    Sub,
+    sub,
     /// Implements subtraction of `TwoFloat` and `f64` using Joldes et al.
     /// (2017) Algorithm 4 modified for negative right-hand side.
     |lhs: &TwoFloat, rhs: f64| {
@@ -244,18 +261,28 @@ op_impl!(SubAssign, sub_assign, Sub, sub,
         let (sh, sl) = two_diff(lhs, rhs.hi);
         let v = sl - rhs.lo;
         fast_two_sum(sh, v)
-    });
+    }
+);
 
-op_impl!(MulAssign, mul_assign, Mul, mul,
+op_impl!(
+    MulAssign,
+    mul_assign,
+    Mul,
+    mul,
     /// Implements multiplication of `TwoFloat` and `f64` using Joldes et al.
     /// (2017) Algorithm 9.
     |lhs: &TwoFloat, rhs: f64| {
         let (ch, cl1) = two_prod(lhs.hi, rhs);
         let cl3 = lhs.lo.mul_add(rhs, cl1);
         fast_two_sum(ch, cl3)
-    });
+    }
+);
 
-op_impl!(DivAssign, div_assign, Div, div,
+op_impl!(
+    DivAssign,
+    div_assign,
+    Div,
+    div,
     /// Implements division of `TwoFloat` and `f64` using Joldes et al. (2017)
     /// Algorithm 15
     |lhs: &TwoFloat, rhs: f64| {
@@ -271,19 +298,24 @@ op_impl!(DivAssign, div_assign, Div, div,
     /// Algorithm 18 modified for the left-hand side having a zero value in
     /// the low word.
     |lhs: f64, rhs: &TwoFloat| {
-    let th = rhs.hi.recip();
-    let rh = 1.0 - rhs.hi * th;
-    let rl = -(rhs.lo * th);
-    let (eh, el) = fast_two_sum(rh, rl);
-    let e = TwoFloat { hi: eh, lo: el };
-    let d = &e * th;
-    let m = &d + th;
-    let (ch, cl1) = two_prod(m.hi, lhs);
-    let cl3 = m.lo.mul_add(lhs, cl1);
-    fast_two_sum(ch, cl3)
-});
+        let th = rhs.hi.recip();
+        let rh = 1.0 - rhs.hi * th;
+        let rl = -(rhs.lo * th);
+        let (eh, el) = fast_two_sum(rh, rl);
+        let e = TwoFloat { hi: eh, lo: el };
+        let d = &e * th;
+        let m = &d + th;
+        let (ch, cl1) = two_prod(m.hi, lhs);
+        let cl3 = m.lo.mul_add(lhs, cl1);
+        fast_two_sum(ch, cl3)
+    }
+);
 
-op_impl!(RemAssign, rem_assign, Rem, rem,
+op_impl!(
+    RemAssign,
+    rem_assign,
+    Rem,
+    rem,
     |lhs: &TwoFloat, rhs: f64| {
         let quotient = (lhs / rhs).trunc();
         (lhs - quotient * rhs).data()
@@ -294,7 +326,11 @@ op_impl!(RemAssign, rem_assign, Rem, rem,
     }
 );
 
-op_impl!(AddAssign, add_assign, Add, add,
+op_impl!(
+    AddAssign,
+    add_assign,
+    Add,
+    add,
     /// Implements addition of two `TwoFloat` values using Joldes et al.
     /// (2017) Algorithm 6.
     |lhs: &TwoFloat, rhs: &TwoFloat| {
@@ -304,9 +340,14 @@ op_impl!(AddAssign, add_assign, Add, add,
         let (vh, vl) = fast_two_sum(sh, c);
         let w = tl + vl;
         fast_two_sum(vh, w)
-    });
+    }
+);
 
-op_impl!(SubAssign, sub_assign, Sub, sub,
+op_impl!(
+    SubAssign,
+    sub_assign,
+    Sub,
+    sub,
     /// Implements subtraction of two `TwoFloat` values using Joldes et al.
     /// (2017) Algorithm 6 modified for a negative right-hand side.
     |lhs: &TwoFloat, rhs: &TwoFloat| {
@@ -316,9 +357,14 @@ op_impl!(SubAssign, sub_assign, Sub, sub,
         let (vh, vl) = fast_two_sum(sh, c);
         let w = tl + vl;
         fast_two_sum(vh, w)
-    });
+    }
+);
 
-op_impl!(MulAssign, mul_assign, Mul, mul,
+op_impl!(
+    MulAssign,
+    mul_assign,
+    Mul,
+    mul,
     /// Implements multiplication of two `TwoFloat` values using Joldes et al.
     /// (2017) Algorithm 12.
     |lhs: &TwoFloat, rhs: &TwoFloat| {
@@ -328,9 +374,14 @@ op_impl!(MulAssign, mul_assign, Mul, mul,
         let cl2 = lhs.lo.mul_add(rhs.hi, tl1);
         let cl3 = cl1 + cl2;
         fast_two_sum(ch, cl3)
-    });
+    }
+);
 
-op_impl!(DivAssign, div_assign, Div, div,
+op_impl!(
+    DivAssign,
+    div_assign,
+    Div,
+    div,
     /// Implements division of two `TwoFloat` values using Joldes et al.
     /// (2017) Algorithm 18.
     |lhs: &TwoFloat, rhs: &TwoFloat| {
@@ -343,13 +394,19 @@ op_impl!(DivAssign, div_assign, Div, div,
         let m = d + th;
         let z = lhs * &m;
         (z.hi, z.lo)
-    });
+    }
+);
 
-op_impl!(RemAssign, rem_assign, Rem, rem,
+op_impl!(
+    RemAssign,
+    rem_assign,
+    Rem,
+    rem,
     |lhs: &TwoFloat, rhs: &TwoFloat| {
         let quotient = (lhs / rhs).trunc();
         (lhs - &quotient * rhs).data()
-    });
+    }
+);
 
 #[cfg(test)]
 mod tests {
@@ -361,71 +418,150 @@ mod tests {
     use rand::Rng;
 
     randomized_test!(fast_two_sum_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x, y| { (x + y).is_finite() });
-        let (hi, lo) = if a.abs() >= b.abs() { fast_two_sum(a, b) } else { fast_two_sum(b, a) };
+        let (a, b) = get_valid_pair(rng, |x, y| (x + y).is_finite());
+        let (hi, lo) = if a.abs() >= b.abs() {
+            fast_two_sum(a, b)
+        } else {
+            fast_two_sum(b, a)
+        };
 
-        assert_eq_ulp!(hi, a + b, 1, "Incorrect result of fast_two_sum({}, {})", a, b);
-        assert!(no_overlap(hi, lo), "Overlapping bits in two_sum({}, {})", a, b);
+        assert_eq_ulp!(
+            hi,
+            a + b,
+            1,
+            "Incorrect result of fast_two_sum({}, {})",
+            a,
+            b
+        );
+        assert!(
+            no_overlap(hi, lo),
+            "Overlapping bits in two_sum({}, {})",
+            a,
+            b
+        );
     });
 
     randomized_test!(two_sum_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x, y| { (x + y).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| (x + y).is_finite());
         let (hi, lo) = two_sum(a, b);
 
         assert_eq_ulp!(hi, a + b, 1, "Incorrect result of two_sum({}, {})", a, b);
-        assert!(no_overlap(hi, lo), "Overlapping bits in two_sum({}, {})", a, b);
+        assert!(
+            no_overlap(hi, lo),
+            "Overlapping bits in two_sum({}, {})",
+            a,
+            b
+        );
     });
 
     randomized_test!(two_diff_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x, y| { (x - y).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| (x - y).is_finite());
         let (hi, lo) = two_diff(a, b);
 
         assert_eq_ulp!(hi, a - b, 1, "Incorrect resut of two_diff({}, {})", a, b);
-        assert!(no_overlap(hi, lo), "Overlapping bits in two_diff({}, {})", a, b);
+        assert!(
+            no_overlap(hi, lo),
+            "Overlapping bits in two_diff({}, {})",
+            a,
+            b
+        );
     });
 
     randomized_test!(two_prod_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x, y| { (x * y).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| (x * y).is_finite());
         let (hi, lo) = two_prod(a, b);
 
         assert_eq_ulp!(hi, a * b, 1, "Incorrect result of two_prod({}, {})", a, b);
-        assert!(no_overlap(hi, lo), "Overlapping bits in two_prod({}, {})", a, b);
+        assert!(
+            no_overlap(hi, lo),
+            "Overlapping bits in two_prod({}, {})",
+            a,
+            b
+        );
     });
 
     randomized_test!(new_add_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x, y| { (x + y).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| (x + y).is_finite());
         let expected = two_sum(a, b);
         let actual = TwoFloat::new_add(a, b);
-        assert_eq!(actual.hi, expected.0, "Incorrect result of new_add({}, {})", a, b);
-        assert_eq!(actual.lo, expected.1, "Incorrect result of new_add({}, {})", a, b);
+        assert_eq!(
+            actual.hi, expected.0,
+            "Incorrect result of new_add({}, {})",
+            a, b
+        );
+        assert_eq!(
+            actual.lo, expected.1,
+            "Incorrect result of new_add({}, {})",
+            a, b
+        );
     });
 
     randomized_test!(new_sub_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x, y| { (x - y).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| (x - y).is_finite());
         let expected = two_diff(a, b);
         let actual = TwoFloat::new_sub(a, b);
-        assert_eq!(actual.hi, expected.0, "Incorrect result of new_sub({}, {})", a, b);
-        assert_eq!(actual.lo, expected.1, "Incorrect result of new_sub({}, {})", a, b);
+        assert_eq!(
+            actual.hi, expected.0,
+            "Incorrect result of new_sub({}, {})",
+            a, b
+        );
+        assert_eq!(
+            actual.lo, expected.1,
+            "Incorrect result of new_sub({}, {})",
+            a, b
+        );
     });
 
     randomized_test!(new_mul_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x, y| { (x * y).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| (x * y).is_finite());
         let expected = two_prod(a, b);
         let actual = TwoFloat::new_mul(a, b);
-        assert_eq!(actual.hi, expected.0, "Incorrect result of new_mul({}, {})", a, b);
-        assert_eq!(actual.lo, expected.1, "Incorrect result of new_mul({}, {})", a, b);
+        assert_eq!(
+            actual.hi, expected.0,
+            "Incorrect result of new_mul({}, {})",
+            a, b
+        );
+        assert_eq!(
+            actual.lo, expected.1,
+            "Incorrect result of new_mul({}, {})",
+            a, b
+        );
     });
 
     randomized_test!(new_div_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x, y| { (x / y).is_finite() });
+        let (a, b) = get_valid_pair(rng, |x, y| (x / y).is_finite());
         let actual = TwoFloat::new_div(a, b);
-        let ef = |a: f64, b: f64| -> u64 { let ab = a.to_bits(); let bb = b.to_bits(); if ab > bb { ab - bb } else { bb - ab }};
-        assert_eq_ulp!(actual.hi, a / b, 10, "Incorrect result of new_div({}, {}) - {}", a, b, ef(actual.hi, a / b));
-        assert!(no_overlap(actual.hi, actual.lo), "Overlapping bits in new_div({}, {})", a, b);
+        let ef = |a: f64, b: f64| -> u64 {
+            let ab = a.to_bits();
+            let bb = b.to_bits();
+            if ab > bb {
+                ab - bb
+            } else {
+                bb - ab
+            }
+        };
+        assert_eq_ulp!(
+            actual.hi,
+            a / b,
+            10,
+            "Incorrect result of new_div({}, {}) - {}",
+            a,
+            b,
+            ef(actual.hi, a / b)
+        );
+        assert!(
+            no_overlap(actual.hi, actual.lo),
+            "Overlapping bits in new_div({}, {})",
+            a,
+            b
+        );
     });
 
     randomized_test!(neg_test, |rng: F64Rand| {
-        let a = TwoFloat { hi: rng(), lo: rng() };
+        let a = TwoFloat {
+            hi: rng(),
+            lo: rng(),
+        };
         let b = -a;
         assert_eq!(b.hi, -a.hi, "Negation does not negate high word");
         assert_eq!(b.lo, -a.lo, "Negation does not negate low word");
@@ -438,16 +574,35 @@ mod tests {
     });
 
     macro_rules! diff_test {
-        (%, $expected:ident, $result:ident, $lhs:ident, $rhs:ident) => ({
+        (%, $expected:ident, $result:ident, $lhs:ident, $rhs:ident) => {{
             let true_difference: f64 = (($expected - $result) / $expected).into();
-            let differences: [f64; 3] = [true_difference.abs(), (1.0 - true_difference).abs(), (1.0 + true_difference).abs()];
-            let min_difference = *differences.iter().min_by(|x, y| x.partial_cmp(y).unwrap()).unwrap();
-            assert!(min_difference < 1e-10, "Out of range result of {:?} {} {:?}", $lhs, stringify!($op), $rhs);
-        });
-        ($op:tt, $expected:ident, $result:ident, $lhs:ident, $rhs:ident) => ({
+            let differences: [f64; 3] = [
+                true_difference.abs(),
+                (1.0 - true_difference).abs(),
+                (1.0 + true_difference).abs(),
+            ];
+            let min_difference = *differences
+                .iter()
+                .min_by(|x, y| x.partial_cmp(y).unwrap())
+                .unwrap();
+            assert!(
+                min_difference < 1e-10,
+                "Out of range result of {:?} {} {:?}",
+                $lhs,
+                stringify!($op),
+                $rhs
+            );
+        }};
+        ($op:tt, $expected:ident, $result:ident, $lhs:ident, $rhs:ident) => {{
             let difference = (($expected - $result) / $expected).abs();
-            assert!(difference.abs() < 1e-10, "Out of range result of {:?} {} {:?}", $lhs, stringify!($op), $rhs);
-        });
+            assert!(
+                difference.abs() < 1e-10,
+                "Out of range result of {:?} {} {:?}",
+                $lhs,
+                stringify!($op),
+                $rhs
+            );
+        }};
     }
 
     macro_rules! op_test_f64_common {

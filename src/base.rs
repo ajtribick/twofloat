@@ -23,9 +23,7 @@ pub(crate) fn right_bit(f: f64) -> Option<i16> {
             }
         }
         1024 => None,
-        _ => {
-            Some(exponent - 52)
-        },
+        _ => Some(exponent - 52),
     }
 }
 
@@ -62,10 +60,11 @@ pub(crate) fn left_bit(f: f64) -> Option<i16> {
 /// assert!(!b);
 /// assert!(!c);
 pub fn no_overlap(a: f64, b: f64) -> bool {
-    (a == 0.0 && b == 0.0) || match (right_bit(a), left_bit(b)) {
-        (Some(r), Some(l)) => r > l,
-        _ => false,
-    }
+    (a == 0.0 && b == 0.0)
+        || match (right_bit(a), left_bit(b)) {
+            (Some(r), Some(l)) => r > l,
+            _ => false,
+        }
 }
 
 impl TwoFloat {
@@ -93,7 +92,11 @@ impl TwoFloat {
     /// #     Ok(())
     /// # }
     pub fn try_new(a: f64, b: f64) -> Result<TwoFloat, ()> {
-        if no_overlap(a, b) { Ok(TwoFloat { hi: a, lo: b }) } else { Err(()) }
+        if no_overlap(a, b) {
+            Ok(TwoFloat { hi: a, lo: b })
+        } else {
+            Err(())
+        }
     }
 
     /// Returns the high and low words of `self` as a tuple.
@@ -183,25 +186,37 @@ mod tests {
     }
 
     randomized_test!(copy_test, |rng: F64Rand| {
-        let a = TwoFloat { hi: rng(), lo: rng() };
+        let a = TwoFloat {
+            hi: rng(),
+            lo: rng(),
+        };
         let b = a;
         assert_eq!(a.hi, b.hi, "Copy failed for {:?}", a);
         assert_eq!(a.lo, b.lo, "Copy failed for {:?}", a);
     });
 
     randomized_test!(clone_test, |rng: F64Rand| {
-        let a = TwoFloat { hi: rng(), lo: rng() };
+        let a = TwoFloat {
+            hi: rng(),
+            lo: rng(),
+        };
         let b = a.clone();
         assert_eq!(a.hi, b.hi, "Clone failed for {:?}", a);
         assert_eq!(a.lo, b.lo, "Clone failed for {:?}", a);
     });
 
     randomized_test!(equality_test, |rng: F64Rand| {
-        let a = TwoFloat { hi: rng(), lo: rng() };
+        let a = TwoFloat {
+            hi: rng(),
+            lo: rng(),
+        };
         assert_eq!(a, a);
         assert_eq!(&a, &a);
 
-        let b = TwoFloat { hi: rng(), lo: rng() };
+        let b = TwoFloat {
+            hi: rng(),
+            lo: rng(),
+        };
         if a.hi != b.hi || a.lo != b.lo {
             assert_ne!(a, b);
             assert_ne!(&a, &b);
@@ -254,8 +269,14 @@ mod tests {
     randomized_test!(compare_f64_test, |rng: F64Rand| {
         let a = rng();
         let a_two = TwoFloat { hi: a, lo: 0.0 };
-        assert!(a.partial_cmp(&a_two) == Some(Ordering::Equal), "Comparison of f64 <=> TwoFloat failed");
-        assert!(a_two.partial_cmp(&a) == Some(Ordering::Equal), "Comparison of TwoFloat <=> f64 failed");
+        assert!(
+            a.partial_cmp(&a_two) == Some(Ordering::Equal),
+            "Comparison of f64 <=> TwoFloat failed"
+        );
+        assert!(
+            a_two.partial_cmp(&a) == Some(Ordering::Equal),
+            "Comparison of TwoFloat <=> f64 failed"
+        );
         assert!(a <= a_two);
         assert!(a_two <= a);
         assert!(a >= a_two);
@@ -264,38 +285,62 @@ mod tests {
         let b = rng();
         let ab = TwoFloat { hi: a, lo: b };
         if b < 0.0 {
-            assert!(a.partial_cmp(&ab) == Some(Ordering::Greater), "Comparison of f64 <=> TwoFloat failed");
+            assert!(
+                a.partial_cmp(&ab) == Some(Ordering::Greater),
+                "Comparison of f64 <=> TwoFloat failed"
+            );
             assert!(a > ab, "Comparison of f64 > TwoFloat failed");
             assert!(a >= ab, "Comparison of f64 >= TwoFloat failed");
 
-            assert!(ab.partial_cmp(&a) == Some(Ordering::Less), "Comparison of TwoFloat <=> f64 failed");
+            assert!(
+                ab.partial_cmp(&a) == Some(Ordering::Less),
+                "Comparison of TwoFloat <=> f64 failed"
+            );
             assert!(ab < a, "Comparison of TwoFloat < f64 failed");
             assert!(ab <= a, "Comparison of TwoFloat <= f64 failed");
         } else if b > 0.0 {
-            assert!(a.partial_cmp(&ab) == Some(Ordering::Less), "Comparison of f64 <=> TwoFloat failed");
+            assert!(
+                a.partial_cmp(&ab) == Some(Ordering::Less),
+                "Comparison of f64 <=> TwoFloat failed"
+            );
             assert!(a < ab, "Comparison of f64 < TwoFloat failed");
             assert!(a <= ab, "Comparison of f64 <= TwoFloat failed");
 
-            assert!(ab.partial_cmp(&a) == Some(Ordering::Greater), "Comparison of TwoFloat <=> f64 failed");
+            assert!(
+                ab.partial_cmp(&a) == Some(Ordering::Greater),
+                "Comparison of TwoFloat <=> f64 failed"
+            );
             assert!(ab > a, "Comparison of TwoFloat > f64 failed");
             assert!(ab >= a, "Comparison of TwoFloat >= f64 failed");
         }
 
         let c = rng();
         if c < a {
-            assert!(c.partial_cmp(&ab) == Some(Ordering::Less), "Comparison of f64 <=> TwoFloat failed");
+            assert!(
+                c.partial_cmp(&ab) == Some(Ordering::Less),
+                "Comparison of f64 <=> TwoFloat failed"
+            );
             assert!(c < ab, "Comparison of f64 < TwoFloat failed");
             assert!(c <= ab, "Comparison of f64 <= TwoFloat failed");
 
-            assert!(ab.partial_cmp(&c) == Some(Ordering::Greater), "Comparison of TwoFloat <=> f64 failed");
+            assert!(
+                ab.partial_cmp(&c) == Some(Ordering::Greater),
+                "Comparison of TwoFloat <=> f64 failed"
+            );
             assert!(ab > c, "Comparison of TwoFloat > f64 failed");
             assert!(ab >= c, "Comparison of TwoFloat >= f64 failed");
         } else if c > a {
-            assert!(c.partial_cmp(&ab) == Some(Ordering::Greater), "Comparison of f64 <=> TwoFloat failed");
+            assert!(
+                c.partial_cmp(&ab) == Some(Ordering::Greater),
+                "Comparison of f64 <=> TwoFloat failed"
+            );
             assert!(c > ab, "Comparison of f64 > TwoFloat failed");
             assert!(c >= ab, "Comparison of f64 >= TwoFloat failed");
 
-            assert!(ab.partial_cmp(&c) == Some(Ordering::Less), "Comparison of TwoFloat <=> f64 failed");
+            assert!(
+                ab.partial_cmp(&c) == Some(Ordering::Less),
+                "Comparison of TwoFloat <=> f64 failed"
+            );
             assert!(ab < c, "Comparison of TwoFloat < f64 failed");
             assert!(ab <= c, "Comparison of TwoFloat <= f64 failed");
         }
@@ -310,16 +355,30 @@ mod tests {
     });
 
     randomized_test!(try_new_no_overlap_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x, y| { no_overlap(x, y) });
+        let (a, b) = get_valid_pair(rng, |x, y| no_overlap(x, y));
         let expected = TwoFloat { hi: a, lo: b };
         let result = TwoFloat::try_new(a, b);
-        assert!(result.is_ok(), "Creation from non-overlapping pair {}, {} resulted in error", a, b);
-        assert_eq!(result.unwrap(), expected, "Value mismatch in creation of TwoFloat");
+        assert!(
+            result.is_ok(),
+            "Creation from non-overlapping pair {}, {} resulted in error",
+            a,
+            b
+        );
+        assert_eq!(
+            result.unwrap(),
+            expected,
+            "Value mismatch in creation of TwoFloat"
+        );
     });
 
     randomized_test!(try_new_overlap_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x, y| { !no_overlap(x, y) });
+        let (a, b) = get_valid_pair(rng, |x, y| !no_overlap(x, y));
         let result = TwoFloat::try_new(a, b);
-        assert!(result.is_err(), "Creation from overlapping pair {}, {} resulted in value", a, b);
+        assert!(
+            result.is_err(),
+            "Creation from overlapping pair {}, {} resulted in value",
+            a,
+            b
+        );
     });
 }

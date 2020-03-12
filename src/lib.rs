@@ -40,9 +40,9 @@ purpose.
 #[cfg(test)]
 mod test_util;
 
+mod arithmetic;
 mod base;
 mod convert;
-mod arithmetic;
 mod functions;
 
-pub use base::{TwoFloat, no_overlap};
+pub use base::{no_overlap, TwoFloat};
