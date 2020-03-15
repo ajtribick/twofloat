@@ -3,7 +3,7 @@ use crate::base::*;
 impl TwoFloat {
     /// Takes the reciprocal (inverse) of the number, `1/x`.
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
@@ -19,7 +19,7 @@ impl TwoFloat {
     /// Returns the square root of the number, using equation 4 from Karp &
     /// Markstein (1997).
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
@@ -44,7 +44,7 @@ impl TwoFloat {
 
     /// Returns the cube root of the number, using Newton-Raphson iteration.
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
@@ -62,7 +62,7 @@ impl TwoFloat {
 
     /// Raises the number to an integer power. Returns a NAN value for 0^0.
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;

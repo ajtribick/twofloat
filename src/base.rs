@@ -48,7 +48,7 @@ pub(crate) fn left_bit(f: f64) -> Option<i16> {
 /// Checks if two `f64` values do not overlap, with the first value being the
 /// more significant.
 ///
-/// # Examples:
+/// # Examples
 ///
 /// ```
 /// # use twofloat::no_overlap;
@@ -72,11 +72,11 @@ impl TwoFloat {
     /// be used to reconstitute a `TwoFloat` from the values returned by the
     /// `data` method.
     ///
-    /// # Errors:
+    /// # Errors
     ///
     /// An error will be returned if the supplied `f64` values overlap.
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
@@ -101,7 +101,7 @@ impl TwoFloat {
 
     /// Returns the high and low words of `self` as a tuple.
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
@@ -114,7 +114,7 @@ impl TwoFloat {
     /// Returns `true` if `self` is a valid value, where both components are
     /// finite (not infinity or NaN).
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
@@ -130,7 +130,7 @@ impl TwoFloat {
     /// Returns the minimum of two numbers. If one of the arguments is NAN,
     /// the other is returned.
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
@@ -151,7 +151,7 @@ impl TwoFloat {
     /// Returns the maximum of two numbers. If one of the arguments is NAN,
     /// the other is returned.
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;

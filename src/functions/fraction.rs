@@ -4,7 +4,7 @@ use crate::base::*;
 impl TwoFloat {
     /// Returns the fractional part of the number.
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
@@ -33,7 +33,7 @@ impl TwoFloat {
 
     /// Returns the integer part of the number.
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
@@ -60,7 +60,7 @@ impl TwoFloat {
 
     /// Returns the smallest integer greater than or equal to the number.
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
@@ -85,7 +85,7 @@ impl TwoFloat {
 
     /// Returns the smallest integer less than or equal to the number.
     ///
-    /// # Examples:
+    /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
