@@ -42,6 +42,12 @@ mod test_util;
 
 mod arithmetic;
 mod base;
+
+/// Basic mathematical constants.
+///
+/// Values determined using Sollya.
+pub mod consts;
+
 mod convert;
 mod functions;
 

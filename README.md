@@ -16,11 +16,15 @@ trigonometry) in future releases.
 
 ## References
 
-* Mioara Joldes, Jean-Michel Muller, Valentina Popescu. Tight and rigourous
+* Mioara Joldeș, Jean-Michel Muller, Valentina Popescu. Tight and rigourous
   error bounds for basic building blocks of double-word arithmetic. ACM
   Transactions on Mathematical Software, Association for Computing Machinery,
-  2017, 44 (2), pp.1 - 27. 10.1145/3121432. hal-01351529v3
+  2017, 44 (2), pp. 1-27. 10.1145/3121432. hal-01351529v3
 
 * Alan H. Karp, Peter Markstein. High Precision Division and Square Root. ACM
-  Transactions on Mathematicial Software, Association for Computing Machinery,
-  1997, 23 (4), pp.561 - 589. 10.1145/279232.279237.
+  Transactions on Mathematical Software, Association for Computing Machinery,
+  1997, 23 (4), pp. 561-589. 10.1145/279232.279237.
+
+* S. Chevillard, M. Joldeș and C. Lauter. Sollya: an environment for the
+  development of numerical codes. Mathematical Software - ICMS 2010, pp.
+  28–31.
