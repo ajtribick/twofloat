@@ -42,6 +42,24 @@ impl TwoFloat {
         }
     }
 
+    /// Returns the cube root of the number, using Newton-Raphson iteration.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::new_add(1.4e53, 0.21515);
+    /// let b = a.cbrt();
+    ///
+    /// assert!(b.powi(3) - a < 1e-16);
+    pub fn cbrt(&self) -> TwoFloat {
+        let mut x = TwoFloat::from(self.hi.cbrt());
+        let mut x2 = x * x;
+        x -= (&x2 * &x - self) / (3.0 * &x2);
+        x2 = x * x;
+        x - (&x2 * &x - self) / (3.0 * &x2)
+    }
+
     /// Raises the number to an integer power. Returns a NAN value for 0^0.
     ///
     /// # Examples:
@@ -141,6 +159,25 @@ mod tests {
             !result.is_valid(),
             "Square root of negative number {:?} gave non-error result",
             source
+        );
+    });
+
+    randomized_test!(cbrt_test, |rng: F64Rand| {
+        let (a, b) = get_valid_pair(rng, |x, y| no_overlap(x, y));
+        let source = TwoFloat { hi: a, lo: b };
+        let result = source.cbrt();
+        assert!(
+            no_overlap(result.hi, result.lo),
+            "Cube root of {:?} gave overlap",
+            source
+        );
+        let difference = (result.powi(3) - &source).abs() / &source;
+        assert!(
+            difference < 1e-16,
+            "Cube root of {:?} ({:?}) squared gives high relative difference {}",
+            source,
+            result,
+            difference.hi
         );
     });
 
