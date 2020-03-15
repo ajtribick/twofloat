@@ -110,6 +110,64 @@ impl TwoFloat {
     pub fn data(&self) -> (f64, f64) {
         (self.hi, self.lo)
     }
+
+    /// Returns `true` if `self` is a valid value, where both components are
+    /// finite (not infinity or NaN).
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::new_add(1.0, 1.0e-300).is_valid();
+    /// let b = TwoFloat::new_mul(1.0e300, 1.0e300).is_valid();
+    ///
+    /// assert!(a);
+    /// assert!(!b);
+    pub fn is_valid(&self) -> bool {
+        self.hi.is_finite() && self.lo.is_finite()
+    }
+
+    /// Returns the minimum of two numbers. If one of the arguments is NAN,
+    /// the other is returned.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::new_add(35.2, 1e-84);
+    /// let b = TwoFloat::new_add(35.2, -1e-93);
+    ///
+    /// assert_eq!(a.min(&b), b);
+    pub fn min(&self, other: &TwoFloat) -> TwoFloat {
+        if !self.is_valid() {
+            other.clone()
+        } else if !other.is_valid() || self <= other {
+            self.clone()
+        } else {
+            other.clone()
+        }
+    }
+
+    /// Returns the maximum of two numbers. If one of the arguments is NAN,
+    /// the other is returned.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::new_add(35.2, 1e-84);
+    /// let b = TwoFloat::new_add(35.2, -1e-93);
+    ///
+    /// assert_eq!(a.max(&b), a);
+    pub fn max(&self, other: &TwoFloat) -> TwoFloat {
+        if !self.is_valid() {
+            other.clone()
+        } else if !other.is_valid() || self >= other {
+            self.clone()
+        } else {
+            other.clone()
+        }
+    }
 }
 
 impl fmt::Display for TwoFloat {
@@ -381,4 +439,97 @@ mod tests {
             b
         );
     });
+
+    fn get_twofloat(get_f64: F64Rand) -> TwoFloat {
+        let (a, b) = get_valid_pair(get_f64, |a: f64, b: f64| no_overlap(a, b));
+        TwoFloat { hi: a, lo: b }
+    }
+
+    #[test]
+    fn min_test() {
+        let mut get_f64 = float_generator();
+        for i in 0..TEST_ITERS {
+            let (a, b) = match i {
+                0 => (
+                    TwoFloat::from(1.5),
+                    TwoFloat {
+                        hi: std::f64::NAN,
+                        lo: std::f64::NAN,
+                    },
+                ),
+                1 => (
+                    TwoFloat {
+                        hi: std::f64::NAN,
+                        lo: std::f64::NAN,
+                    },
+                    TwoFloat::from(-3592.7),
+                ),
+                _ => (get_twofloat(&mut get_f64), get_twofloat(&mut get_f64)),
+            };
+
+            let expected = match i {
+                0 => TwoFloat::from(1.5),
+                1 => TwoFloat::from(-3592.7),
+                _ => {
+                    if a < b {
+                        a
+                    } else {
+                        b
+                    }
+                }
+            };
+
+            let result = a.min(&b);
+
+            assert_eq!(
+                result, expected,
+                "min({:?}, {:?}) produced unexpected result",
+                a, b
+            );
+        }
+    }
+
+    #[test]
+    fn max_test() {
+        let mut get_f64 = float_generator();
+        for i in 0..TEST_ITERS {
+            let (a, b) = match i {
+                0 => (
+                    TwoFloat::from(1.5),
+                    TwoFloat {
+                        hi: std::f64::NAN,
+                        lo: std::f64::NAN,
+                    },
+                ),
+                1 => (
+                    TwoFloat {
+                        hi: std::f64::NAN,
+                        lo: std::f64::NAN,
+                    },
+                    TwoFloat::from(-3592.7),
+                ),
+                _ => (get_twofloat(&mut get_f64), get_twofloat(&mut get_f64)),
+            };
+
+            let expected = match i {
+                0 => TwoFloat::from(1.5),
+                1 => TwoFloat::from(-3592.7),
+                _ => {
+                    if a > b {
+                        a
+                    } else {
+                        b
+                    }
+                }
+            };
+
+            let result = a.max(&b);
+
+            assert_eq!(
+                result, expected,
+                "min({:?}, {:?}) produced unexpected result",
+                a, b
+            );
+        }
+    }
 }
