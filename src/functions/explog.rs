@@ -84,6 +84,25 @@ impl TwoFloat {
             }
         }
     }
+
+    /// Returns the natural logarithm of the value.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let a = twofloat::consts::E.ln();
+    /// assert!((a - 1.0).abs() < 1e-10);
+    pub fn ln(&self) -> TwoFloat {
+        if *self == 1.0 {
+            TwoFloat::from(0.0)
+        } else if *self <= 0.0 {
+            TwoFloat { hi: std::f64::NAN, lo: std::f64::NAN }
+        } else {
+            let mut x = TwoFloat::from(self.hi.ln());
+            x += self * (-x).exp() - 1.0;
+            x + self * (-x).exp() - 1.0
+        }
+    }
 }
 
 #[cfg(test)]
@@ -117,6 +136,33 @@ mod tests {
             let difference = ((exp_b - exp_a) / exp_a).abs();
 
             assert!(difference < 1e-10, "Mismatch in exp({}): {} vs {:?}", a, exp_a, exp_b);
+        }
+    }
+
+    #[test]
+    fn ln_test() {
+        let mut rng = rand::thread_rng();
+        let src_dist = rand::distributions::Uniform::new(f64::from_bits(1u64), std::f64::MAX);
+
+        assert!(!TwoFloat::from(0.0).ln().is_valid(), "ln(0) produced valid result");
+        assert!(!TwoFloat::from(-5.0).ln().is_valid(), "ln(negative) produced valid result");
+
+        for i in 0..TEST_ITERS {
+            let a = match i {
+                0 => 1.0,
+                1 => std::f64::MAX,
+                _ => rng.sample(src_dist)
+            };
+            let b = TwoFloat::from(a);
+
+            let ln_a = a.ln();
+            let ln_b = b.ln();
+
+            assert!(no_overlap(ln_b.hi, ln_b.lo), "Overlap detected in ln({}) = {:?}", a, ln_a);
+
+            let difference = (ln_b - ln_a).abs();
+
+            assert!(difference < 1e-10, "Mismatch in ln({}): {} vs {:?}", a, ln_a, ln_b);
         }
     }
 }
