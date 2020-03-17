@@ -54,9 +54,9 @@ impl TwoFloat {
     /// assert!(b.powi(3) - a < 1e-16);
     pub fn cbrt(&self) -> TwoFloat {
         let mut x = TwoFloat::from(self.hi.cbrt());
-        let mut x2 = x * x;
+        let mut x2 = &x * &x;
         x -= (&x2 * &x - self) / (3.0 * &x2);
-        x2 = x * x;
+        x2 = &x * &x;
         x - (&x2 * &x - self) / (3.0 * &x2)
     }
 
