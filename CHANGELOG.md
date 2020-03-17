@@ -2,7 +2,7 @@
 
 ## Version 0.1.2
 
-* Added function: `cbrt`.
+* Added functions: `cbrt`, `exp`.
 * Added mathematical constants.
 
 ## Version 0.1.1
