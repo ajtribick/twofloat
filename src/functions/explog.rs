@@ -2,7 +2,10 @@ use crate::base::*;
 use crate::consts::LN_2;
 
 // 1/ln(2)
-const FRAC_1_LN_2: TwoFloat = TwoFloat { hi: 1.4426950408889634, lo: 2.0355273740931033e-17 };
+const FRAC_1_LN_2: TwoFloat = TwoFloat {
+    hi: 1.4426950408889634,
+    lo: 2.0355273740931033e-17,
+};
 
 // limits
 const EXP_UPPER_LIMIT: f64 = 709.782712893384;
@@ -10,12 +13,30 @@ const EXP_LOWER_LIMIT: f64 = -745.1332191019412;
 
 // Coefficients for polynomial approximation of x*(exp(x)+1)/(exp(x)-1)
 
-const P1: TwoFloat = TwoFloat { hi: 0.16666666666666666, lo: 8.301559840894034e-18 };
-const P2: TwoFloat = TwoFloat { hi: -0.0027777777777776512, lo: 1.1664268064351513e-19 };
-const P3: TwoFloat = TwoFloat { hi: 6.613756613123634e-05, lo: 3.613966532258593e-21 };
-const P4: TwoFloat = TwoFloat { hi: -1.6534390027595268e-06, lo: 2.6408090483313454e-23 };
-const P5: TwoFloat = TwoFloat { hi: 4.175167193059256e-08, lo: -2.949837910669653e-24 };
-const P6: TwoFloat = TwoFloat { hi: -1.0456596683715461e-09, lo: -9.375356618962057e-26 };
+const P1: TwoFloat = TwoFloat {
+    hi: 0.16666666666666666,
+    lo: 8.301559840894034e-18,
+};
+const P2: TwoFloat = TwoFloat {
+    hi: -0.0027777777777776512,
+    lo: 1.1664268064351513e-19,
+};
+const P3: TwoFloat = TwoFloat {
+    hi: 6.613756613123634e-05,
+    lo: 3.613966532258593e-21,
+};
+const P4: TwoFloat = TwoFloat {
+    hi: -1.6534390027595268e-06,
+    lo: 2.6408090483313454e-23,
+};
+const P5: TwoFloat = TwoFloat {
+    hi: 4.175167193059256e-08,
+    lo: -2.949837910669653e-24,
+};
+const P6: TwoFloat = TwoFloat {
+    hi: -1.0456596683715461e-09,
+    lo: -9.375356618962057e-26,
+};
 
 fn mul_pow2(mut x: f64, mut y: i32) -> f64 {
     loop {
@@ -49,7 +70,10 @@ impl TwoFloat {
         if self.hi <= EXP_LOWER_LIMIT {
             TwoFloat::from(0.0)
         } else if self.hi >= EXP_UPPER_LIMIT {
-            TwoFloat { hi: std::f64::INFINITY, lo: 0.0 }
+            TwoFloat {
+                hi: std::f64::INFINITY,
+                lo: 0.0,
+            }
         } else if self.hi == 0.0 {
             TwoFloat::from(1.0)
         } else {
@@ -71,7 +95,8 @@ impl TwoFloat {
             // where R1 = r - (P1*r^2 + P2*r^4 + ...)
 
             let rr = &r * &r;
-            let r1 = &r - &rr * (&P1 + &rr * (&P2 + &rr * (&P3 + &rr * (&P4 + &rr * (&P5 + &rr * &P6)))));
+            let r1 = &r
+                - &rr * (&P1 + &rr * (&P2 + &rr * (&P3 + &rr * (&P4 + &rr * (&P5 + &rr * &P6)))));
 
             let exp_r = 1.0 - ((&r * &r1) / (&r1 - 2.0) - &r);
 
@@ -80,7 +105,10 @@ impl TwoFloat {
             if k == 0.0 {
                 exp_r
             } else {
-                TwoFloat { hi: mul_pow2(exp_r.hi, k as i32), lo: mul_pow2(exp_r.lo, k as i32) }
+                TwoFloat {
+                    hi: mul_pow2(exp_r.hi, k as i32),
+                    lo: mul_pow2(exp_r.lo, k as i32),
+                }
             }
         }
     }
@@ -96,7 +124,10 @@ impl TwoFloat {
         if *self == 1.0 {
             TwoFloat::from(0.0)
         } else if *self <= 0.0 {
-            TwoFloat { hi: std::f64::NAN, lo: std::f64::NAN }
+            TwoFloat {
+                hi: std::f64::NAN,
+                lo: std::f64::NAN,
+            }
         } else {
             let mut x = TwoFloat::from(self.hi.ln());
             x += self * (-x).exp() - 1.0;
@@ -117,25 +148,43 @@ mod tests {
         let mut rng = rand::thread_rng();
         let src_dist = rand::distributions::Uniform::new(-600.0, EXP_UPPER_LIMIT);
 
-        assert_eq!(TwoFloat::from(-1000.0).exp(), 0.0, "Large negative exponent produced non-zero value");
-        assert!(!TwoFloat::from(1000.0).exp().is_valid(), "Large positive exponent produced valid value");
+        assert_eq!(
+            TwoFloat::from(-1000.0).exp(),
+            0.0,
+            "Large negative exponent produced non-zero value"
+        );
+        assert!(
+            !TwoFloat::from(1000.0).exp().is_valid(),
+            "Large positive exponent produced valid value"
+        );
 
         for i in 0..TEST_ITERS {
             let a = match i {
                 0 => 0.0,
                 1 => -600.0,
-                _ => rng.sample(src_dist)
+                _ => rng.sample(src_dist),
             };
             let b = TwoFloat::from(a);
 
             let exp_a = a.exp();
             let exp_b = b.exp();
 
-            assert!(no_overlap(exp_b.hi, exp_b.lo), "Overlap detected in exp({}) = {:?}", a, exp_b);
+            assert!(
+                no_overlap(exp_b.hi, exp_b.lo),
+                "Overlap detected in exp({}) = {:?}",
+                a,
+                exp_b
+            );
 
             let difference = ((exp_b - exp_a) / exp_a).abs();
 
-            assert!(difference < 1e-10, "Mismatch in exp({}): {} vs {:?}", a, exp_a, exp_b);
+            assert!(
+                difference < 1e-10,
+                "Mismatch in exp({}): {} vs {:?}",
+                a,
+                exp_a,
+                exp_b
+            );
         }
     }
 
@@ -144,25 +193,42 @@ mod tests {
         let mut rng = rand::thread_rng();
         let src_dist = rand::distributions::Uniform::new(f64::from_bits(1u64), std::f64::MAX);
 
-        assert!(!TwoFloat::from(0.0).ln().is_valid(), "ln(0) produced valid result");
-        assert!(!TwoFloat::from(-5.0).ln().is_valid(), "ln(negative) produced valid result");
+        assert!(
+            !TwoFloat::from(0.0).ln().is_valid(),
+            "ln(0) produced valid result"
+        );
+        assert!(
+            !TwoFloat::from(-5.0).ln().is_valid(),
+            "ln(negative) produced valid result"
+        );
 
         for i in 0..TEST_ITERS {
             let a = match i {
                 0 => 1.0,
                 1 => std::f64::MAX,
-                _ => rng.sample(src_dist)
+                _ => rng.sample(src_dist),
             };
             let b = TwoFloat::from(a);
 
             let ln_a = a.ln();
             let ln_b = b.ln();
 
-            assert!(no_overlap(ln_b.hi, ln_b.lo), "Overlap detected in ln({}) = {:?}", a, ln_a);
+            assert!(
+                no_overlap(ln_b.hi, ln_b.lo),
+                "Overlap detected in ln({}) = {:?}",
+                a,
+                ln_a
+            );
 
             let difference = (ln_b - ln_a).abs();
 
-            assert!(difference < 1e-10, "Mismatch in ln({}): {} vs {:?}", a, ln_a, ln_b);
+            assert!(
+                difference < 1e-10,
+                "Mismatch in ln({}): {} vs {:?}",
+                a,
+                ln_a,
+                ln_b
+            );
         }
     }
 }
