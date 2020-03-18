@@ -2,7 +2,7 @@
 
 ## Version 0.1.2
 
-* Added functions: `cbrt`, `exp`, `exp2`, `ln`, `log`, `log2`, `log10`.
+* Added functions: `cbrt`, `exp`, `exp2`, `ln`, `log`, `log2`, `log10`, `powf`.
 * Added mathematical constants.
 
 ## Version 0.1.1

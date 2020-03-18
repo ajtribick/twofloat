@@ -10,9 +10,17 @@ Rust language. Note that this is not the same as the IEEE quadruple-precision
 floating-point format. Instead, higher precision is obtained by representing
 the value as the sum of two non-overlapping `f64` values.
 
-Currently the provided API is very basic, I hope to be able to provide more
-mathematical functions (square root, logarithms, exponentiation and
-trigonometry) in future releases.
+Operator traits are implemented both for reference and value types where
+appropriate. Refer to the source code for the source of the algorithms.
+
+Mathematical constants are available in the `twofloat::consts` module, which
+provides the same set of constants as `std::f64::consts`.
+
+Please note that the implementation of the mathematical functions (`exp`,
+`powf`, etc.) is very preliminary. In particular, they are calculated using
+operations at the same precision as the result, so they will not return values
+which are correct to the full precision of the `TwoFloat` type. This may be
+addressed in future releases.
 
 ## References
 

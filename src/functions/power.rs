@@ -104,6 +104,54 @@ impl TwoFloat {
             }
         }
     }
+
+    /// Returns the value raised to the power `y`.
+    ///
+    /// This method is quite inaccurate, where possible `powi`, `sqrt` or
+    /// `cbrt` should be preferred.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(-5.0);
+    /// let b = TwoFloat::from(3.0);
+    /// let c = a.powf(&b);
+    ///
+    /// assert!((c + 125.0).abs() < 1e-9, "{}", c);
+    pub fn powf(&self, y: &TwoFloat) -> TwoFloat {
+        match (*self == 0.0, *y == 0.0) {
+            (true, true) => TwoFloat {
+                hi: std::f64::NAN,
+                lo: std::f64::NAN,
+            },
+            (true, false) => TwoFloat::from(0.0),
+            (false, true) => TwoFloat::from(1.0),
+            (false, false) => {
+                if self.is_sign_positive() {
+                    (y * self.ln()).exp()
+                } else if self.hi.fract() != 0.0 || self.lo.fract() != 0.0 {
+                    TwoFloat {
+                        hi: std::f64::NAN,
+                        lo: std::f64::NAN,
+                    }
+                } else {
+                    let abs_result = (y * self.abs().ln()).exp();
+                    let low_trunc = if self.lo.trunc() == 0.0 {
+                        self.hi.trunc()
+                    } else {
+                        self.lo.trunc()
+                    };
+
+                    if low_trunc % 2.0 == 0.0 {
+                        abs_result
+                    } else {
+                        -abs_result
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -258,6 +306,85 @@ mod tests {
                 result, expected,
                 "{0:?}.powi({1}) was not reciprocal of {0:?}.powi({2})",
                 source, -exponent, exponent
+            );
+        }
+    }
+
+    #[test]
+    fn zero_powf_test() {
+        let mut gen_f64 = float_generator();
+        for i in 0..TEST_ITERS {
+            let (a, b) = match i {
+                0 => (0.0, 0.0),
+                _ => get_valid_pair(&mut gen_f64, |x, y| no_overlap(x, y)),
+            };
+
+            let source = TwoFloat { hi: a, lo: b };
+            let result = TwoFloat::from(0.0).powf(&source);
+            if source == 0.0 {
+                assert!(!result.is_valid(), "0^0 returned valid result");
+            } else {
+                assert!(
+                    no_overlap(result.hi, result.lo),
+                    "0^{} returned overlap",
+                    source
+                );
+                assert_eq!(result, 0.0, "0^{} did not return 0", source);
+            }
+        }
+    }
+
+    #[test]
+    fn powf_zero_test() {
+        let mut gen_f64 = float_generator();
+        for i in 0..TEST_ITERS {
+            let (a, b) = match i {
+                0 => (0.0, 0.0),
+                _ => get_valid_pair(&mut gen_f64, |x, y| no_overlap(x, y)),
+            };
+
+            let source = TwoFloat { hi: a, lo: b };
+            let result = source.powf(&TwoFloat::from(0.0));
+            if source == 0.0 {
+                assert!(!result.is_valid(), "0^0 returned valid result");
+            } else {
+                assert!(
+                    no_overlap(result.hi, result.lo),
+                    "{}^0 returned overlap",
+                    source
+                );
+                assert_eq!(result, 1.0, "{}^0 did not return 1", source);
+            }
+        }
+    }
+
+    #[test]
+    fn powf_test() {
+        let mut rng = rand::thread_rng();
+        let value_dist = rand::distributions::Uniform::new(1.0f64, 20.0f64);
+        for _ in 0..TEST_ITERS {
+            let a = rng.sample(value_dist);
+            let b = rng.sample(value_dist);
+
+            let expected = a.powf(b);
+            let result = TwoFloat::from(a).powf(&TwoFloat::from(b));
+
+            assert!(
+                no_overlap(result.hi, result.lo),
+                "{}^{} resulted in overlap",
+                a,
+                b
+            );
+
+            let difference = (result - expected).abs().hi / expected;
+
+            assert!(
+                difference < 1e-8,
+                "{}^{} resulted in different value {} vs {}",
+                a,
+                b,
+                result,
+                expected
             );
         }
     }
