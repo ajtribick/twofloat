@@ -7,6 +7,12 @@ const FRAC_1_LN_2: TwoFloat = TwoFloat {
     lo: 2.0355273740931033e-17,
 };
 
+// ln(10)
+const LN_10: TwoFloat = TwoFloat {
+    hi: 2.302585092994046,
+    lo: -2.1707562233822494e-16,
+};
+
 // limits
 const EXP_UPPER_LIMIT: f64 = 709.782712893384;
 const EXP_LOWER_LIMIT: f64 = -745.1332191019412;
@@ -57,6 +63,9 @@ fn mul_pow2(mut x: f64, mut y: i32) -> f64 {
 impl TwoFloat {
     /// Returns `e^(self)`, (the exponential function).
     ///
+    /// Note that this function returns an approximate value, in particular
+    /// the low word of the core polynomial approximation is not guaranteed.
+    ///
     /// # Examples
     ///
     /// ```
@@ -80,8 +89,8 @@ impl TwoFloat {
             // reduce value to range |r| <= ln(2)/2
             // where self = k*ln(2) + r
 
-            let k = ((&FRAC_1_LN_2 * self).hi + 0.5).trunc();
-            let r = self - &LN_2 * k;
+            let k = ((FRAC_1_LN_2 * self).hi + 0.5).trunc();
+            let r = self - LN_2 * k;
 
             // Now approximate the function
             //
@@ -95,8 +104,7 @@ impl TwoFloat {
             // where R1 = r - (P1*r^2 + P2*r^4 + ...)
 
             let rr = &r * &r;
-            let r1 = &r
-                - &rr * (&P1 + &rr * (&P2 + &rr * (&P3 + &rr * (&P4 + &rr * (&P5 + &rr * &P6)))));
+            let r1 = &r - &rr * (P1 + &rr * (P2 + &rr * (P3 + &rr * (P4 + &rr * (P5 + &rr * P6)))));
 
             let exp_r = 1.0 - ((&r * &r1) / (&r1 - 2.0) - &r);
 
@@ -113,13 +121,32 @@ impl TwoFloat {
         }
     }
 
+    /// Returns `2^(self)`.
+    ///
+    /// This is a convenience method that computes `(self * LN_2).exp()`, no
+    /// additional accuracy is provided.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(6.0).exp2();
+    ///
+    /// assert!((a - 64.0).abs() < 1e-15);
+    pub fn exp2(&self) -> TwoFloat {
+        (self * LN_2).exp()
+    }
+
     /// Returns the natural logarithm of the value.
+    ///
+    /// Uses Newton–Raphson iteration which depends on the `exp` function, so
+    /// may not be fully accurate to the full precision of a `TwoFloat`.
     ///
     /// # Example
     ///
     /// ```
     /// let a = twofloat::consts::E.ln();
-    /// assert!((a - 1.0).abs() < 1e-10);
+    /// assert!((a - 1.0).abs() < 1e-11);
     pub fn ln(&self) -> TwoFloat {
         if *self == 1.0 {
             TwoFloat::from(0.0)
@@ -133,6 +160,54 @@ impl TwoFloat {
             x += self * (-x).exp() - 1.0;
             x + self * (-x).exp() - 1.0
         }
+    }
+
+    /// Returns the logarithm of the number with respect to an arbitrary base.
+    ///
+    /// This is a convenience method that computes `self.ln() / base.ln()`, no
+    /// additional accuracy is provided.
+    ///
+    /// # Examples
+    ///
+    /// let a = TwoFloat::from(81.0);
+    /// let b = TwoFloat::from(3.0);
+    /// let c = a.log(&b);
+    ///
+    /// assert!((c - 4.0).abs() < 1e-12);
+    pub fn log(&self, base: &TwoFloat) -> TwoFloat {
+        self.ln() / base.ln()
+    }
+
+    /// Returns the base 2 logarithm of the number.
+    ///
+    /// This is a convenience method that computes `self.ln() / LN_2`, no
+    /// additional accuracy is provided.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(64.0).log2();
+    ///
+    /// assert!((a - 6.0).abs() < 1e-12, "{}", a);
+    pub fn log2(&self) -> TwoFloat {
+        self.ln() / LN_2
+    }
+
+    /// Returns the base 10 logarithm of the number.
+    ///
+    /// This is a convenience method that computes `self.ln() / LN_10`, no
+    /// additional accuracy is provided.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(100.0).log10();
+    ///
+    /// assert!((a - 2.0).abs() < 1e-12);
+    pub fn log10(&self) -> TwoFloat {
+        self.ln() / LN_10
     }
 }
 
