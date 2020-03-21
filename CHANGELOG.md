@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.1.3
+
+* Added functions: `to_degrees`, `to_radians`.
+
 ## Version 0.1.2
 
 * Added functions: `cbrt`, `exp`, `exp2`, `ln`, `log`, `log2`, `log10`, `powf`.
