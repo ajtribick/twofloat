@@ -1,6 +1,6 @@
-#![cfg(test)]
 #![macro_use]
 
+use twofloat::TwoFloat;
 use rand::Rng;
 
 pub const TEST_ITERS: usize = 100000;
@@ -33,6 +33,63 @@ macro_rules! randomized_test {
 
 pub type F64Rand<'a> = &'a mut dyn FnMut() -> f64;
 
+pub fn get_valid_f64<F: Fn(f64) -> bool>(rng: F64Rand, pred: F) -> f64 {
+    loop {
+        let a = rng();
+        if pred(a) {
+            return a;
+        }
+    }
+}
+
+pub fn get_twofloat(rng: F64Rand) -> TwoFloat {
+    loop {
+        if let Ok(result) = TwoFloat::try_new(rng(), rng()) {
+            return result;
+        }
+    }
+}
+
+pub fn try_get_twofloat_with_hi(rng: F64Rand, hi: f64) -> Result<TwoFloat, ()> {
+    if hi == 0.0 {
+        return Ok(TwoFloat::from(0.0));
+    }
+
+    for _ in 0..10 {
+        let result = TwoFloat::try_new(hi, rng() % hi);
+        if result.is_ok() {
+            return result;
+        }
+    }
+
+    Err(())
+}
+
+pub fn try_get_twofloat_with_lo(rng: F64Rand, lo: f64) -> Result<TwoFloat, ()> {
+    for _ in 0..10 {
+        let result = TwoFloat::try_new(rng(), lo);
+        if result.is_ok() {
+            return result;
+        }
+    }
+
+    Err(())
+}
+
+pub fn get_valid_twofloat<F: Fn(f64, f64) -> bool>(rng: F64Rand, pred: F) -> TwoFloat {
+    loop {
+        let a = rng();
+        let b = rng();
+        if !pred(a, b) {
+            continue;
+        }
+
+        if let Ok(result) = TwoFloat::try_new(a, b) {
+            return result;
+        }
+    }
+}
+
 pub fn get_valid_pair<F: Fn(f64, f64) -> bool>(rng: F64Rand, pred: F) -> (f64, f64) {
     loop {
         let a = rng();
@@ -56,6 +113,7 @@ pub fn ulp_diff(a: f64, b: f64) -> i64 {
     (fix_sign(a_bits) as i64).saturating_sub(fix_sign(b_bits) as i64)
 }
 
+#[allow(unused_macros)]
 macro_rules! assert_eq_ulp {
     ($left:expr, $right:expr, $ulp:expr) => ({
         match (&$left, &$right, &$ulp) {
