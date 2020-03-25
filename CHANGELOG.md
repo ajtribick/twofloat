@@ -2,7 +2,7 @@
 
 ## Version 0.1.3
 
-* Added functions: `to_degrees`, `to_radians`.
+* Added functions: `to_degrees`, `to_radians`, `hi`, `lo`.
 
 ## Version 0.1.2
 

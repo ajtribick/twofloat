@@ -17,10 +17,9 @@ fn exp_test() {
 
         let exp_a = a.exp();
         let exp_b = b.exp();
-        let (hi, lo) = exp_b.data();
 
         assert!(
-            no_overlap(hi, lo),
+            no_overlap(exp_b.hi(), exp_b.lo()),
             "Overlap detected in exp({}) = {:?}",
             a,
             exp_b
@@ -49,10 +48,9 @@ fn ln_test() {
 
         let ln_a = a.ln();
         let ln_b = b.ln();
-        let (hi, lo) = ln_b.data();
 
         assert!(
-            no_overlap(hi, lo),
+            no_overlap(ln_b.hi(), ln_b.lo()),
             "Overlap detected in ln({}) = {:?}",
             a,
             ln_a

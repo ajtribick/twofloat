@@ -111,6 +111,30 @@ impl TwoFloat {
         (self.hi, self.lo)
     }
 
+    /// Returns the high word of `self`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let value = TwoFloat::new_add(1.0, -1.0e-200);
+    /// assert_eq!(value.hi(), 1.0);
+    pub fn hi(&self) -> f64 {
+        self.hi
+    }
+
+    /// Returns the low word of `self`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let value = TwoFloat::new_add(1.0, -1.0e-200);
+    /// assert_eq!(value.lo(), -1.0e-200);
+    pub fn lo(&self) -> f64 {
+        self.lo
+    }
+
     /// Returns `true` if `self` is a valid value, where both components are
     /// finite (not infinity or NaN).
     ///

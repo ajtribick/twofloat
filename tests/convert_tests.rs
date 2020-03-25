@@ -34,13 +34,12 @@ macro_rules! float_test {
             };
 
             let result: TwoFloat = source.into();
-            let (hi, lo) = result.data();
 
             assert_eq!(
-                hi, source as f64,
+                result.hi(), source as f64,
                 "Float conversion failed: mismatch in high word"
             );
-            assert_eq!(lo, 0.0, "Float conversion failed: non-zero low word");
+            assert_eq!(result.lo(), 0.0, "Float conversion failed: non-zero low word");
         });
 
         randomized_test!($into_test, |rng: F64Rand| {
@@ -49,7 +48,7 @@ macro_rules! float_test {
 
             let result: $type = source.into();
             assert_eq!(
-                result, source.data().0 as $type,
+                result, source.hi() as $type,
                 "Float conversion from TwoFloat failed"
             );
 
@@ -104,7 +103,7 @@ macro_rules! from_twofloat_test {
                 }
             };
 
-            let expected = if source.data().1 > 0.0 {
+            let expected = if source.lo() > 0.0 {
                 Ok(std::$type::MIN)
             } else {
                 Err(())
@@ -127,7 +126,7 @@ macro_rules! from_twofloat_test {
                     break source;
                 }
             };
-            let expected = if source.data().1 < 0.0 {
+            let expected = if source.lo() < 0.0 {
                 Ok(std::$type::MAX)
             } else {
                 Err(())
@@ -255,20 +254,19 @@ macro_rules! int_test {
                     let source = rng.sample(dist);
 
                     let result: TwoFloat = source.into();
-                    let (hi, lo) = result.data();
 
                     assert!(
-                        no_overlap(hi, lo),
+                        no_overlap(result.hi(), result.lo()),
                         "Conversion of {} produced overlap",
                         source
                     );
                     assert_eq!(
-                        hi, source as f64,
+                        result.hi(), source as f64,
                         "Conversion of {} failed: mismatch in high word",
                         source
                     );
                     assert_eq!(
-                        lo, 0.0,
+                        result.lo(), 0.0,
                         "Conversion of {} failed: non-zero low word",
                         source
                     );
@@ -288,20 +286,19 @@ macro_rules! int_test {
                 let mut source = std::$type::MIN;
                 loop {
                     let result: TwoFloat = source.into();
-                    let (hi, lo) = result.data();
 
                     assert!(
-                        no_overlap(hi, lo),
+                        no_overlap(result.hi(), result.lo()),
                         "Conversion of {} produced overlap",
                         source
                     );
                     assert_eq!(
-                        hi, source as f64,
+                        result.hi(), source as f64,
                         "Conversion of {} failed: mismatch in high word",
                         source
                     );
                     assert_eq!(
-                        lo, 0.0,
+                        result.lo(), 0.0,
                         "Conversion of {} failed: non-zero low word",
                         source
                     );
@@ -339,63 +336,62 @@ macro_rules! int64_test {
                 for _ in 0..TEST_ITERS {
                     let source = rng.sample(source_dist);
                     let result: TwoFloat = source.into();
-                    let (hi, lo) = result.data();
 
                     assert!(
-                        no_overlap(hi, lo),
+                        no_overlap(result.hi(), result.lo()),
                         "Conversion of {} produced overlap",
                         source
                     );
                     assert!(
-                        hi >= std::$type::MIN as f64 && hi <= std::$type::MAX as f64,
+                        result.hi() >= std::$type::MIN as f64 && result.hi() <= std::$type::MAX as f64,
                         "Conversion of {} high word out of range",
                         source
                     );
                     assert!(
-                        hi.fract() == 0.0,
+                        result.hi().fract() == 0.0,
                         "Integer conversion of {} produced a fraction",
                         source
                     );
                     assert!(
-                        lo.fract() == 0.0,
+                        result.lo().fract() == 0.0,
                         "Integer conversion of {} produced a fraction",
                         source
                     );
 
-                    if hi == std::$type::MAX as f64 {
+                    if result.hi() == std::$type::MAX as f64 {
                         assert!(
-                            lo < 0.0,
+                            result.lo() < 0.0,
                             "Converted result of {} out of range",
                             source
                         );
                         assert_eq!(
-                            (-lo) as $type - 1,
+                            (-result.lo()) as $type - 1,
                             std::$type::MAX - source,
                             "Conversion of {} did not produce matching value",
                             source
                         );
-                    } else if hi == std::$type::MIN as f64 {
+                    } else if result.hi() == std::$type::MIN as f64 {
                         assert!(
-                            lo >= 0.0,
+                            result.lo() >= 0.0,
                             "Converted result of {} out of range",
                             source
                         );
                         assert_eq!(
-                            lo as $type,
+                            result.lo() as $type,
                             source - std::$type::MIN,
                             "Conversion of {} did not produce matching value",
                             source
                         );
-                    } else if lo >= 0.0 {
+                    } else if result.lo() >= 0.0 {
                         assert_eq!(
-                            hi as $type + lo as $type,
+                            result.hi() as $type + result.lo() as $type,
                             source,
                             "Conversion of {} did not produce matching value",
                             source
                         );
                     } else {
                         assert_eq!(
-                            hi as $type - ((-lo) as $type),
+                            result.hi() as $type - ((-result.lo()) as $type),
                             source,
                             "Conversion of {} did not produce matching value",
                             source

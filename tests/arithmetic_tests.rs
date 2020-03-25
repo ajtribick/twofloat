@@ -58,13 +58,10 @@ randomized_test!(new_div_test, |rng: F64Rand| {
 
 randomized_test!(neg_test, |rng: F64Rand| {
     let a = get_twofloat(rng);
-    let (a_hi, a_lo) = a.data();
-
     let b = -a;
-    let (b_hi, b_lo) = b.data();
 
-    assert_eq!(a_hi, -b_hi, "Negation does not negate high word");
-    assert_eq!(a_lo, -b_lo, "Negation does not negate low word");
+    assert_eq!(a.hi(), -b.hi(), "Negation does not negate high word");
+    assert_eq!(a.lo(), -b.lo(), "Negation does not negate low word");
 
     let c = -b;
     assert_eq!(c, a, "Double negation does not result in original value");
@@ -156,8 +153,7 @@ macro_rules! op_test_f64_common {
                 let result = a $op value;
                 if (!result.is_valid()) { continue; }
 
-                let (hi, lo) = result.data();
-                assert!(no_overlap(hi, lo), "Result of {} {} {:?} contained overlap", a, stringify!($op), value);
+                assert!(no_overlap(result.hi(), result.lo()), "Result of {} {} {:?} contained overlap", a, stringify!($op), value);
 
                 diff_test!($op, expected, result, a, value);
                 break;
@@ -192,8 +188,7 @@ macro_rules! op_test_f64 {
                     if (!expected.is_valid()) { continue; }
 
                     let result = value $op a;
-                    let (hi, lo) = result.data();
-                    assert!(no_overlap(hi, lo), "Result of {:?} {} {} contained overlap", value, stringify!($op), a);
+                    assert!(no_overlap(result.hi(), result.lo()), "Result of {:?} {} {} contained overlap", value, stringify!($op), a);
                     assert_eq!(result, expected, "Operation {:?} {} {} gave different result to reversed", value, stringify!($op), a);
                     break;
                 }
@@ -226,8 +221,7 @@ macro_rules! op_test_f64 {
                     let result = value $op a;
                     if (!result.is_valid()) { continue; }
 
-                    let (hi, lo) = result.data();
-                    assert!(no_overlap(hi, lo), "Result of {:?} {} {} contained overlap", value, stringify!($op), a);
+                    assert!(no_overlap(result.hi(), result.lo()), "Result of {:?} {} {} contained overlap", value, stringify!($op), a);
 
                     diff_test!($op, expected, result, value, a);
                     break;
@@ -253,7 +247,7 @@ macro_rules! op_test {
 
             randomized_test!(ref_overloads_test, |rng: F64Rand| {
                 let value1 = get_twofloat(rng);
-                let a = value1.data().0;
+                let a = value1.hi();
                 let value2 = get_valid_twofloat(rng, |x, y| { ((x + y) $op a).is_finite() });
                 let result1 = value1 $op value2;
                 if result1.is_valid() {
@@ -307,8 +301,7 @@ macro_rules! op_test {
                     let result = value1 $op value2;
                     if (!result.is_valid()) { continue; }
 
-                    let (hi, lo) = result.data();
-                    assert!(no_overlap(hi, lo), "Result of {:?} {} {:?} contained overlap", value1, stringify!($op), value2);
+                    assert!(no_overlap(result.hi(), result.lo()), "Result of {:?} {} {:?} contained overlap", value1, stringify!($op), value2);
 
                     diff_test!($op, expected, result, value1, value2);
                     break;

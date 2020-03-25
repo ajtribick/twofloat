@@ -21,12 +21,11 @@ randomized_test!(equality_test, |rng: F64Rand| {
     assert_eq!(a, a, "Self-equality check failed for {:?}", a);
     assert_eq!(&a, &a, "Reference self-equality check failed for {:?}", a);
 
-    let (hi, lo) = a.data();
-    let b = TwoFloat::try_new(hi, lo).unwrap();
+    let b = TwoFloat::try_new(a.hi(), a.lo()).unwrap();
     assert_eq!(a, b, "Equality check for equivalent value failed for {:?}", a);
     assert_eq!(&a, &b, "Equality check for reference to equivalent value failed for {:?}", a);
 
-    let c = get_valid_twofloat(rng, |x, y| { x != hi || y != lo });
+    let c = get_valid_twofloat(rng, |x, y| { x != a.hi() || y != a.lo() });
 
     assert_ne!(a, c);
     assert_ne!(&a, &c);
@@ -51,31 +50,29 @@ macro_rules! comparison_test {
     ($val_test: ident, $ref_test: ident, $op: tt, $allow_equal: expr) => {
         randomized_test!($val_test, |rng: F64Rand| {
             let a = get_twofloat(rng);
-            let (hi, lo) = a.data();
 
             assert_eq!($allow_equal, a $op a, "Self-comparison using {} failed", stringify!($op));
 
-            if let Ok(b) = try_get_twofloat_with_hi(rng, hi) {
-                assert_eq!(lo $op b.data().1, a $op b, "Comparison using {} failed", stringify!($op));
+            if let Ok(b) = try_get_twofloat_with_hi(rng, a.hi()) {
+                assert_eq!(a.lo() $op b.lo(), a $op b, "Comparison using {} failed", stringify!($op));
             }
 
-            if let Ok(c) = try_get_twofloat_with_lo(rng, lo) {
-                assert_eq!(hi $op c.data().0, a $op c, "Comparison using {} failed", stringify!($op));
+            if let Ok(c) = try_get_twofloat_with_lo(rng, a.lo()) {
+                assert_eq!(a.hi() $op c.hi(), a $op c, "Comparison using {} failed", stringify!($op));
             }
         });
 
         randomized_test!($ref_test, |rng: F64Rand| {
             let a = get_twofloat(rng);
-            let (hi, lo) = a.data();
 
             assert_eq!($allow_equal, &a $op &a, "Self-comparison using {} failed", stringify!($op));
 
-            if let Ok(b) = try_get_twofloat_with_hi(rng, hi) {
-                assert_eq!(lo $op b.data().1, &a $op &b, "Comparison using {} failed", stringify!($op));
+            if let Ok(b) = try_get_twofloat_with_hi(rng, a.hi()) {
+                assert_eq!(a.lo() $op b.lo(), &a $op &b, "Comparison using {} failed", stringify!($op));
             }
 
-            if let Ok(c) = try_get_twofloat_with_lo(rng, lo) {
-                assert_eq!(hi $op c.data().0, &a $op &c, "Comparison using {} failed", stringify!($op));
+            if let Ok(c) = try_get_twofloat_with_lo(rng, a.lo()) {
+                assert_eq!(a.hi() $op c.hi(), &a $op &c, "Comparison using {} failed", stringify!($op));
             }
         });
     };
@@ -103,7 +100,7 @@ randomized_test!(compare_f64_test, |rng: F64Rand| {
     assert!(a_two >= a);
 
     if let Ok(ab) = try_get_twofloat_with_hi(rng, a) {
-        let b = ab.data().1;
+        let b = ab.lo();
         if b < 0.0 {
             assert!(
                 a.partial_cmp(&ab) == Some(Ordering::Greater),
@@ -168,15 +165,10 @@ randomized_test!(compare_f64_test, |rng: F64Rand| {
 });
 
 randomized_test!(data_test, |rng: F64Rand| {
-    let (a, b, source) = loop {
-        let a = rng();
-        let b = rng();
-        if let Ok(source) = TwoFloat::try_new(a, b) {
-            break (a, b, source);
-        }
-    };
+    let source = get_twofloat(rng);
+    let expected = (source.hi(), source.lo());
     let result = source.data();
-    assert_eq!(result, (a, b));
+    assert_eq!(expected, result, "Mismatch between data(), hi() and lo()");
 });
 
 randomized_test!(try_new_no_overlap_test, |rng: F64Rand| {

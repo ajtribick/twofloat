@@ -5,28 +5,26 @@ use common::*;
 
 randomized_test!(fract_hi_fract_test, |rng: F64Rand| {
     let source = get_valid_twofloat(rng, |x, _| { x.fract() != 0.0 });
-    let (a, b) = source.data();
-    let expected = a.fract() + b.fract();
+    let expected = source.hi().fract() + source.lo().fract();
     let result = source.fract();
-    let (hi, lo) = result.data();
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "Overlap in fract({:?})",
         source
     );
     assert!(
-        hi.trunc() == 0.0
-            || (hi.trunc().abs() == 1.0 && ((hi >= 0.0) != (lo >= 0.0))),
+        result.hi().trunc() == 0.0
+            || (result.hi().trunc().abs() == 1.0 && ((result.hi() >= 0.0) != (result.lo() >= 0.0))),
         "Fractional part of {:?} is greater than one",
         source
     );
     assert!(
-        lo.trunc() == 0.0,
+        result.lo().trunc() == 0.0,
         "Non-zero integer part of low word of fract({:?}",
         source
     );
     assert_eq_ulp!(
-        hi,
+        result.hi(),
         expected,
         1,
         "Mismatch in fractional part of {:?}",
@@ -44,26 +42,25 @@ randomized_test!(fract_lo_fract_test, |rng: F64Rand| {
         _ => b.fract(),
     };
     let result = source.fract();
-    let (hi, lo) = result.data();
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "Overlap in fract({:?})",
         source
     );
     println!("{:?}", result);
     assert!(
-        hi.trunc() == 0.0
-            || (hi.trunc().abs() == 1.0 && ((hi >= 0.0) != (lo >= 0.0))),
+        result.hi().trunc() == 0.0
+            || (result.hi().trunc().abs() == 1.0 && ((result.hi() >= 0.0) != (result.lo() >= 0.0))),
         "Fractional part of {:?} is greater than one",
         source
     );
     assert!(
-        lo.trunc() == 0.0,
+        result.lo().trunc() == 0.0,
         "Non-zero integer part of low word of fract({:?}",
         source
     );
     assert_eq_ulp!(
-        hi,
+        result.hi(),
         expected,
         1,
         "Mismatch in fractional part of {:?}",
@@ -85,22 +82,21 @@ randomized_test!(fract_no_fract_test, |rng: F64Rand| {
 
 randomized_test!(trunc_hi_fract_test, |rng: F64Rand| {
     let source = get_valid_twofloat(rng, |x, _| { x.fract() != 0.0 });
-    let expected = TwoFloat::from(source.data().0.trunc());
+    let expected = TwoFloat::from(source.hi().trunc());
     let result = source.trunc();
-    let (hi, lo) = result.data();
 
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "Overlap in trunc({:?})",
         source
     );
     assert!(
-        hi.fract() == 0.0,
+        result.hi().fract() == 0.0,
         "Fractional part remains in high word after truncating {:?}",
         source
     );
     assert!(
-        lo.fract() == 0.0,
+        result.lo().fract() == 0.0,
         "Fractional part remains in low word after truncating {:?}",
         source
     );
@@ -117,19 +113,18 @@ randomized_test!(trunc_lo_fract_test, |rng: F64Rand| {
         _ => TwoFloat::try_new(a, b.trunc()).unwrap(),
     };
     let result = source.trunc();
-    let (hi, lo) = result.data();
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "Overlap in trunc({:?})",
         source
     );
     assert!(
-        hi.fract() == 0.0,
+        result.hi().fract() == 0.0,
         "Fractional part remains in high word after truncating {:?}",
         source
     );
     assert!(
-        lo.fract() == 0.0,
+        result.lo().fract() == 0.0,
         "Fractional part remains in low word after truncating {:?}",
         source
     );
@@ -141,8 +136,8 @@ randomized_test!(trunc_no_fract_test, |rng: F64Rand| {
     let source = TwoFloat::try_new(a_fract.trunc(), b_fract.trunc()).unwrap();
     let expected = source;
     let result = source.trunc();
-    let (hi, lo) = result.data();
-    assert!(no_overlap(hi, lo), "Overlap in trunc({:?})", source);
+
+    assert!(no_overlap(result.hi(), result.lo()), "Overlap in trunc({:?})", source);
     assert_eq!(
         result, expected,
         "Truncation of integer {:?} returned different value",
@@ -152,12 +147,11 @@ randomized_test!(trunc_no_fract_test, |rng: F64Rand| {
 
 randomized_test!(ceil_hi_fract_test, |rng: F64Rand| {
     let source = get_valid_twofloat(rng, |x, _| { x.fract() != 0.0 });
-    let expected = TwoFloat::from(source.data().0.ceil());
+    let expected = TwoFloat::from(source.hi().ceil());
     let result = source.ceil();
-    let (hi, lo) = result.data();
 
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "ceil({:?}) contained overlap",
         source
     );
@@ -170,10 +164,9 @@ randomized_test!(ceil_lo_fract_test, |rng: F64Rand| {
     let source = TwoFloat::try_new(a, b).unwrap();
     let expected = TwoFloat::new_add(a, b.ceil());
     let result = source.ceil();
-    let (hi, lo) = result.data();
 
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "ceil({:?}) contained overlap",
         source
     );
@@ -185,9 +178,9 @@ randomized_test!(ceil_no_fract_test, |rng: F64Rand| {
     let source = TwoFloat::try_new(a_fract.trunc(), b_fract.trunc()).unwrap();
     let expected = source;
     let result = source.ceil();
-    let (hi, lo) = result.data();
+
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "ceil({:?}) contained overlap",
         source
     );
@@ -200,12 +193,11 @@ randomized_test!(ceil_no_fract_test, |rng: F64Rand| {
 
 randomized_test!(floor_hi_fract_test, |rng: F64Rand| {
     let source = get_valid_twofloat(rng, |x, _| { x.fract() != 0.0 });
-    let expected = TwoFloat::from(source.data().0.floor());
+    let expected = TwoFloat::from(source.hi().floor());
     let result = source.floor();
-    let (hi, lo) = result.data();
 
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "floor({:?}) contained overlap",
         source
     );
@@ -218,9 +210,8 @@ randomized_test!(floor_lo_fract_test, |rng: F64Rand| {
     let source = TwoFloat::try_new(a, b).unwrap();
     let expected = TwoFloat::new_add(a, b.floor());
     let result = source.floor();
-    let (hi, lo) = result.data();
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "floor({:?}) contained overlap",
         source
     );
@@ -232,9 +223,8 @@ randomized_test!(floor_no_fract_test, |rng: F64Rand| {
     let source = TwoFloat::try_new(a_fract.trunc(), b_fract.trunc()).unwrap();
     let expected = source;
     let result = source.floor();
-    let (hi, lo) = result.data();
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "floor({:?}) contained overlap",
         source
     );

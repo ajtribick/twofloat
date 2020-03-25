@@ -7,10 +7,9 @@ use common::*;
 randomized_test!(recip_test, |rng: F64Rand| {
     let source = get_valid_twofloat(rng, |x, _| { x.abs() > 1e-300 });
     let result = source.recip();
-    let (hi, lo) = result.data();
 
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "Reciprocal of {:?} contained overlap",
         source
     );
@@ -26,10 +25,9 @@ randomized_test!(recip_test, |rng: F64Rand| {
 randomized_test!(sqrt_test, |rng: F64Rand| {
     let source = get_valid_twofloat(rng, |x, _| { x > 0.0 });
     let result = source.sqrt();
-    let (hi, lo) = result.data();
 
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "Square root of {:?} gave overlap",
         source
     );
@@ -39,7 +37,7 @@ randomized_test!(sqrt_test, |rng: F64Rand| {
         "Square root of {:?} ({:?}) squared gives high relative difference {}",
         source,
         result,
-        difference.data().0
+        difference.hi()
     );
 });
 
@@ -56,9 +54,8 @@ randomized_test!(sqrt_negative_test, |rng: F64Rand| {
 randomized_test!(cbrt_test, |rng: F64Rand| {
     let source = get_twofloat(rng);
     let result = source.cbrt();
-    let (hi, lo) = result.data();
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "Cube root of {:?} gave overlap",
         source
     );
@@ -68,7 +65,7 @@ randomized_test!(cbrt_test, |rng: F64Rand| {
         "Cube root of {:?} ({:?}) squared gives high relative difference {}",
         source,
         result,
-        difference.data().0
+        difference.hi()
     );
 });
 
@@ -76,10 +73,9 @@ randomized_test!(powi_0_test, |rng: F64Rand| {
     let source = get_valid_twofloat(rng, |x, _| { x != 0.0 });
     let expected = TwoFloat::from(1.0);
     let result = source.powi(0);
-    let (hi, lo) = result.data();
 
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "Result of {:?}.powi(0) contained overlap",
         source
     );
@@ -89,10 +85,9 @@ randomized_test!(powi_0_test, |rng: F64Rand| {
 randomized_test!(powi_1_test, |rng: F64Rand| {
     let source = get_twofloat(rng);
     let result = source.powi(1);
-    let (hi, lo) = result.data();
 
     assert!(
-        no_overlap(hi, lo),
+        no_overlap(result.hi(), result.lo()),
         "{:?}.powi(1) contained overlap",
         source
     );
@@ -115,9 +110,8 @@ fn powi_value_test() {
         }
 
         let result = source.powi(exponent);
-        let (hi, lo) = result.data();
         assert!(
-            no_overlap(hi, lo),
+            no_overlap(result.hi(), result.lo()),
             "{:?}.powi({}) contained overlap",
             source,
             exponent
@@ -141,9 +135,9 @@ fn powi_reciprocal_test() {
         let exponent = rng.gen_range(1, 20);
         let expected = 1.0 / source.powi(exponent);
         let result = source.powi(-exponent);
-        let (hi, lo) = result.data();
+
         assert!(
-            no_overlap(hi, lo),
+            no_overlap(result.hi(), result.lo()),
             "{:?}.powi({}) contained overlap",
             source,
             -exponent
@@ -163,9 +157,8 @@ randomized_test!(zero_powf_test, |rng: F64Rand| {
     if source == 0.0 {
         assert!(!result.is_valid(), "0^0 returned valid result");
     } else {
-        let (hi, lo) = result.data();
         assert!(
-            no_overlap(hi, lo),
+            no_overlap(result.hi(), result.lo()),
             "0^{} returned overlap",
             source
         );
@@ -180,9 +173,8 @@ randomized_test!(powf_zero_test, |rng: F64Rand| {
     if source == 0.0 {
         assert!(!result.is_valid(), "0^0 returned valid result");
     } else {
-        let (hi, lo) = result.data();
         assert!(
-            no_overlap(hi, lo),
+            no_overlap(result.hi(), result.lo()),
             "{}^0 returned overlap",
             source
         );
@@ -200,16 +192,15 @@ fn powf_test() {
 
         let expected = a.powf(b);
         let result = TwoFloat::from(a).powf(&TwoFloat::from(b));
-        let (hi, lo) = result.data();
 
         assert!(
-            no_overlap(hi, lo),
+            no_overlap(result.hi(), result.lo()),
             "{}^{} resulted in overlap",
             a,
             b
         );
 
-        let difference = (result - expected).abs().data().0 / expected;
+        let difference = (result - expected).abs().hi() / expected;
 
         assert!(
             difference < 1e-8,
