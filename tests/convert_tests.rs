@@ -259,11 +259,7 @@ macro_rules! int_test {
 
                     let result: TwoFloat = source.into();
 
-                    assert!(
-                        no_overlap(result.hi(), result.lo()),
-                        "Conversion of {} produced overlap",
-                        source
-                    );
+                    assert!(result.is_valid(), "Conversion of {} was invalid", source);
                     assert_eq!(
                         result.hi(),
                         source as f64,
@@ -293,11 +289,7 @@ macro_rules! int_test {
                 loop {
                     let result: TwoFloat = source.into();
 
-                    assert!(
-                        no_overlap(result.hi(), result.lo()),
-                        "Conversion of {} produced overlap",
-                        source
-                    );
+                    assert!(result.is_valid(), "Conversion of {} was invalid", source);
                     assert_eq!(
                         result.hi(),
                         source as f64,
@@ -345,11 +337,7 @@ macro_rules! int64_test {
                     let source = rng.sample(source_dist);
                     let result: TwoFloat = source.into();
 
-                    assert!(
-                        no_overlap(result.hi(), result.lo()),
-                        "Conversion of {} produced overlap",
-                        source
-                    );
+                    assert!(result.is_valid(), "Conversion of {} was invalid", source);
                     assert!(
                         result.hi() >= std::$type::MIN as f64
                             && result.hi() <= std::$type::MAX as f64,
@@ -412,63 +400,52 @@ macro_rules! int64_test {
             const LOWER_BOUND: f64 = std::$type::MIN as f64 - 1.0;
             const UPPER_BOUND: f64 = std::$type::MAX as f64;
 
-            #[test]
-            fn from_twofloat_lower_bound() {
-                let mut get_f64 = float_generator();
-                for i in 0..TEST_ITERS {
-                    let a = LOWER_BOUND;
-                    let b = if i == 0 {
-                        0.0
-                    } else {
-                        get_valid_f64(&mut get_f64, |x| no_overlap(a, x))
-                    };
-                    let source = TwoFloat::try_new(a, b).unwrap();
-                    let expected = if b >= 0.0 {
-                        Ok(std::$type::MIN + b as $type)
-                    } else {
-                        Err(())
-                    };
-                    let result = $type::try_from(source);
+            randomized_test!(from_twofloat_lower_bound, |rng: F64Rand| {
+                let source = loop {
+                    if let Ok(result) = try_get_twofloat_with_hi(rng, LOWER_BOUND) {
+                        break result;
+                    }
+                };
+                let expected = if source.lo() >= 0.0 {
+                    Ok(std::$type::MIN + source.lo() as $type)
+                } else {
+                    Err(())
+                };
 
-                    check_try_from_result(expected, result, source);
+                let result = $type::try_from(source);
 
-                    let result_ref = $type::try_from(&source);
-                    assert_eq!(
-                        result, result_ref,
-                        "Different value and reference conversions for {:?}",
-                        source
-                    );
-                }
-            }
+                check_try_from_result(expected, result, source);
 
-            #[test]
-            fn from_twofloat_upper_bound() {
-                let mut get_f64 = float_generator();
-                for i in 0..TEST_ITERS {
-                    let a = UPPER_BOUND;
-                    let b = if i == 0 {
-                        0.0
-                    } else {
-                        get_valid_f64(&mut get_f64, |x| no_overlap(a, x))
-                    };
-                    let source = TwoFloat::try_new(a, b).unwrap();
-                    let expected = if b < 0.0 {
-                        Ok(std::$type::MAX - ((-b.floor()) as $type) + 1)
-                    } else {
-                        Err(())
-                    };
-                    let result = $type::try_from(source);
+                let result_ref = $type::try_from(&source);
+                assert_eq!(
+                    result, result_ref,
+                    "Different value and reference conversions for {:?}",
+                    source
+                );
+            });
 
-                    check_try_from_result(expected, result, source);
+            randomized_test!(from_twofloat_upper_bound, |rng: F64Rand| {
+                let source = loop {
+                    if let Ok(result) = try_get_twofloat_with_hi(rng, UPPER_BOUND) {
+                        break result;
+                    }
+                };
+                let expected = if source.lo() < 0.0 {
+                    Ok(std::$type::MAX - ((-source.lo().floor()) as $type) + 1)
+                } else {
+                    Err(())
+                };
+                let result = $type::try_from(source);
 
-                    let result_ref = $type::try_from(&source);
-                    assert_eq!(
-                        result, result_ref,
-                        "Different value and reference conversions for {:?}",
-                        source
-                    );
-                }
-            }
+                check_try_from_result(expected, result, source);
+
+                let result_ref = $type::try_from(&source);
+                assert_eq!(
+                    result, result_ref,
+                    "Different value and reference conversions for {:?}",
+                    source
+                );
+            });
 
             #[test]
             fn from_twofloat_high_fract() {

@@ -8,8 +8,8 @@ randomized_test!(fract_hi_fract_test, |rng: F64Rand| {
     let expected = source.hi().fract() + source.lo().fract();
     let result = source.fract();
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "Overlap in fract({:?})",
+        result.is_valid(),
+        "fract({:?}) produced invalid value",
         source
     );
     assert!(
@@ -43,8 +43,8 @@ randomized_test!(fract_lo_fract_test, |rng: F64Rand| {
     };
     let result = source.fract();
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "Overlap in fract({:?})",
+        result.is_valid(),
+        "fract({:?}) produced invalid value",
         source
     );
     println!("{:?}", result);
@@ -86,8 +86,8 @@ randomized_test!(trunc_hi_fract_test, |rng: F64Rand| {
     let result = source.trunc();
 
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "Overlap in trunc({:?})",
+        result.is_valid(),
+        "trunc({:?}) produced invalid value",
         source
     );
     assert!(
@@ -114,8 +114,8 @@ randomized_test!(trunc_lo_fract_test, |rng: F64Rand| {
     };
     let result = source.trunc();
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "Overlap in trunc({:?})",
+        result.is_valid(),
+        "trunc({:?}) produced invalid value",
         source
     );
     assert!(
@@ -138,8 +138,8 @@ randomized_test!(trunc_no_fract_test, |rng: F64Rand| {
     let result = source.trunc();
 
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "Overlap in trunc({:?})",
+        result.is_valid(),
+        "trunc({:?}) produced invalid value",
         source
     );
     assert_eq!(
@@ -155,8 +155,8 @@ randomized_test!(ceil_hi_fract_test, |rng: F64Rand| {
     let result = source.ceil();
 
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "ceil({:?}) contained overlap",
+        result.is_valid(),
+        "ceil({:?}) produced invalid value",
         source
     );
     assert_eq!(result, expected, "Incorrect value of ceil({:?})", source);
@@ -170,8 +170,8 @@ randomized_test!(ceil_lo_fract_test, |rng: F64Rand| {
     let result = source.ceil();
 
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "ceil({:?}) contained overlap",
+        result.is_valid(),
+        "ceil({:?}) produced invalid value",
         source
     );
     assert_eq!(result, expected, "Incorrect value of ceil({:?})", source);
@@ -184,8 +184,8 @@ randomized_test!(ceil_no_fract_test, |rng: F64Rand| {
     let result = source.ceil();
 
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "ceil({:?}) contained overlap",
+        result.is_valid(),
+        "ceil({:?}) produced invalid value",
         source
     );
     assert_eq!(
@@ -201,8 +201,8 @@ randomized_test!(floor_hi_fract_test, |rng: F64Rand| {
     let result = source.floor();
 
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "floor({:?}) contained overlap",
+        result.is_valid(),
+        "floor({:?}) produced invalid value",
         source
     );
     assert_eq!(result, expected, "Incorrect value of floor({:?})", source);
@@ -215,8 +215,8 @@ randomized_test!(floor_lo_fract_test, |rng: F64Rand| {
     let expected = TwoFloat::new_add(a, b.floor());
     let result = source.floor();
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "floor({:?}) contained overlap",
+        result.is_valid(),
+        "floor({:?}) produced invalid value",
         source
     );
     assert_eq!(result, expected, "Incorrect value of floor({:?})", source);
@@ -228,8 +228,8 @@ randomized_test!(floor_no_fract_test, |rng: F64Rand| {
     let expected = source;
     let result = source.floor();
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "floor({:?}) contained overlap",
+        result.is_valid(),
+        "floor({:?}) produced invalid value",
         source
     );
     assert_eq!(

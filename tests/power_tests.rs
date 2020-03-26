@@ -9,8 +9,8 @@ randomized_test!(recip_test, |rng: F64Rand| {
     let result = source.recip();
 
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "Reciprocal of {:?} contained overlap",
+        result.is_valid(),
+        "Reciprocal of {:?} produced invalid value",
         source
     );
 
@@ -27,8 +27,8 @@ randomized_test!(sqrt_test, |rng: F64Rand| {
     let result = source.sqrt();
 
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "Square root of {:?} gave overlap",
+        result.is_valid(),
+        "Square root of {:?} produced invalid value",
         source
     );
     let difference = (&result * &result - &source).abs() / &source;
@@ -55,8 +55,8 @@ randomized_test!(cbrt_test, |rng: F64Rand| {
     let source = get_twofloat(rng);
     let result = source.cbrt();
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "Cube root of {:?} gave overlap",
+        result.is_valid(),
+        "Cube root of {:?} produced invalid value",
         source
     );
     let difference = (result.powi(3) - &source).abs() / &source;
@@ -75,8 +75,8 @@ randomized_test!(powi_0_test, |rng: F64Rand| {
     let result = source.powi(0);
 
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "Result of {:?}.powi(0) contained overlap",
+        result.is_valid(),
+        "Result of {:?}.powi(0) produced invalid value",
         source
     );
     assert_eq!(result, expected, "{:?}.powi(0) did not return 1", source);
@@ -87,8 +87,8 @@ randomized_test!(powi_1_test, |rng: F64Rand| {
     let result = source.powi(1);
 
     assert!(
-        no_overlap(result.hi(), result.lo()),
-        "{:?}.powi(1) contained overlap",
+        result.is_valid(),
+        "{:?}.powi(1) produced invalid value",
         source
     );
     assert_eq!(
@@ -111,8 +111,8 @@ fn powi_value_test() {
 
         let result = source.powi(exponent);
         assert!(
-            no_overlap(result.hi(), result.lo()),
-            "{:?}.powi({}) contained overlap",
+            result.is_valid(),
+            "{:?}.powi({}) produced invalid value",
             source,
             exponent
         );
@@ -137,8 +137,8 @@ fn powi_reciprocal_test() {
         let result = source.powi(-exponent);
 
         assert!(
-            no_overlap(result.hi(), result.lo()),
-            "{:?}.powi({}) contained overlap",
+            result.is_valid(),
+            "{:?}.powi({}) produced invalid value",
             source,
             -exponent
         );
@@ -157,11 +157,7 @@ randomized_test!(zero_powf_test, |rng: F64Rand| {
     if source == 0.0 {
         assert!(!result.is_valid(), "0^0 returned valid result");
     } else {
-        assert!(
-            no_overlap(result.hi(), result.lo()),
-            "0^{} returned overlap",
-            source
-        );
+        assert!(result.is_valid(), "0^{} produced invalid value", source);
         assert_eq!(result, 0.0, "0^{} did not return 0", source);
     }
 });
@@ -173,11 +169,7 @@ randomized_test!(powf_zero_test, |rng: F64Rand| {
     if source == 0.0 {
         assert!(!result.is_valid(), "0^0 returned valid result");
     } else {
-        assert!(
-            no_overlap(result.hi(), result.lo()),
-            "{}^0 returned overlap",
-            source
-        );
+        assert!(result.is_valid(), "{}^0 returned invalid value", source);
         assert_eq!(result, 1.0, "{}^0 did not return 1", source);
     }
 });
@@ -193,12 +185,7 @@ fn powf_test() {
         let expected = a.powf(b);
         let result = TwoFloat::from(a).powf(&TwoFloat::from(b));
 
-        assert!(
-            no_overlap(result.hi(), result.lo()),
-            "{}^{} resulted in overlap",
-            a,
-            b
-        );
+        assert!(result.is_valid(), "{}^{} resulted in invalid value", a, b);
 
         let difference = (result - expected).abs().hi() / expected;
 

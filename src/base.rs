@@ -148,7 +148,7 @@ impl TwoFloat {
     /// assert!(a);
     /// assert!(!b);
     pub fn is_valid(&self) -> bool {
-        self.hi.is_finite() && self.lo.is_finite()
+        self.hi.is_finite() && self.lo.is_finite() && no_overlap(self.hi, self.lo)
     }
 
     /// Returns the minimum of two numbers. If one of the arguments is NAN,

@@ -9,69 +9,82 @@ use common::*;
 randomized_test!(new_add_test, |rng: F64Rand| {
     let (a, b) = get_valid_pair(rng, |x, y| (x + y).is_finite());
     let expected = a + b;
-    let (hi, lo) = TwoFloat::new_add(a, b).data();
+    let result = TwoFloat::new_add(a, b);
 
     assert!(
-        no_overlap(hi, lo),
-        "Result of new_add({}, {}) had overlap",
+        result.is_valid(),
+        "Result of new_add({}, {}) was invalid",
         a,
         b
     );
     assert_eq!(
-        expected, hi,
+        expected,
+        result.hi(),
         "Result of new_add({}, {}) had unexpected high word",
-        a, b
+        a,
+        b
     );
 });
 
 randomized_test!(new_sub_test, |rng: F64Rand| {
     let (a, b) = get_valid_pair(rng, |x, y| (x - y).is_finite());
     let expected = a - b;
-    let (hi, lo) = TwoFloat::new_sub(a, b).data();
+    let result = TwoFloat::new_sub(a, b);
 
     assert!(
-        no_overlap(hi, lo),
-        "Result of new_sub({}, {}) had overlap",
+        result.is_valid(),
+        "Result of new_sub({}, {}) was invalid",
         a,
         b
     );
     assert_eq!(
-        expected, hi,
+        expected,
+        result.hi(),
         "Result of new_sub({}, {}) had unexpected high word",
-        a, b
+        a,
+        b
     );
 });
 
 randomized_test!(new_mul_test, |rng: F64Rand| {
     let (a, b) = get_valid_pair(rng, |x, y| (x * y).is_finite());
     let expected = a * b;
-    let (hi, lo) = TwoFloat::new_mul(a, b).data();
+    let result = TwoFloat::new_mul(a, b);
 
     assert!(
-        no_overlap(hi, lo),
-        "Result of new_mul({}, {}) had overlap",
+        result.is_valid(),
+        "Result of new_mul({}, {}) was invalid",
         a,
         b
     );
     assert_eq!(
-        expected, hi,
+        expected,
+        result.hi(),
         "Result of new_mul({}, {}) had unexpected high word",
-        a, b
+        a,
+        b
     );
 });
 
 randomized_test!(new_div_test, |rng: F64Rand| {
     let (a, b) = get_valid_pair(rng, |x, y| (x / y).is_finite());
-    let (hi, lo) = TwoFloat::new_div(a, b).data();
+    let result = TwoFloat::new_div(a, b);
 
     assert!(
-        no_overlap(hi, lo),
-        "Overlapping bits in new_div({}, {})",
+        result.is_valid(),
+        "Result of new_div({}, {}) was invalid",
         a,
         b
     );
 
-    assert_eq_ulp!(hi, a / b, 10, "Incorrect result of new_div({}, {})", a, b);
+    assert_eq_ulp!(
+        result.hi(),
+        a / b,
+        10,
+        "Incorrect result of new_div({}, {})",
+        a,
+        b
+    );
 });
 
 // Test for negation operator
@@ -171,9 +184,7 @@ macro_rules! op_test_f64_common {
                 let expected = a $op b;
                 if (!expected.is_finite()) { continue; }
                 let result = a $op value;
-                if (!result.is_valid()) { continue; }
-
-                assert!(no_overlap(result.hi(), result.lo()), "Result of {} {} {:?} contained overlap", a, stringify!($op), value);
+                assert!(result.is_valid(), "Result of {} {} {:?} was invalid", a, stringify!($op), value);
 
                 diff_test!($op, expected, result, a, value);
                 break;
@@ -208,7 +219,7 @@ macro_rules! op_test_f64 {
                     if (!expected.is_valid()) { continue; }
 
                     let result = value $op a;
-                    assert!(no_overlap(result.hi(), result.lo()), "Result of {:?} {} {} contained overlap", value, stringify!($op), a);
+                    assert!(result.is_valid(), "Result of {:?} {} {} was invalid", value, stringify!($op), a);
                     assert_eq!(result, expected, "Operation {:?} {} {} gave different result to reversed", value, stringify!($op), a);
                     break;
                 }
@@ -239,9 +250,7 @@ macro_rules! op_test_f64 {
                     let expected = b $op a;
                     if (!expected.is_finite()) { continue; }
                     let result = value $op a;
-                    if (!result.is_valid()) { continue; }
-
-                    assert!(no_overlap(result.hi(), result.lo()), "Result of {:?} {} {} contained overlap", value, stringify!($op), a);
+                    assert!(result.is_valid(), "Result of {:?} {} {} was invalid", value, stringify!($op), a);
 
                     diff_test!($op, expected, result, value, a);
                     break;
@@ -319,9 +328,8 @@ macro_rules! op_test {
                     let expected = a $op c;
                     if (!expected.is_finite()) { continue; }
                     let result = value1 $op value2;
-                    if (!result.is_valid()) { continue; }
 
-                    assert!(no_overlap(result.hi(), result.lo()), "Result of {:?} {} {:?} contained overlap", value1, stringify!($op), value2);
+                    assert!(result.is_valid(), "Result of {:?} {} {:?} was invalid", value1, stringify!($op), value2);
 
                     diff_test!($op, expected, result, value1, value2);
                     break;

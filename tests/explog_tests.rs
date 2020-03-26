@@ -18,12 +18,7 @@ fn exp_test() {
         let exp_a = a.exp();
         let exp_b = b.exp();
 
-        assert!(
-            no_overlap(exp_b.hi(), exp_b.lo()),
-            "Overlap detected in exp({}) = {:?}",
-            a,
-            exp_b
-        );
+        assert!(exp_b.is_valid(), "exp({}) produced invalid value", a);
 
         let difference = ((exp_b - exp_a) / exp_a).abs();
 
@@ -49,12 +44,7 @@ fn ln_test() {
         let ln_a = a.ln();
         let ln_b = b.ln();
 
-        assert!(
-            no_overlap(ln_b.hi(), ln_b.lo()),
-            "Overlap detected in ln({}) = {:?}",
-            a,
-            ln_a
-        );
+        assert!(ln_b.is_valid(), "ln({}) produced invalid value", a);
 
         let difference = (ln_b - ln_a).abs();
 

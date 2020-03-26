@@ -126,8 +126,8 @@ mod tests {
                 use super::*;
 
                 #[test]
-                fn overlap_test() {
-                    assert!(no_overlap($name.hi, $name.lo));
+                fn valid_test() {
+                    assert!($name.is_valid());
                 }
 
                 #[test]
@@ -143,8 +143,8 @@ mod tests {
                 use super::*;
 
                 #[test]
-                fn overlap_test() {
-                    assert!(no_overlap($name.hi, $name.lo));
+                fn valid_test() {
+                    assert!($name.is_valid());
                 }
 
                 #[cfg($feature)]
