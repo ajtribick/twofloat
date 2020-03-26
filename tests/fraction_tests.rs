@@ -4,7 +4,7 @@ pub mod common;
 use common::*;
 
 randomized_test!(fract_hi_fract_test, |rng: F64Rand| {
-    let source = get_valid_twofloat(rng, |x, _| { x.fract() != 0.0 });
+    let source = get_valid_twofloat(rng, |x, _| x.fract() != 0.0);
     let expected = source.hi().fract() + source.lo().fract();
     let result = source.fract();
     assert!(
@@ -81,7 +81,7 @@ randomized_test!(fract_no_fract_test, |rng: F64Rand| {
 });
 
 randomized_test!(trunc_hi_fract_test, |rng: F64Rand| {
-    let source = get_valid_twofloat(rng, |x, _| { x.fract() != 0.0 });
+    let source = get_valid_twofloat(rng, |x, _| x.fract() != 0.0);
     let expected = TwoFloat::from(source.hi().trunc());
     let result = source.trunc();
 
@@ -137,7 +137,11 @@ randomized_test!(trunc_no_fract_test, |rng: F64Rand| {
     let expected = source;
     let result = source.trunc();
 
-    assert!(no_overlap(result.hi(), result.lo()), "Overlap in trunc({:?})", source);
+    assert!(
+        no_overlap(result.hi(), result.lo()),
+        "Overlap in trunc({:?})",
+        source
+    );
     assert_eq!(
         result, expected,
         "Truncation of integer {:?} returned different value",
@@ -146,7 +150,7 @@ randomized_test!(trunc_no_fract_test, |rng: F64Rand| {
 });
 
 randomized_test!(ceil_hi_fract_test, |rng: F64Rand| {
-    let source = get_valid_twofloat(rng, |x, _| { x.fract() != 0.0 });
+    let source = get_valid_twofloat(rng, |x, _| x.fract() != 0.0);
     let expected = TwoFloat::from(source.hi().ceil());
     let result = source.ceil();
 
@@ -192,7 +196,7 @@ randomized_test!(ceil_no_fract_test, |rng: F64Rand| {
 });
 
 randomized_test!(floor_hi_fract_test, |rng: F64Rand| {
-    let source = get_valid_twofloat(rng, |x, _| { x.fract() != 0.0 });
+    let source = get_valid_twofloat(rng, |x, _| x.fract() != 0.0);
     let expected = TwoFloat::from(source.hi().floor());
     let result = source.floor();
 

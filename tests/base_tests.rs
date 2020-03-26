@@ -22,10 +22,18 @@ randomized_test!(equality_test, |rng: F64Rand| {
     assert_eq!(&a, &a, "Reference self-equality check failed for {:?}", a);
 
     let b = TwoFloat::try_new(a.hi(), a.lo()).unwrap();
-    assert_eq!(a, b, "Equality check for equivalent value failed for {:?}", a);
-    assert_eq!(&a, &b, "Equality check for reference to equivalent value failed for {:?}", a);
+    assert_eq!(
+        a, b,
+        "Equality check for equivalent value failed for {:?}",
+        a
+    );
+    assert_eq!(
+        &a, &b,
+        "Equality check for reference to equivalent value failed for {:?}",
+        a
+    );
 
-    let c = get_valid_twofloat(rng, |x, y| { x != a.hi() || y != a.lo() });
+    let c = get_valid_twofloat(rng, |x, y| x != a.hi() || y != a.lo());
 
     assert_ne!(a, c);
     assert_ne!(&a, &c);
@@ -34,14 +42,22 @@ randomized_test!(equality_test, |rng: F64Rand| {
 randomized_test!(equality_f64_test, |rng: F64Rand| {
     let a = rng();
     let a_twofloat = TwoFloat::from(a);
-    assert_eq!(a_twofloat, a, "LHS equality check failed for f64 value {}", a);
-    assert_eq!(a, a_twofloat, "RHS equality check failed for f64 value {}", a);
+    assert_eq!(
+        a_twofloat, a,
+        "LHS equality check failed for f64 value {}",
+        a
+    );
+    assert_eq!(
+        a, a_twofloat,
+        "RHS equality check failed for f64 value {}",
+        a
+    );
 
     if let Ok(b_twofloat) = try_get_twofloat_with_hi(rng, a) {
         assert_ne!(a_twofloat, b_twofloat);
     }
 
-    let c_twofloat = get_valid_twofloat(rng, |x, _| { x != a });
+    let c_twofloat = get_valid_twofloat(rng, |x, _| x != a);
 
     assert_ne!(a_twofloat, c_twofloat);
 });

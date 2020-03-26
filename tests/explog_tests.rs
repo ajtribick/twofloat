@@ -1,5 +1,5 @@
-use twofloat::*;
 use rand::Rng;
+use twofloat::*;
 
 pub mod common;
 use common::*;
@@ -69,7 +69,7 @@ fn ln_test() {
 }
 
 randomized_test!(ln_negative_test, |rng: F64Rand| {
-    let a = get_valid_twofloat(rng, |x, _| { x < 0.0 });
+    let a = get_valid_twofloat(rng, |x, _| x < 0.0);
     let result = a.ln();
     assert!(!result.is_valid(), "ln({:?}) produced a valid result", a);
 });

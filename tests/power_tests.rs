@@ -1,11 +1,11 @@
-use twofloat::*;
 use rand::Rng;
+use twofloat::*;
 
 pub mod common;
 use common::*;
 
 randomized_test!(recip_test, |rng: F64Rand| {
-    let source = get_valid_twofloat(rng, |x, _| { x.abs() > 1e-300 });
+    let source = get_valid_twofloat(rng, |x, _| x.abs() > 1e-300);
     let result = source.recip();
 
     assert!(
@@ -23,7 +23,7 @@ randomized_test!(recip_test, |rng: F64Rand| {
 });
 
 randomized_test!(sqrt_test, |rng: F64Rand| {
-    let source = get_valid_twofloat(rng, |x, _| { x > 0.0 });
+    let source = get_valid_twofloat(rng, |x, _| x > 0.0);
     let result = source.sqrt();
 
     assert!(
@@ -42,7 +42,7 @@ randomized_test!(sqrt_test, |rng: F64Rand| {
 });
 
 randomized_test!(sqrt_negative_test, |rng: F64Rand| {
-    let source = get_valid_twofloat(rng, |x, _| { x < 0.0 });
+    let source = get_valid_twofloat(rng, |x, _| x < 0.0);
     let result = source.sqrt();
     assert!(
         !result.is_valid(),
@@ -70,7 +70,7 @@ randomized_test!(cbrt_test, |rng: F64Rand| {
 });
 
 randomized_test!(powi_0_test, |rng: F64Rand| {
-    let source = get_valid_twofloat(rng, |x, _| { x != 0.0 });
+    let source = get_valid_twofloat(rng, |x, _| x != 0.0);
     let expected = TwoFloat::from(1.0);
     let result = source.powi(0);
 

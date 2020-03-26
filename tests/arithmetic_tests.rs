@@ -1,5 +1,5 @@
-use twofloat::*;
 use rand::Rng;
+use twofloat::*;
 
 pub mod common;
 use common::*;
@@ -11,8 +11,17 @@ randomized_test!(new_add_test, |rng: F64Rand| {
     let expected = a + b;
     let (hi, lo) = TwoFloat::new_add(a, b).data();
 
-    assert!(no_overlap(hi, lo), "Result of new_add({}, {}) had overlap", a, b);
-    assert_eq!(expected, hi, "Result of new_add({}, {}) had unexpected high word", a, b);
+    assert!(
+        no_overlap(hi, lo),
+        "Result of new_add({}, {}) had overlap",
+        a,
+        b
+    );
+    assert_eq!(
+        expected, hi,
+        "Result of new_add({}, {}) had unexpected high word",
+        a, b
+    );
 });
 
 randomized_test!(new_sub_test, |rng: F64Rand| {
@@ -20,8 +29,17 @@ randomized_test!(new_sub_test, |rng: F64Rand| {
     let expected = a - b;
     let (hi, lo) = TwoFloat::new_sub(a, b).data();
 
-    assert!(no_overlap(hi, lo), "Result of new_sub({}, {}) had overlap", a, b);
-    assert_eq!(expected, hi, "Result of new_sub({}, {}) had unexpected high word", a, b);
+    assert!(
+        no_overlap(hi, lo),
+        "Result of new_sub({}, {}) had overlap",
+        a,
+        b
+    );
+    assert_eq!(
+        expected, hi,
+        "Result of new_sub({}, {}) had unexpected high word",
+        a, b
+    );
 });
 
 randomized_test!(new_mul_test, |rng: F64Rand| {
@@ -29,8 +47,17 @@ randomized_test!(new_mul_test, |rng: F64Rand| {
     let expected = a * b;
     let (hi, lo) = TwoFloat::new_mul(a, b).data();
 
-    assert!(no_overlap(hi, lo), "Result of new_mul({}, {}) had overlap", a, b);
-    assert_eq!(expected, hi, "Result of new_mul({}, {}) had unexpected high word", a, b);
+    assert!(
+        no_overlap(hi, lo),
+        "Result of new_mul({}, {}) had overlap",
+        a,
+        b
+    );
+    assert_eq!(
+        expected, hi,
+        "Result of new_mul({}, {}) had unexpected high word",
+        a, b
+    );
 });
 
 randomized_test!(new_div_test, |rng: F64Rand| {
@@ -44,14 +71,7 @@ randomized_test!(new_div_test, |rng: F64Rand| {
         b
     );
 
-    assert_eq_ulp!(
-        hi,
-        a / b,
-        10,
-        "Incorrect result of new_div({}, {})",
-        a,
-        b
-    );
+    assert_eq_ulp!(hi, a / b, 10, "Incorrect result of new_div({}, {})", a, b);
 });
 
 // Test for negation operator

@@ -1,7 +1,7 @@
 #![macro_use]
 
-use twofloat::TwoFloat;
 use rand::Rng;
+use twofloat::TwoFloat;
 
 pub const TEST_ITERS: usize = 100000;
 

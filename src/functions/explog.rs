@@ -217,7 +217,7 @@ mod tests {
 
     #[test]
     fn exp_test() {
-         assert_eq!(
+        assert_eq!(
             TwoFloat::from(-1000.0).exp(),
             0.0,
             "Large negative exponent produced non-zero value"
@@ -226,7 +226,11 @@ mod tests {
             !TwoFloat::from(1000.0).exp().is_valid(),
             "Large positive exponent produced valid value"
         );
-        assert_eq!(TwoFloat::from(0.0).exp(), TwoFloat::from(1.0), "exp(0) did not return 1");
+        assert_eq!(
+            TwoFloat::from(0.0).exp(),
+            TwoFloat::from(1.0),
+            "exp(0) did not return 1"
+        );
     }
 
     #[test]
@@ -239,6 +243,10 @@ mod tests {
             !TwoFloat::from(-5.0).ln().is_valid(),
             "ln(negative) produced valid result"
         );
-        assert_eq!(TwoFloat::from(1.0).ln(), TwoFloat::from(0.0), "ln(1) did not return 0");
+        assert_eq!(
+            TwoFloat::from(1.0).ln(),
+            TwoFloat::from(0.0),
+            "ln(1) did not return 0"
+        );
     }
 }

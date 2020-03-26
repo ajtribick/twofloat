@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 
-use twofloat::*;
 use rand::Rng;
+use twofloat::*;
 
 pub mod common;
 use common::*;
@@ -36,10 +36,15 @@ macro_rules! float_test {
             let result: TwoFloat = source.into();
 
             assert_eq!(
-                result.hi(), source as f64,
+                result.hi(),
+                source as f64,
                 "Float conversion failed: mismatch in high word"
             );
-            assert_eq!(result.lo(), 0.0, "Float conversion failed: non-zero low word");
+            assert_eq!(
+                result.lo(),
+                0.0,
+                "Float conversion failed: non-zero low word"
+            );
         });
 
         randomized_test!($into_test, |rng: F64Rand| {
@@ -48,7 +53,8 @@ macro_rules! float_test {
 
             let result: $type = source.into();
             assert_eq!(
-                result, source.hi() as $type,
+                result,
+                source.hi() as $type,
                 "Float conversion from TwoFloat failed"
             );
 
@@ -199,7 +205,7 @@ macro_rules! from_twofloat_test {
                     }
                     let b = if i == 0 { 0.0 } else { get_f64() };
                     if let Ok(source) = TwoFloat::try_new(a, b) {
-                        break (a, source)
+                        break (a, source);
                     }
                 };
 
@@ -218,7 +224,7 @@ macro_rules! from_twofloat_test {
         }
 
         randomized_test!(from_twofloat_out_of_range, |rng: F64Rand| {
-            let source = get_valid_twofloat(rng, |x, _| { x < LOWER_BOUND || x > UPPER_BOUND });
+            let source = get_valid_twofloat(rng, |x, _| x < LOWER_BOUND || x > UPPER_BOUND);
             let result = $type::try_from(source);
 
             assert!(
@@ -246,10 +252,8 @@ macro_rules! int_test {
             #[test]
             fn to_twofloat() {
                 let mut rng = rand::thread_rng();
-                let dist = rand::distributions::Uniform::new_inclusive(
-                    std::$type::MIN,
-                    std::$type::MAX,
-                );
+                let dist =
+                    rand::distributions::Uniform::new_inclusive(std::$type::MIN, std::$type::MAX);
                 for _ in 0..TEST_ITERS {
                     let source = rng.sample(dist);
 
@@ -261,12 +265,14 @@ macro_rules! int_test {
                         source
                     );
                     assert_eq!(
-                        result.hi(), source as f64,
+                        result.hi(),
+                        source as f64,
                         "Conversion of {} failed: mismatch in high word",
                         source
                     );
                     assert_eq!(
-                        result.lo(), 0.0,
+                        result.lo(),
+                        0.0,
                         "Conversion of {} failed: non-zero low word",
                         source
                     );
@@ -293,12 +299,14 @@ macro_rules! int_test {
                         source
                     );
                     assert_eq!(
-                        result.hi(), source as f64,
+                        result.hi(),
+                        source as f64,
                         "Conversion of {} failed: mismatch in high word",
                         source
                     );
                     assert_eq!(
-                        result.lo(), 0.0,
+                        result.lo(),
+                        0.0,
                         "Conversion of {} failed: non-zero low word",
                         source
                     );
@@ -343,7 +351,8 @@ macro_rules! int64_test {
                         source
                     );
                     assert!(
-                        result.hi() >= std::$type::MIN as f64 && result.hi() <= std::$type::MAX as f64,
+                        result.hi() >= std::$type::MIN as f64
+                            && result.hi() <= std::$type::MAX as f64,
                         "Conversion of {} high word out of range",
                         source
                     );
@@ -528,15 +537,12 @@ macro_rules! int64_test {
                     }
                 };
 
-                let fract_dist = rand::distributions::Uniform::new(
-                    f64::from_bits((-1.0f64).to_bits() - 1),
-                    1.0,
-                );
+                let fract_dist =
+                    rand::distributions::Uniform::new(f64::from_bits((-1.0f64).to_bits() - 1), 1.0);
                 for i in 0..TEST_ITERS {
                     let (a, b) = loop {
-                        let a =
-                            get_valid_f64(&mut gen_f64, |x| x > LOWER_BOUND && x < UPPER_BOUND)
-                                .trunc();
+                        let a = get_valid_f64(&mut gen_f64, |x| x > LOWER_BOUND && x < UPPER_BOUND)
+                            .trunc();
                         if a == 0.0 {
                             continue;
                         }
@@ -609,7 +615,7 @@ macro_rules! int64_test {
             }
 
             randomized_test!(from_twofloat_out_of_range, |rng: F64Rand| {
-                let source = get_valid_twofloat(rng, |x, _| { x < LOWER_BOUND || x > UPPER_BOUND });
+                let source = get_valid_twofloat(rng, |x, _| x < LOWER_BOUND || x > UPPER_BOUND);
 
                 let result = $type::try_from(source);
 
