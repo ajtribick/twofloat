@@ -40,7 +40,7 @@ impl TwoFloat {
     /// Hyperbolic tangent function.
     ///
     /// This is a convenience method that computes the value by calling the
-    /// `sinh` and `cosh` functions.
+    /// exponential function.
     ///
     /// # Examples
     ///
@@ -52,6 +52,8 @@ impl TwoFloat {
     ///
     /// assert!((b - c).abs() < 1e-10);
     pub fn tanh(&self) -> TwoFloat {
-        self.sinh() / self.cosh()
+        let e_plus = self.exp();
+        let e_minus = (-self).exp();
+        (e_plus - e_minus) / (e_plus + e_minus)
     }
 }
