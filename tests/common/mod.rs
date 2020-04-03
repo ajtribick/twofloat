@@ -19,6 +19,7 @@ pub fn float_generator() -> impl FnMut() -> f64 {
     }
 }
 
+#[allow(unused_macros)]
 macro_rules! randomized_test {
     ($test_name:ident, $code:expr) => {
         #[test]
