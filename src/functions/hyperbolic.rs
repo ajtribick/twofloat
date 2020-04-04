@@ -56,4 +56,58 @@ impl TwoFloat {
         let e_minus = (-self).exp();
         (e_plus - e_minus) / (e_plus + e_minus)
     }
+
+    /// Inverse hyperbolic cosine function.
+    ///
+    /// This is a convenience method that computes the value by calling the
+    /// `sqrt` and `ln` functions.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(2.0);
+    /// let b = a.acosh();
+    /// let c = 2.0f64.acosh();
+    ///
+    /// assert!((b - c).abs() < 1e-10);
+    pub fn acosh(&self) -> TwoFloat {
+        (self + (self * self - 1.0).sqrt()).ln()
+    }
+
+    /// Inverse hyperbolic sine function.
+    ///
+    /// This is a convenience method that computes the value by calling the
+    /// `sqrt` and `ln` functions.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(2.0);
+    /// let b = a.asinh();
+    /// let c = 2.0f64.asinh();
+    ///
+    /// assert!((b - c).abs() < 1e-10);
+    pub fn asinh(&self) -> TwoFloat {
+        (self + (self * self + 1.0).sqrt()).ln()
+    }
+
+    /// Inverse hyperbolic tangent function.
+    ///
+    /// This is a convenience method that computes the value by calling the
+    /// `ln` function.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(0.5);
+    /// let b = a.atanh();
+    /// let c = 0.5f64.atanh();
+    ///
+    /// assert!((b - c).abs() < 1e-10);
+    pub fn atanh(&self) -> TwoFloat {
+        ((1.0 + self) / (1.0 - self)).ln() / 2.0
+    }
 }

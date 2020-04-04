@@ -2,7 +2,8 @@
 
 ## Version 0.1.3
 
-* Added functions: `to_degrees`, `to_radians`, `hi`, `lo`, `cosh`, `sinh`, `tanh`.
+* Added functions: `to_degrees`, `to_radians`, `hi`, `lo`, `cosh`, `sinh`,
+  `tanh`, `acosh`, `asinh`, `atanh`.
 * `is_valid` method checks for overlapping representations.
 
 ## Version 0.1.2
