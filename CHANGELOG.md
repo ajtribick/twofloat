@@ -2,9 +2,12 @@
 
 ## Version 0.1.3
 
-* Added functions: `to_degrees`, `to_radians`, `hi`, `lo`, `cosh`, `sinh`,
-  `tanh`, `acosh`, `asinh`, `atanh`.
-* `is_valid` method checks for overlapping representations.
+* Added `hi` and `lo` functions to extract individual words.
+* Added angle conversion functions: `to_degrees`, `to_radians`.
+* Added hyperbolic functions `cosh`, `sinh`, `tanh` and inverse functions
+  `acosh`, `asinh`, `atanh`.
+* Updated `is_valid` method to check for overlapping representations.
+* Bugfix in integer truncation where low word fraction was zero.
 
 ## Version 0.1.2
 

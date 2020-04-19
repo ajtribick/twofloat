@@ -3,6 +3,8 @@ use twofloat::*;
 pub mod common;
 use common::*;
 
+// fract() tests
+
 randomized_test!(fract_hi_fract_test, |rng: F64Rand| {
     let source = get_valid_twofloat(rng, |x, _| x.fract() != 0.0);
     let expected = source.hi().fract() + source.lo().fract();
@@ -68,6 +70,24 @@ randomized_test!(fract_lo_fract_test, |rng: F64Rand| {
     );
 });
 
+randomized_test!(fract_no_lo_word_test, |rng: F64Rand| {
+    let a = rng();
+    let source = TwoFloat::from(a);
+    let expected = a.fract();
+    let result = source.fract();
+
+    assert!(
+        result.is_valid(),
+        "fract({:?}) produced invalid value",
+        source
+    );
+    assert_eq!(
+        result, expected,
+        "fract({:?}) produced incorrect value",
+        source
+    );
+});
+
 randomized_test!(fract_no_fract_test, |rng: F64Rand| {
     let (a_fract, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x.trunc(), y.trunc()));
     let source = TwoFloat::try_new(a_fract.trunc(), b_fract.trunc()).unwrap();
@@ -79,6 +99,8 @@ randomized_test!(fract_no_fract_test, |rng: F64Rand| {
         source
     );
 });
+
+// trunc() tests
 
 randomized_test!(trunc_hi_fract_test, |rng: F64Rand| {
     let source = get_valid_twofloat(rng, |x, _| x.fract() != 0.0);
@@ -131,6 +153,49 @@ randomized_test!(trunc_lo_fract_test, |rng: F64Rand| {
     assert_eq!(result, expected, "Incorrect value in trunc({:?})", source);
 });
 
+randomized_test!(trunc_no_lo_word_test, |rng: F64Rand| {
+    let a = rng();
+    let source = TwoFloat::from(a);
+    let result = source.trunc();
+
+    assert!(
+        result.is_valid(),
+        "trunc({:?}) produced invalid value",
+        source
+    );
+    assert_eq!(
+        result,
+        a.trunc(),
+        "trunc({:?}) produced incorrect value",
+        source
+    );
+});
+
+randomized_test!(trunc_no_lo_fract_test, |rng: F64Rand| {
+    let (a, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x, y.trunc()));
+    let b = b_fract.trunc();
+    let source = TwoFloat::try_new(a, b).unwrap();
+    let result = source.trunc();
+
+    assert!(
+        result.is_valid(),
+        "trunc({:?} produced invalid value",
+        source
+    );
+    assert_eq!(
+        result.lo(),
+        b,
+        "trunc({:?}) changed integer low word",
+        source
+    );
+    assert_eq!(
+        result.hi(),
+        a.trunc(),
+        "trunc({:?}) returned incorrect high word",
+        source
+    );
+});
+
 randomized_test!(trunc_no_fract_test, |rng: F64Rand| {
     let (a_fract, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x.trunc(), y.trunc()));
     let source = TwoFloat::try_new(a_fract.trunc(), b_fract.trunc()).unwrap();
@@ -148,6 +213,8 @@ randomized_test!(trunc_no_fract_test, |rng: F64Rand| {
         source
     );
 });
+
+// ceil() tests
 
 randomized_test!(ceil_hi_fract_test, |rng: F64Rand| {
     let source = get_valid_twofloat(rng, |x, _| x.fract() != 0.0);
@@ -177,6 +244,49 @@ randomized_test!(ceil_lo_fract_test, |rng: F64Rand| {
     assert_eq!(result, expected, "Incorrect value of ceil({:?})", source);
 });
 
+randomized_test!(ceil_no_lo_word_test, |rng: F64Rand| {
+    let a = rng();
+    let source = TwoFloat::from(a);
+    let result = source.ceil();
+
+    assert!(
+        result.is_valid(),
+        "ceil({:?}) produced invalid value",
+        source
+    );
+    assert_eq!(
+        result,
+        a.ceil(),
+        "ceil({:?}) produced incorrect value",
+        source
+    );
+});
+
+randomized_test!(ceil_no_lo_fract_test, |rng: F64Rand| {
+    let (a, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x, y.trunc()));
+    let b = b_fract.trunc();
+    let source = TwoFloat::try_new(a, b).unwrap();
+    let result = source.ceil();
+
+    assert!(
+        result.is_valid(),
+        "ceil({:?} produced invalid value",
+        source
+    );
+    assert_eq!(
+        result.lo(),
+        b,
+        "ceil({:?}) changed integer low word",
+        source
+    );
+    assert_eq!(
+        result.hi(),
+        a.ceil(),
+        "ceil({:?}) returned incorrect high word",
+        source
+    );
+});
+
 randomized_test!(ceil_no_fract_test, |rng: F64Rand| {
     let (a_fract, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x.trunc(), y.trunc()));
     let source = TwoFloat::try_new(a_fract.trunc(), b_fract.trunc()).unwrap();
@@ -194,6 +304,8 @@ randomized_test!(ceil_no_fract_test, |rng: F64Rand| {
         source
     );
 });
+
+// floor() tests
 
 randomized_test!(floor_hi_fract_test, |rng: F64Rand| {
     let source = get_valid_twofloat(rng, |x, _| x.fract() != 0.0);
@@ -220,6 +332,49 @@ randomized_test!(floor_lo_fract_test, |rng: F64Rand| {
         source
     );
     assert_eq!(result, expected, "Incorrect value of floor({:?})", source);
+});
+
+randomized_test!(floor_no_lo_word_test, |rng: F64Rand| {
+    let a = rng();
+    let source = TwoFloat::from(a);
+    let result = source.floor();
+
+    assert!(
+        result.is_valid(),
+        "ceil({:?}) produced invalid value",
+        source
+    );
+    assert_eq!(
+        result,
+        a.floor(),
+        "ceil({:?}) produced incorrect value",
+        source
+    );
+});
+
+randomized_test!(floor_no_lo_fract_test, |rng: F64Rand| {
+    let (a, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x, y.trunc()));
+    let b = b_fract.trunc();
+    let source = TwoFloat::try_new(a, b).unwrap();
+    let result = source.floor();
+
+    assert!(
+        result.is_valid(),
+        "floor({:?} produced invalid value",
+        source
+    );
+    assert_eq!(
+        result.lo(),
+        b,
+        "floor({:?}) changed integer low word",
+        source
+    );
+    assert_eq!(
+        result.hi(),
+        a.floor(),
+        "floor({:?}) returned incorrect high word",
+        source
+    );
 });
 
 randomized_test!(floor_no_fract_test, |rng: F64Rand| {
