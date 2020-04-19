@@ -74,6 +74,27 @@ impl TwoFloat {
     pub fn copysign(&self, sign: &TwoFloat) -> TwoFloat {
         if self.is_sign_positive() == sign.is_sign_positive() { *self } else { -self }
     }
+
+    /// Returns a number that represents the sign of the value.
+    ///
+    /// * `1.0` if the number is positive or `+0.0`
+    /// * `-1.0` if the number is negative or `-0.0`
+    /// * Invalid value otherwise
+    ///
+    /// # Examples
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(3.5);
+    /// let b = TwoFloat::from(-0.0);
+    ///
+    /// assert_eq!(a.signum(), 1.0);
+    /// assert_eq!(b.signum(), -1.0);
+    pub fn signum(&self) -> TwoFloat {
+        if self.is_valid() {
+            if self.is_sign_positive() { TwoFloat::from(1.0) } else { TwoFloat::from(-1.0) }
+        } else {
+            TwoFloat { hi: std::f64::NAN, lo: std::f64::NAN }
+        }
+    }
 }
 
 #[cfg(test)]
