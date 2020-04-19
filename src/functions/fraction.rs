@@ -107,6 +107,32 @@ impl TwoFloat {
 
         TwoFloat { hi: a, lo: b }
     }
+
+    /// Returns the nearest integer to the value. Round half-way cases away
+    /// from `0.0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::new_add(1.0, 1e-200).round();
+    /// let b = TwoFloat::new_add(1.0, -1e-200).round();
+    /// let c = TwoFloat::from(-0.5).round();
+    ///
+    /// assert_eq!(a, TwoFloat::from(1.0));
+    /// assert_eq!(b, TwoFloat::from(1.0));
+    /// assert_eq!(c, TwoFloat::from(-1.0));
+    pub fn round(&self) -> TwoFloat {
+        let (a, b) = if self.lo.fract() == 0.0 {
+            (self.hi.round(), self.lo())
+        } else if self.hi.fract() == 0.0 {
+            fast_two_sum(self.hi, self.lo.round())
+        } else {
+            (self.hi.round(), 0.0)
+        };
+
+        TwoFloat { hi: a, lo: b }
+    }
 }
 
 #[cfg(test)]
@@ -129,5 +155,13 @@ mod tests {
     fn floor_test() {
         assert_eq!(0.0, TwoFloat::from(0.25).floor());
         assert_eq!(-1.0, TwoFloat::from(-0.25).floor());
+    }
+
+    #[test]
+    fn round_test() {
+        assert_eq!(1.0, TwoFloat::from(0.5).round());
+        assert_eq!(2.0, TwoFloat::from(1.5).round());
+        assert_eq!(-1.0, TwoFloat::from(-0.5).round());
+        assert_eq!(-2.0, TwoFloat::from(-1.5).round());
     }
 }

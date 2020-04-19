@@ -209,7 +209,7 @@ randomized_test!(trunc_no_fract_test, |rng: F64Rand| {
     );
     assert_eq!(
         result, expected,
-        "Truncation of integer {:?} returned different value",
+        "trunc({:?}) returned different value",
         source
     );
 });
@@ -389,7 +389,96 @@ randomized_test!(floor_no_fract_test, |rng: F64Rand| {
     );
     assert_eq!(
         result, expected,
-        "Floor of integer value {:?} returned different value",
+        "floor({:?}) returned different value",
+        source
+    );
+});
+
+// round() tests
+
+randomized_test!(round_hi_fract_test, |rng: F64Rand| {
+    let source = get_valid_twofloat(rng, |x, _| x.fract() != 0.0);
+    let expected = TwoFloat::from(source.hi().round());
+    let result = source.round();
+
+    assert!(
+        result.is_valid(),
+        "round({:?}) produced invalid value",
+        source
+    );
+    assert_eq!(result, expected, "Incorrect value of floor({:?})", source);
+});
+
+randomized_test!(round_lo_fract_test, |rng: F64Rand| {
+    let (a_fract, b) = get_valid_pair(rng, |x, y| y.fract() != 0.0 && no_overlap(x.trunc(), y));
+    let a = a_fract.trunc();
+    let source = TwoFloat::try_new(a, b).unwrap();
+    let expected = TwoFloat::new_add(a, b.round());
+    let result = source.round();
+    assert!(
+        result.is_valid(),
+        "round({:?}) produced invalid value",
+        source
+    );
+    assert_eq!(result, expected, "Incorrect value of round({:?})", source);
+});
+
+randomized_test!(round_no_lo_word_test, |rng: F64Rand| {
+    let a = rng();
+    let source = TwoFloat::from(a);
+    let result = source.round();
+
+    assert!(
+        result.is_valid(),
+        "round({:?}) produced invalid value",
+        source
+    );
+    assert_eq!(
+        result,
+        a.round(),
+        "round({:?}) produced incorrect value",
+        source
+    );
+});
+
+randomized_test!(round_no_lo_fract_test, |rng: F64Rand| {
+    let (a, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x, y.trunc()));
+    let b = b_fract.trunc();
+    let source = TwoFloat::try_new(a, b).unwrap();
+    let result = source.round();
+
+    assert!(
+        result.is_valid(),
+        "round({:?} produced invalid value",
+        source
+    );
+    assert_eq!(
+        result.lo(),
+        b,
+        "round({:?}) changed integer low word",
+        source
+    );
+    assert_eq!(
+        result.hi(),
+        a.round(),
+        "round({:?}) returned incorrect high word",
+        source
+    );
+});
+
+randomized_test!(round_no_fract_test, |rng: F64Rand| {
+    let (a_fract, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x.trunc(), y.trunc()));
+    let source = TwoFloat::try_new(a_fract.trunc(), b_fract.trunc()).unwrap();
+    let expected = source;
+    let result = source.round();
+    assert!(
+        result.is_valid(),
+        "round({:?}) produced invalid value",
+        source
+    );
+    assert_eq!(
+        result, expected,
+        "round({:?}) returned different value",
         source
     );
 });

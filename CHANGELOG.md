@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.1.4
+
+* Added `round` function.
+
 ## Version 0.1.3
 
 * Added `hi` and `lo` functions to extract individual words.
