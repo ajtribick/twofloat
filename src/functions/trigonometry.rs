@@ -31,6 +31,22 @@ const C5: TwoFloat = TwoFloat { hi: 2.0876754247413408e-09, lo: -3.4443669660877
 const C6: TwoFloat = TwoFloat { hi: -1.1470281608989357e-11, lo: 4.623853450729046e-28 };
 const C7: TwoFloat = TwoFloat { hi: 4.737645013072795e-14, lo: 2.0519566094121702e-30 };
 
+// Polynomial coefficients of tan(x)-x on [0,pi/4]
+const T1: TwoFloat = TwoFloat { hi: 0.333333333333301, lo: -1.6964192869147454e-17 };
+const T2: TwoFloat = TwoFloat { hi: 0.133333333336424, lo: 1.2882344203768942e-17 };
+const T3: TwoFloat = TwoFloat { hi: 0.053968253847554985, lo: 7.3568315143778935e-19 };
+const T4: TwoFloat = TwoFloat { hi: 0.02186949110053143, lo: 7.506482205636934e-19 };
+const T5: TwoFloat = TwoFloat { hi: 0.008863201837095791, lo: -1.6985713823531061e-19 };
+const T6: TwoFloat = TwoFloat { hi: 0.0035924221451762235, lo: -3.783119522648438e-20 };
+const T7: TwoFloat = TwoFloat { hi: 0.0014540539618521297, lo: -9.893196667739264e-20 };
+const T8: TwoFloat = TwoFloat { hi: 0.000597689634752774, lo: -1.844774602740589e-20 };
+const T9: TwoFloat = TwoFloat { hi: 0.00021542536600071578, lo: 2.5078450231357865e-21 };
+const T10: TwoFloat = TwoFloat { hi: 0.00014954373126927091, lo: -4.9925826785968525e-21 };
+const T11: TwoFloat = TwoFloat { hi: -4.3214610451232346e-05, lo: 1.3602116927481075e-22 };
+const T12: TwoFloat = TwoFloat { hi: 0.00010374385393487309, lo: -1.7246199044466566e-21 };
+const T13: TwoFloat = TwoFloat { hi: -5.2050985346847035e-05, lo: 3.038262431960992e-21 };
+const T14: TwoFloat = TwoFloat { hi: 2.2476452033043005e-05, lo: -1.3763291484895173e-21 };
+
 fn quadrant(value: &TwoFloat) -> (TwoFloat, i8) {
     if value.abs() < FRAC_PI_4 {
         (*value, 0)
@@ -46,12 +62,22 @@ fn quadrant(value: &TwoFloat) -> (TwoFloat, i8) {
 
 fn restricted_sin(x: &TwoFloat) -> TwoFloat {
     let x2 = x * x;
-    x * (1.0 + x2 * (S1 + x2 * (S2 + x2 * (S3 + x2 * (S4 + x2 * (S5 + x2 * (S6 + x2 * S7)))))))
+    x * (1.0 + x2 * (S1 + x2 * (S2 + x2 * (S3 + x2 * (S4
+         + x2 * (S5 + x2 * (S6 + x2 * S7)))))))
 }
 
 fn restricted_cos(x: &TwoFloat) -> TwoFloat {
     let x2 = x * x;
-    1.0 + x2 * (-0.5 + x2 * (C1 + x2 * (C2 + x2 * (C3 + x2 * (C4 + x2 * (C5 + x2 * (C6 + x2 * C7)))))))
+    1.0 + x2 * (-0.5 + x2 * (C1 + x2 * (C2 + x2 * (C3 + x2 * (C4
+         + x2 * (C5 + x2 * (C6 + x2 * C7)))))))
+}
+
+fn restricted_tan(x: &TwoFloat) -> TwoFloat {
+    let x2 = x * x;
+    x * (1.0 + x2 * (T1 + x2 * (T2 + x2 * (T3 + x2 * (T4
+         + x2 * (T5 + x2 * (T6 + x2 * (T7 + x2 * (T8
+             + x2 * (T9 + x2 * (T10 + x2 * (T11 + x2 * (T12
+                 + x2 * (T13 + x2 * T14))))))))))))))
 }
 
 impl TwoFloat {
@@ -151,6 +177,26 @@ impl TwoFloat {
             _ => (-c, s)
         }
     }
+
+    /// Computes the tangent of the value (in radians).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(2.5);
+    /// let b = a.tan();
+    /// let c = 2.5f64.tan();
+    ///
+    /// assert!((b - c).abs() < 1e-10);
+    pub fn tan(&self) -> TwoFloat {
+        if !self.is_valid() { return *self; }
+        let (x, quadrant) = quadrant(self);
+        match quadrant {
+            0 | 2 => restricted_tan(&x),
+            _ => -1.0 / restricted_tan(&x),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -189,5 +235,15 @@ mod tests {
         assert!((3.0f64.cos() - TwoFloat::from(3.0).cos()).abs() < 1e-10);
         assert!((4.0f64.cos() - TwoFloat::from(4.0).cos()).abs() < 1e-10);
         assert!((6.0f64.cos() - TwoFloat::from(6.0).cos()).abs() < 1e-10);
+    }
+
+    #[test]
+    fn tan_test() {
+        assert_eq!(0.0, TwoFloat::from(0.0).tan());
+        assert!((0.5f64.tan() - TwoFloat::from(0.5).tan()).abs() < 1e-10);
+        assert!((1.4f64.tan() - TwoFloat::from(1.4).tan()).abs() < 1e-10);
+        assert!((3.0f64.tan() - TwoFloat::from(3.0).tan()).abs() < 1e-10);
+        assert!((4.0f64.tan() - TwoFloat::from(4.0).tan()).abs() < 1e-10);
+        assert!((6.0f64.tan() - TwoFloat::from(6.0).tan()).abs() < 1e-10);
     }
 }

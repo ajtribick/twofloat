@@ -1,0 +1,13 @@
+prec=512;
+f=tan(x)-x;
+I=[0,round(pi/4, prec, RN)];
+L=[|0,3,5,7,9,11,13,15,17,19,21,23,25,27,29|];
+p=remez(f,L,I,1,1e-15);
+print("Target=", 2^-107);
+print("Actual=", dirtyinfnorm(p-f,I));
+display=hexadecimal;
+for l in L do {
+    xh = double(coeff(p, l));
+    xl = double(coeff(p, l) - xh);
+    print(xh, ",", xl, ",");
+};
