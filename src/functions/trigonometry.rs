@@ -63,24 +63,16 @@ fn quadrant(value: &TwoFloat) -> (TwoFloat, i8) {
 fn restricted_sin(x: &TwoFloat) -> TwoFloat {
     let x2 = x * x;
     x * polynomial!(x2, 1.0, S1, S2, S3, S4, S5, S6, S7)
-    /*x * (1.0 + x2 * (S1 + x2 * (S2 + x2 * (S3 + x2 * (S4
-         + x2 * (S5 + x2 * (S6 + x2 * S7)))))))*/
 }
 
 fn restricted_cos(x: &TwoFloat) -> TwoFloat {
     let x2 = x * x;
     polynomial!(x2, 1.0, -0.5, C1, C2, C3, C4, C5, C6, C7)
-/*    1.0 + x2 * (-0.5 + x2 * (C1 + x2 * (C2 + x2 * (C3 + x2 * (C4
-         + x2 * (C5 + x2 * (C6 + x2 * C7)))))))*/
 }
 
 fn restricted_tan(x: &TwoFloat) -> TwoFloat {
     let x2 = x * x;
     x * polynomial!(x2, 1.0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)
-    /*x * (1.0 + x2 * (T1 + x2 * (T2 + x2 * (T3 + x2 * (T4
-         + x2 * (T5 + x2 * (T6 + x2 * (T7 + x2 * (T8
-             + x2 * (T9 + x2 * (T10 + x2 * (T11 + x2 * (T12
-                 + x2 * (T13 + x2 * T14))))))))))))))*/
 }
 
 impl TwoFloat {
