@@ -4,7 +4,7 @@
 
 * Added `round` function.
 * Added trigonometric functions `cos`, `sin`, `sin_cos`, `tan` and inverse
-  functions `asin`, `acos`.
+  functions `asin`, `acos`, `atan`.
 
 ## Version 0.1.3
 

@@ -173,7 +173,76 @@ const AS10: TwoFloat = TwoFloat {
     lo: -3.4307997519760322e-18,
 };
 
-// Polynomial coefficients of acos(x)
+// Polynomial coefficients of atan(x) - x on [0, 7/16]
+const AT1: TwoFloat = TwoFloat {
+    hi: -0.3333333333333333,
+    lo: -1.8404711392378294e-17,
+};
+const AT2: TwoFloat = TwoFloat {
+    hi: 0.19999999999999996,
+    lo: 8.821841116322433e-18,
+};
+const AT3: TwoFloat = TwoFloat {
+    hi: -0.1428571428571376,
+    lo: -8.757692135391525e-18,
+};
+const AT4: TwoFloat = TwoFloat {
+    hi: 0.11111111111068835,
+    lo: -5.832462234788162e-19,
+};
+const AT5: TwoFloat = TwoFloat {
+    hi: -0.090909090887859,
+    lo: 6.0077049965516354e-18,
+};
+const AT6: TwoFloat = TwoFloat {
+    hi: 0.0769230762073313,
+    lo: -3.2884708888145337e-18,
+};
+const AT7: TwoFloat = TwoFloat {
+    hi: -0.06666664969948971,
+    lo: 4.320817735439753e-19,
+};
+const AT8: TwoFloat = TwoFloat {
+    hi: 0.05882323803853899,
+    lo: -2.805787242057251e-18,
+};
+const AT9: TwoFloat = TwoFloat {
+    hi: -0.05262788771506685,
+    lo: 2.9037477653961078e-18,
+};
+const AT10: TwoFloat = TwoFloat {
+    hi: 0.04758423341314784,
+    lo: 2.4230908396440816e-19,
+};
+const AT11: TwoFloat = TwoFloat {
+    hi: -0.043233511131193926,
+    lo: -1.7170865975388194e-18,
+};
+const AT12: TwoFloat = TwoFloat {
+    hi: 0.038726167898553494,
+    lo: -2.3827075835715594e-18,
+};
+const AT13: TwoFloat = TwoFloat {
+    hi: -0.03220490340648736,
+    lo: -2.5695532509697203e-18,
+};
+const AT14: TwoFloat = TwoFloat {
+    hi: 0.021458037392206093,
+    lo: -2.213497023050699e-20,
+};
+const AT15: TwoFloat = TwoFloat {
+    hi: -0.00811325678548267,
+    lo: 8.602995904603601e-19,
+};
+
+const ATAN_FRAC_1_2: TwoFloat = TwoFloat {
+    hi: 0.4636476090008061,
+    lo: 2.2698777452961687e-17,
+};
+const ATAN_FRAC_3_2: TwoFloat = TwoFloat {
+    hi: 0.982793723247329,
+    lo: 1.3903311031230998e-17,
+};
 
 fn quadrant(value: &TwoFloat) -> (TwoFloat, i8) {
     if value.abs() < FRAC_PI_4 {
@@ -219,6 +288,13 @@ fn restricted_tan(x: &TwoFloat) -> TwoFloat {
 fn restricted_asin(x: &TwoFloat) -> TwoFloat {
     let x2 = x * x;
     x * polynomial!(x2, 1.0, AS1, AS2, AS3, AS4, AS5, AS6, AS7, AS8, AS9, AS10)
+}
+
+fn restricted_atan(x: &TwoFloat) -> TwoFloat {
+    let x2 = x * x;
+    x * polynomial!(
+        x2, 1.0, AT1, AT2, AT3, AT4, AT5, AT6, AT7, AT8, AT9, AT10, AT11, AT12, AT13, AT14, AT15
+    )
 }
 
 impl TwoFloat {
@@ -400,6 +476,55 @@ impl TwoFloat {
             x
         }
     }
+
+    /// Computes the arctangent of the value. Return value is in radians in
+    /// the range [-π/2, π/2].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(3.5);
+    /// let b = a.atan();
+    /// let c = 3.5f64.atan();
+    ///
+    /// assert!((b - c).abs() < 1e-10);
+    pub fn atan(&self) -> TwoFloat {
+        if !self.is_valid() {
+            TwoFloat {
+                hi: std::f64::NAN,
+                lo: std::f64::NAN,
+            }
+        } else if self.hi.is_infinite() {
+            if self.hi.is_sign_positive() {
+                FRAC_PI_2
+            } else {
+                -FRAC_PI_2
+            }
+        } else {
+            let x = self.abs();
+            let k = 4.0 * x + 0.25;
+            if k <= 2.0 {
+                return restricted_atan(self);
+            }
+
+            let result = if k < 3.0 {
+                ATAN_FRAC_1_2 + restricted_atan(&((x - 0.5) / (1.0 + 0.5 * x)))
+            } else if k < 5.0 {
+                FRAC_PI_4 + restricted_atan(&((x - 1.0) / (1.0 + x)))
+            } else if k < 10.0 {
+                ATAN_FRAC_3_2 + restricted_atan(&((x - 1.5) / (1.0 + 1.5 * x)))
+            } else {
+                FRAC_PI_2 - restricted_atan(&x.recip())
+            };
+
+            if self.is_sign_positive() {
+                result
+            } else {
+                -result
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -480,12 +605,12 @@ mod tests {
     #[test]
     fn asin_test() {
         assert_eq!(0.0, TwoFloat::from(0.0).asin());
-        assert!((0.25f64.asin() - TwoFloat::from(0.25f64).asin()) < THRESHOLD);
-        assert!((0.75f64.asin() - TwoFloat::from(0.75f64).asin()) < THRESHOLD);
+        assert!((0.25f64.asin() - TwoFloat::from(0.25).asin()) < THRESHOLD);
+        assert!((0.75f64.asin() - TwoFloat::from(0.75).asin()) < THRESHOLD);
         assert!((TwoFloat::from(1.0).asin() - FRAC_PI_2).abs() < THRESHOLD);
 
-        assert!((0.25f64.asin() + TwoFloat::from(-0.25f64).asin()) < THRESHOLD);
-        assert!((0.75f64.asin() + TwoFloat::from(-0.75f64).asin()) < THRESHOLD);
+        assert!((0.25f64.asin() + TwoFloat::from(-0.25).asin()) < THRESHOLD);
+        assert!((0.75f64.asin() + TwoFloat::from(-0.75).asin()) < THRESHOLD);
         assert!((TwoFloat::from(-1.0).asin() + FRAC_PI_2).abs() < THRESHOLD);
     }
 
@@ -493,12 +618,29 @@ mod tests {
     fn acos_test() {
         assert!((TwoFloat::from(0.0).acos() - FRAC_PI_2).abs() < THRESHOLD);
 
-        assert!((0.25f64.acos() - TwoFloat::from(0.25f64).acos()) < THRESHOLD);
-        assert!((0.75f64.acos() - TwoFloat::from(0.75f64).acos()) < THRESHOLD);
+        assert!((0.25f64.acos() - TwoFloat::from(0.25).acos()) < THRESHOLD);
+        assert!((0.75f64.acos() - TwoFloat::from(0.75).acos()) < THRESHOLD);
         assert_eq!(0.0, TwoFloat::from(1.0).acos());
 
-        assert!((0.25f64.asin() - TwoFloat::from(-0.25f64).acos()) < THRESHOLD);
-        assert!((0.75f64.asin() - TwoFloat::from(-0.75f64).acos()) < THRESHOLD);
+        assert!((0.25f64.asin() - TwoFloat::from(-0.25).acos()) < THRESHOLD);
+        assert!((0.75f64.asin() - TwoFloat::from(-0.75).acos()) < THRESHOLD);
         assert!((TwoFloat::from(-1.0).acos() - PI).abs() < THRESHOLD);
+    }
+
+    #[test]
+    fn atan_test() {
+        assert_eq!(0.0, TwoFloat::from(0.0).atan());
+
+        assert!((0.25f64.atan() - TwoFloat::from(0.25).atan()).abs() < THRESHOLD);
+        assert!((0.5f64.atan() - TwoFloat::from(0.5).atan()).abs() < THRESHOLD);
+        assert!((FRAC_PI_4 - TwoFloat::from(1.0).atan()).abs() < THRESHOLD);
+        assert!((2.25f64.atan() - TwoFloat::from(2.25).atan()).abs() < THRESHOLD);
+        assert!((10.0f64.atan() - TwoFloat::from(10.0).atan()).abs() < THRESHOLD);
+
+        assert!((0.25f64.atan() + TwoFloat::from(-0.25).atan()).abs() < THRESHOLD);
+        assert!((0.5f64.atan() + TwoFloat::from(-0.5).atan()).abs() < THRESHOLD);
+        assert!((FRAC_PI_4 + TwoFloat::from(-1.0).atan()).abs() < THRESHOLD);
+        assert!((2.25f64.atan() + TwoFloat::from(-2.25).atan()).abs() < THRESHOLD);
+        assert!((10.0f64.atan() + TwoFloat::from(-10.0).atan()).abs() < THRESHOLD);
     }
 }
