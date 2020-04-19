@@ -3,6 +3,7 @@
 ## Version 0.1.4
 
 * Added `round` function.
+* Added trigonometric functions `cos`, `sin`, `sin_cos`.
 
 ## Version 0.1.3
 
