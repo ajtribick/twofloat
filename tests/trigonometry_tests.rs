@@ -121,3 +121,28 @@ fn tan_atan_test() {
         );
     }
 }
+
+#[test]
+fn sin_cos_atan2_test() {
+    let mut rng = rand::thread_rng();
+    let dist = rand::distributions::Uniform::new_inclusive(
+        -std::f64::consts::PI,
+        std::f64::consts::PI,
+    );
+    for _ in 0..TEST_ITERS {
+        let source = TwoFloat::from(rng.sample(dist));
+        let (s, c) = source.sin_cos();
+        let result = s.atan2(&c);
+        assert!(
+            result.is_valid(),
+            "Angle {:?} does not produce valid value for sin_cos/atan2 round trip",
+            source
+        );
+        assert!(
+            (source - result).abs() < 1e-10,
+            "Angle {:?} does not return same value after sin_cos/atan2 round trip ({:?})",
+            source,
+            result
+        );
+    }
+}

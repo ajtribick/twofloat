@@ -525,6 +525,45 @@ impl TwoFloat {
             }
         }
     }
+
+    /// Computes the four quadrant arctangent of `self` (y) and `other` (x)
+    /// in radians.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let y = TwoFloat::from(-1.0);
+    /// let x = TwoFloat::from(-1.0);
+    /// let theta = y.atan2(&x);
+    ///
+    /// assert!((theta + 3.0 * twofloat::consts::FRAC_PI_4).abs() < 1e-10);
+    pub fn atan2(&self, other: &TwoFloat) -> TwoFloat {
+        if self.hi == 0.0 {
+            if other.hi.is_sign_positive() {
+                TwoFloat::from(0.0)
+            } else if self.hi.is_sign_positive() {
+                PI
+            } else {
+                -PI
+            }
+        } else if other.hi == 0.0 {
+            if self.hi.is_sign_positive() {
+                FRAC_PI_2
+            } else {
+                -FRAC_PI_2
+            }
+        } else {
+            let a = (self / other).atan();
+            if other.hi.is_sign_positive() {
+                a
+            } else if self.hi.is_sign_positive() {
+                a + PI
+            } else {
+                a - PI
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -642,5 +681,16 @@ mod tests {
         assert!((FRAC_PI_4 + TwoFloat::from(-1.0).atan()).abs() < THRESHOLD);
         assert!((2.25f64.atan() + TwoFloat::from(-2.25).atan()).abs() < THRESHOLD);
         assert!((10.0f64.atan() + TwoFloat::from(-10.0).atan()).abs() < THRESHOLD);
+    }
+
+    #[test]
+    fn atan2_test() {
+        assert_eq!(0.0, TwoFloat::from(0.0).atan2(&TwoFloat::from(0.0)));
+        assert_eq!(0.0, TwoFloat::from(0.0).atan2(&TwoFloat::from(1.0)));
+        assert_eq!(PI, TwoFloat::from(0.0).atan2(&TwoFloat::from(-1.0)));
+        assert_eq!(-PI, TwoFloat::from(-0.0).atan2(&TwoFloat::from(-1.0)));
+        assert_eq!(FRAC_PI_2, TwoFloat::from(1.0).atan2(&TwoFloat::from(0.0)));
+        assert_eq!(-FRAC_PI_2, TwoFloat::from(-1.0).atan2(&TwoFloat::from(0.0)));
+        assert!((0.73f64.atan2(0.21f64) - TwoFloat::from(0.73).atan2(&TwoFloat::from(0.21))).abs() < THRESHOLD);
     }
 }
