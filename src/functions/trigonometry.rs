@@ -54,7 +54,7 @@ fn quadrant(value: &TwoFloat) -> (TwoFloat, i8) {
         let quotient = (value / FRAC_PI_2).round();
         let remainder = value - &quotient * FRAC_PI_2;
         match i8::try_from(quotient % 4.0) {
-            Ok(quadrant) => (remainder, quadrant.abs()),
+            Ok(quadrant) => (remainder, if quadrant >= 0 { quadrant } else { 4 + quadrant }),
             _ => (TwoFloat { hi: std::f64::NAN, lo: std::f64::NAN }, 0)
         }
     }
@@ -192,22 +192,55 @@ impl TwoFloat {
             _ => -1.0 / restricted_tan(&x),
         }
     }
+
+    /// Computes the arcsine of the value. Return value is in radians in the
+    /// range [-π/2, π/2] or an invalid value if the value is outside the
+    /// range [-1, 1].
+    ///
+    /// # Examples
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(0.7);
+    /// let b = a.asin();
+    /// let c = 0.7f64.asin();
+    ///
+    /// assert!((b - c).abs() < 1e-10);
+    pub fn asin(&self) -> TwoFloat {
+        let abs_val = self.abs();
+        if !self.is_valid() || abs_val > 1.0 {
+            TwoFloat { hi: std::f64::NAN, lo: std::f64::NAN }
+        } else if abs_val <= 0.5 {
+            restricted_asin(self)
+        } else {
+            let result = FRAC_PI_2 - 2.0 * restricted_asin(&(((1.0 - self.abs()) / 2.0).sqrt()));
+            println!("Result = {:?}", result);
+            println!("sign_positive = {:?}", self.is_sign_positive());
+            println!("Self = {:?}", self);
+            if self.is_sign_positive() { result } else { -result }
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    const THRESHOLD: f64 = 1e-10;
+
     #[test]
     fn quadrant_test() {
         assert_eq!(0, quadrant(&TwoFloat::from(0.5)).1);
         assert_eq!(0, quadrant(&TwoFloat::from(-0.5)).1);
+
         assert_eq!(1, quadrant(&TwoFloat::from(2.0)).1);
-        assert_eq!(1, quadrant(&TwoFloat::from(-2.0)).1);
+        assert_eq!(3, quadrant(&TwoFloat::from(-2.0)).1);
+
         assert_eq!(2, quadrant(&TwoFloat::from(3.14)).1);
         assert_eq!(2, quadrant(&TwoFloat::from(-3.14)).1);
+
         assert_eq!(3, quadrant(&TwoFloat::from(4.0)).1);
-        assert_eq!(3, quadrant(&TwoFloat::from(-4.0)).1);
+        assert_eq!(1, quadrant(&TwoFloat::from(-4.0)).1);
+
         assert_eq!(0, quadrant(&TwoFloat::from(6.0)).1);
         assert_eq!(0, quadrant(&TwoFloat::from(-6.0)).1);
     }
@@ -215,30 +248,52 @@ mod tests {
     #[test]
     fn sin_test() {
         assert_eq!(0.0, TwoFloat::from(0.0).sin());
-        assert!((0.5f64.sin() - TwoFloat::from(0.5).sin()).abs() < 1e-10);
-        assert!((1.4f64.sin() - TwoFloat::from(1.4).sin()).abs() < 1e-10);
-        assert!((3.0f64.sin() - TwoFloat::from(3.0).sin()).abs() < 1e-10);
-        assert!((4.0f64.sin() - TwoFloat::from(4.0).sin()).abs() < 1e-10);
-        assert!((6.0f64.sin() - TwoFloat::from(6.0).sin()).abs() < 1e-10);
+
+        assert!((0.5f64.sin() - TwoFloat::from(0.5).sin()).abs() < THRESHOLD);
+        assert!((1.4f64.sin() - TwoFloat::from(1.4).sin()).abs() < THRESHOLD);
+        assert!((3.0f64.sin() - TwoFloat::from(3.0).sin()).abs() < THRESHOLD);
+        assert!((4.0f64.sin() - TwoFloat::from(4.0).sin()).abs() < THRESHOLD);
+        assert!((6.0f64.sin() - TwoFloat::from(6.0).sin()).abs() < THRESHOLD);
+
+        assert!((0.5f64.sin() + TwoFloat::from(-0.5).sin()).abs() < THRESHOLD);
+        assert!((1.4f64.sin() + TwoFloat::from(-1.4).sin()).abs() < THRESHOLD);
+        assert!((3.0f64.sin() + TwoFloat::from(-3.0).sin()).abs() < THRESHOLD);
+        assert!((4.0f64.sin() + TwoFloat::from(-4.0).sin()).abs() < THRESHOLD);
+        assert!((6.0f64.sin() + TwoFloat::from(-6.0).sin()).abs() < THRESHOLD);
     }
 
     #[test]
     fn cos_test() {
         assert_eq!(1.0, TwoFloat::from(0.0).cos());
-        assert!((0.5f64.cos() - TwoFloat::from(0.5).cos()).abs() < 1e-10);
-        assert!((1.4f64.cos() - TwoFloat::from(1.4).cos()).abs() < 1e-10);
-        assert!((3.0f64.cos() - TwoFloat::from(3.0).cos()).abs() < 1e-10);
-        assert!((4.0f64.cos() - TwoFloat::from(4.0).cos()).abs() < 1e-10);
-        assert!((6.0f64.cos() - TwoFloat::from(6.0).cos()).abs() < 1e-10);
+
+        assert!((0.5f64.cos() - TwoFloat::from(0.5).cos()).abs() < THRESHOLD);
+        assert!((1.4f64.cos() - TwoFloat::from(1.4).cos()).abs() < THRESHOLD);
+        assert!((3.0f64.cos() - TwoFloat::from(3.0).cos()).abs() < THRESHOLD);
+        assert!((4.0f64.cos() - TwoFloat::from(4.0).cos()).abs() < THRESHOLD);
+        assert!((6.0f64.cos() - TwoFloat::from(6.0).cos()).abs() < THRESHOLD);
+
+        assert!((0.5f64.cos() - TwoFloat::from(-0.5).cos()).abs() < THRESHOLD);
+        assert!((1.4f64.cos() - TwoFloat::from(-1.4).cos()).abs() < THRESHOLD);
+        assert!((3.0f64.cos() - TwoFloat::from(-3.0).cos()).abs() < THRESHOLD);
+        assert!((4.0f64.cos() - TwoFloat::from(-4.0).cos()).abs() < THRESHOLD);
+        assert!((6.0f64.cos() - TwoFloat::from(-6.0).cos()).abs() < THRESHOLD);
+
     }
 
     #[test]
     fn tan_test() {
         assert_eq!(0.0, TwoFloat::from(0.0).tan());
-        assert!((0.5f64.tan() - TwoFloat::from(0.5).tan()).abs() < 1e-10);
-        assert!((1.4f64.tan() - TwoFloat::from(1.4).tan()).abs() < 1e-10);
-        assert!((3.0f64.tan() - TwoFloat::from(3.0).tan()).abs() < 1e-10);
-        assert!((4.0f64.tan() - TwoFloat::from(4.0).tan()).abs() < 1e-10);
-        assert!((6.0f64.tan() - TwoFloat::from(6.0).tan()).abs() < 1e-10);
+
+        assert!((0.5f64.tan() - TwoFloat::from(0.5).tan()).abs() < THRESHOLD);
+        assert!((1.4f64.tan() - TwoFloat::from(1.4).tan()).abs() < THRESHOLD);
+        assert!((3.0f64.tan() - TwoFloat::from(3.0).tan()).abs() < THRESHOLD);
+        assert!((4.0f64.tan() - TwoFloat::from(4.0).tan()).abs() < THRESHOLD);
+        assert!((6.0f64.tan() - TwoFloat::from(6.0).tan()).abs() < THRESHOLD);
+
+        assert!((0.5f64.tan() + TwoFloat::from(-0.5).tan()).abs() < THRESHOLD);
+        assert!((1.4f64.tan() + TwoFloat::from(-1.4).tan()).abs() < THRESHOLD);
+        assert!((3.0f64.tan() + TwoFloat::from(-3.0).tan()).abs() < THRESHOLD);
+        assert!((4.0f64.tan() + TwoFloat::from(-4.0).tan()).abs() < THRESHOLD);
+        assert!((6.0f64.tan() + TwoFloat::from(-6.0).tan()).abs() < THRESHOLD);
     }
 }
