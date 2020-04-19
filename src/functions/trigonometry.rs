@@ -47,6 +47,20 @@ const T12: TwoFloat = TwoFloat { hi: 0.00010374385393487309, lo: -1.724619904446
 const T13: TwoFloat = TwoFloat { hi: -5.2050985346847035e-05, lo: 3.038262431960992e-21 };
 const T14: TwoFloat = TwoFloat { hi: 2.2476452033043005e-05, lo: -1.3763291484895173e-21 };
 
+// Polynomial coefficients of asin(x)-x on [0,0.5]
+const AS1: TwoFloat = TwoFloat { hi: 0.16666666665760896, lo: 6.318909167472426e-18 };
+const AS2: TwoFloat = TwoFloat { hi: 0.07500000116177634, lo: -3.6535510436559885e-19 };
+const AS3: TwoFloat = TwoFloat { hi: 0.04464279716731413, lo: -7.858342616855284e-19 };
+const AS4: TwoFloat = TwoFloat { hi: 0.030383587986160417, lo: 2.910903680786144e-22 };
+const AS5: TwoFloat = TwoFloat { hi: 0.022345297689414505, lo: -1.4743699989653656e-18 };
+const AS6: TwoFloat = TwoFloat { hi: 0.017629659409590933, lo: -4.947235313007659e-19 };
+const AS7: TwoFloat = TwoFloat { hi: 0.012128557172711413, lo: 5.8362891350143e-19 };
+const AS8: TwoFloat = TwoFloat { hi: 0.019288181641610027, lo: -3.799209584634637e-19 };
+const AS9: TwoFloat = TwoFloat { hi: -0.009769012047538925, lo: -8.206627214129968e-20 };
+const AS10: TwoFloat = TwoFloat { hi: 0.033397748388563755, lo: -3.4307997519760322e-18 };
+
+// Polynomial coefficients of acos(x)
+
 fn quadrant(value: &TwoFloat) -> (TwoFloat, i8) {
     if value.abs() < FRAC_PI_4 {
         (*value, 0)
@@ -73,6 +87,11 @@ fn restricted_cos(x: &TwoFloat) -> TwoFloat {
 fn restricted_tan(x: &TwoFloat) -> TwoFloat {
     let x2 = x * x;
     x * polynomial!(x2, 1.0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)
+}
+
+fn restricted_asin(x: &TwoFloat) -> TwoFloat {
+    let x2 = x * x;
+    x * polynomial!(x2, 1.0, AS1, AS2, AS3, AS4, AS5, AS6, AS7, AS8, AS9, AS10)
 }
 
 impl TwoFloat {
@@ -194,10 +213,11 @@ impl TwoFloat {
     }
 
     /// Computes the arcsine of the value. Return value is in radians in the
-    /// range [-π/2, π/2] or an invalid value if the value is outside the
-    /// range [-1, 1].
+    /// range [-π/2, π/2] or an invalid value if the input value is outside
+    /// the range [-1, 1].
     ///
     /// # Examples
+    ///
     /// ```
     /// # use twofloat::TwoFloat;
     /// let a = TwoFloat::from(0.7);
@@ -213,11 +233,26 @@ impl TwoFloat {
             restricted_asin(self)
         } else {
             let result = FRAC_PI_2 - 2.0 * restricted_asin(&(((1.0 - self.abs()) / 2.0).sqrt()));
-            println!("Result = {:?}", result);
-            println!("sign_positive = {:?}", self.is_sign_positive());
-            println!("Self = {:?}", self);
             if self.is_sign_positive() { result } else { -result }
         }
+    }
+
+    /// Computes the arccosine of the value. Return value is in radians in
+    /// the range [0, π] or an invalid value if the input value is outside
+    /// the range [-1, 1].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(-0.8);
+    /// let b = a.acos();
+    /// let c = (-0.8f64).acos();
+    ///
+    /// assert!((b - c).abs() < 1e-10);
+    pub fn acos(&self) -> TwoFloat {
+        let x = self.asin();
+        if x.is_valid() { FRAC_PI_2 - x } else { x }
     }
 }
 
@@ -295,5 +330,30 @@ mod tests {
         assert!((3.0f64.tan() + TwoFloat::from(-3.0).tan()).abs() < THRESHOLD);
         assert!((4.0f64.tan() + TwoFloat::from(-4.0).tan()).abs() < THRESHOLD);
         assert!((6.0f64.tan() + TwoFloat::from(-6.0).tan()).abs() < THRESHOLD);
+    }
+
+    #[test]
+    fn asin_test() {
+        assert_eq!(0.0, TwoFloat::from(0.0).asin());
+        assert!((0.25f64.asin() - TwoFloat::from(0.25f64).asin()) < THRESHOLD);
+        assert!((0.75f64.asin() - TwoFloat::from(0.75f64).asin()) < THRESHOLD);
+        assert!((TwoFloat::from(1.0).asin() - FRAC_PI_2).abs() < THRESHOLD);
+
+        assert!((0.25f64.asin() + TwoFloat::from(-0.25f64).asin()) < THRESHOLD);
+        assert!((0.75f64.asin() + TwoFloat::from(-0.75f64).asin()) < THRESHOLD);
+        assert!((TwoFloat::from(-1.0).asin() + FRAC_PI_2).abs() < THRESHOLD);
+    }
+
+    #[test]
+    fn acos_test() {
+        assert!((TwoFloat::from(0.0).acos() - FRAC_PI_2).abs() < THRESHOLD);
+
+        assert!((0.25f64.acos() - TwoFloat::from(0.25f64).acos()) < THRESHOLD);
+        assert!((0.75f64.acos() - TwoFloat::from(0.75f64).acos()) < THRESHOLD);
+        assert_eq!(0.0, TwoFloat::from(1.0).acos());
+
+        assert!((0.25f64.asin() - TwoFloat::from(-0.25f64).acos()) < THRESHOLD);
+        assert!((0.75f64.asin() - TwoFloat::from(-0.75f64).acos()) < THRESHOLD);
+        assert!((TwoFloat::from(-1.0).acos() - PI).abs() < THRESHOLD);
     }
 }
