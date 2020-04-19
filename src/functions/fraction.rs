@@ -44,7 +44,7 @@ impl TwoFloat {
     /// assert_eq!(b, TwoFloat::from(0.0));
     pub fn trunc(&self) -> TwoFloat {
         let (a, b) = if self.lo.fract() == 0.0 {
-            (self.hi, self.lo)
+            (self.hi.trunc(), self.lo)
         } else if self.hi.fract() == 0.0 {
             match (self.hi >= 0.0, self.lo >= 0.0) {
                 (true, false) => fast_two_sum(self.hi, self.lo.trunc() - 1.0),
@@ -73,7 +73,7 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(0.0));
     pub fn ceil(&self) -> TwoFloat {
         let (a, b) = if self.lo.fract() == 0.0 {
-            (self.hi, self.lo)
+            (self.hi.ceil(), self.lo)
         } else if self.hi.fract() == 0.0 {
             fast_two_sum(self.hi, self.lo.ceil())
         } else {
@@ -98,7 +98,7 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(-1.0));
     pub fn floor(&self) -> TwoFloat {
         let (a, b) = if self.lo.fract() == 0.0 {
-            (self.hi, self.lo)
+            (self.hi.floor(), self.lo)
         } else if self.hi.fract() == 0.0 {
             fast_two_sum(self.hi, self.lo.floor())
         } else {
@@ -106,5 +106,28 @@ impl TwoFloat {
         };
 
         TwoFloat { hi: a, lo: b }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn trunc_test() {
+        assert_eq!(0.0, TwoFloat::from(0.25).trunc());
+        assert_eq!(0.0, TwoFloat::from(-0.25).trunc());
+    }
+
+    #[test]
+    fn ceil_test() {
+        assert_eq!(1.0, TwoFloat::from(0.25).ceil());
+        assert_eq!(0.0, TwoFloat::from(-0.25).ceil());
+    }
+
+    #[test]
+    fn floor_test() {
+        assert_eq!(0.0, TwoFloat::from(0.25).floor());
+        assert_eq!(-1.0, TwoFloat::from(-0.25).floor());
     }
 }
