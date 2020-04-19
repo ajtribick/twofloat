@@ -104,7 +104,8 @@ impl TwoFloat {
             // where R1 = r - (P1*r^2 + P2*r^4 + ...)
 
             let rr = &r * &r;
-            let r1 = &r - &rr * (P1 + &rr * (P2 + &rr * (P3 + &rr * (P4 + &rr * (P5 + &rr * P6)))));
+            let r1 = r - rr * polynomial!(rr, P1, P2, P3, P4, P5, P6);
+            //let r1 = &r - &rr * (P1 + &rr * (P2 + &rr * (P3 + &rr * (P4 + &rr * (P5 + &rr * P6)))));
 
             let exp_r = 1.0 - ((&r * &r1) / (&r1 - 2.0) - &r);
 

@@ -1,3 +1,4 @@
+mod function_utils;
 pub mod explog;
 pub mod fraction;
 pub mod hyperbolic;
