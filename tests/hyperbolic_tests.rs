@@ -41,3 +41,66 @@ fn cosh_sinh_test() {
         );
     }
 }
+
+#[test]
+fn sinh_asinh_test() {
+    let mut rng = rand::thread_rng();
+    let dist = rand::distributions::Uniform::new_inclusive(-20.0, 20.0);
+    for _ in 0..TEST_ITERS {
+        let source = TwoFloat::from(rng.sample(dist));
+        let result = source.sinh().asinh();
+        assert!(
+            result.is_valid(),
+            "Angle {:?} does not produce valid value for sinh/asinh round trip",
+            source
+        );
+        assert!(
+            (source - result).abs() < 1e-5,
+            "Angle {:?} does not return same value after sinh/asinh round trip ({:?})",
+            source,
+            result
+        );
+    }
+}
+
+#[test]
+fn cosh_acosh_test() {
+    let mut rng = rand::thread_rng();
+    let dist = rand::distributions::Uniform::new_inclusive(0.0, 20.0);
+    for _ in 0..TEST_ITERS {
+        let source = TwoFloat::from(rng.sample(dist));
+        let result = source.cosh().acosh();
+        assert!(
+            result.is_valid(),
+            "Angle {:?} does not produce valid value for cosh/acosh round trip",
+            source
+        );
+        assert!(
+            (source - result).abs() < 1e-5,
+            "Angle {:?} does not return same value after cosh/acosh round trip ({:?})",
+            source,
+            result
+        );
+    }
+}
+
+#[test]
+fn tanh_atanh_test() {
+    let mut rng = rand::thread_rng();
+    let dist = rand::distributions::Uniform::new_inclusive(-10.0, 10.0);
+    for _ in 0..TEST_ITERS {
+        let source = TwoFloat::from(rng.sample(dist));
+        let result = source.tanh().atanh();
+        assert!(
+            result.is_valid(),
+            "Angle {:?} does not produce valid value for tanh/atanh round trip",
+            source
+        );
+        assert!(
+            (source - result).abs() < 1e-5,
+            "Angle {:?} does not return same value after tanh/atanh round trip ({:?})",
+            source,
+            result
+        );
+    }
+}
