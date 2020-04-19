@@ -104,6 +104,17 @@ impl TwoFloat {
         }
     }
 
+    /// Computes the cosine of the value (in radians)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(2.5);
+    /// let b = a.cos();
+    /// let c = 2.5f64.cos();
+    ///
+    /// assert!((b - c).abs() < 1e-10);
     pub fn cos(&self) -> TwoFloat {
         if !self.is_valid() { return *self; }
         let (x, quadrant) = quadrant(self);
@@ -115,6 +126,19 @@ impl TwoFloat {
         }
     }
 
+    /// Simultaneously computes the sine and cosine of the value. Returns a
+    /// tuple with the sine as the first element and the cosine as the second
+    /// element.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(2.5);
+    /// let (s, c) = a.sin_cos();
+    ///
+    /// assert!((s - 2.5f64.sin()).abs() < 1e-10);
+    /// assert!((c - 2.5f64.cos()).abs() < 1e-10);
     pub fn sin_cos(&self) -> (TwoFloat, TwoFloat) {
         if !self.is_valid() { return (*self, *self); }
         let (x, quadrant) = quadrant(self);

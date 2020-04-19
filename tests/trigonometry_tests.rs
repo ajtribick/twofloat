@@ -5,7 +5,7 @@ pub mod common;
 use common::*;
 
 #[test]
-fn cos_sin_test() {
+fn sin_cos_test() {
     let mut rng = rand::thread_rng();
     let mut get_f64 = float_generator();
     let dist = rand::distributions::Uniform::new_inclusive(-20.0, 20.0);
