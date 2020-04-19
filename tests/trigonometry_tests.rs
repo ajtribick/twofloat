@@ -56,12 +56,24 @@ fn sin_cos_test() {
 #[test]
 fn sin_asin_test() {
     let mut rng = rand::thread_rng();
-    let dist = rand::distributions::Uniform::new_inclusive(-std::f64::consts::FRAC_PI_2, std::f64::consts::FRAC_PI_2);
+    let dist = rand::distributions::Uniform::new_inclusive(
+        -std::f64::consts::FRAC_PI_2,
+        std::f64::consts::FRAC_PI_2,
+    );
     for _ in 0..TEST_ITERS {
         let source = TwoFloat::from(rng.sample(dist));
         let result = source.sin().asin();
-        assert!(result.is_valid(), "Angle {:?} does not produce valid value for sin/asin round trip", source);
-        assert!((source - result).abs() < 1e-10, "Angle {:?} does not return same value after sin/asin round trip ({:?})", source, result);
+        assert!(
+            result.is_valid(),
+            "Angle {:?} does not produce valid value for sin/asin round trip",
+            source
+        );
+        assert!(
+            (source - result).abs() < 1e-10,
+            "Angle {:?} does not return same value after sin/asin round trip ({:?})",
+            source,
+            result
+        );
     }
 }
 
@@ -72,7 +84,16 @@ fn cos_acos_test() {
     for _ in 0..TEST_ITERS {
         let source = TwoFloat::from(rng.sample(dist));
         let result = source.cos().acos();
-        assert!(result.is_valid(), "Angle {:?} does not produce valid value for cos/acos round trip", source);
-        assert!((source - result).abs() < 1e-10, "Angle {:?} does not return same value after cos/acos round trip ({:?})", source, result);
+        assert!(
+            result.is_valid(),
+            "Angle {:?} does not produce valid value for cos/acos round trip",
+            source
+        );
+        assert!(
+            (source - result).abs() < 1e-10,
+            "Angle {:?} does not return same value after cos/acos round trip ({:?})",
+            source,
+            result
+        );
     }
 }
