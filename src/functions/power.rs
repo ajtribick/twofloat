@@ -60,6 +60,22 @@ impl TwoFloat {
         x - (&x2 * &x - self) / (3.0 * &x2)
     }
 
+    /// Calculates the length of the hypotenuse of a right-angle triangle
+    /// given legs of length `self` and `other`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(3.0);
+    /// let b = TwoFloat::from(4.0);
+    /// let c = a.hypot(&b);
+    ///
+    /// assert!((c - 5.0).abs() < 1e-10);
+    pub fn hypot(&self, other: &TwoFloat) -> TwoFloat {
+        (self * self + other * other).sqrt()
+    }
+
     /// Raises the number to an integer power. Returns a NAN value for 0^0.
     ///
     /// # Examples

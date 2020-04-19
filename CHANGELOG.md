@@ -2,7 +2,7 @@
 
 ## Version 0.1.4
 
-* Added `round` function.
+* Added `copysign`, `hypot`, `round` functions.
 * Added trigonometric functions `cos`, `sin`, `sin_cos`, `tan` and inverse
   functions `asin`, `acos`, `atan`, `atan2`.
 
