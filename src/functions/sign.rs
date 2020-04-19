@@ -36,7 +36,7 @@ impl TwoFloat {
     /// assert!(b);
     /// assert!(!c);
     pub fn is_sign_positive(&self) -> bool {
-        self.hi > 0.0 || (self.hi == 0.0 && self.hi.is_sign_positive())
+        self.hi.is_sign_positive()
     }
 
     /// Returns `true` if `self` has a negative sign, including `-0.0`.
@@ -53,7 +53,26 @@ impl TwoFloat {
     /// assert!(!b);
     /// assert!(!c);
     pub fn is_sign_negative(&self) -> bool {
-        self.hi < 0.0 || (self.hi == 0.0 && self.hi.is_sign_negative())
+        self.hi.is_sign_negative()
+    }
+
+    /// Returns a number composed of the magnitude of `self` and the sign of
+    /// `sign`.
+    ///
+    /// Equal to `self` if the sign of `self` and `sign` are the same,
+    /// otherwise equal to `-self`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::new_add(-1.0, 1.0e-200);
+    /// let b = TwoFloat::new_add(1.0, 0.3);
+    /// let c = a.copysign(&b);
+    ///
+    /// assert_eq!(c, -a);
+    pub fn copysign(&self, sign: &TwoFloat) -> TwoFloat {
+        if self.is_sign_positive() == sign.is_sign_positive() { *self } else { -self }
     }
 }
 
@@ -76,16 +95,8 @@ mod tests {
         assert!(TwoFloat { hi: 0.0, lo: -0.0 }.is_sign_positive());
         assert!(!TwoFloat { hi: -0.0, lo: 0.0 }.is_sign_positive());
         assert!(!TwoFloat { hi: -0.0, lo: -0.0 }.is_sign_positive());
-        assert!(TwoFloat {
-            hi: 1.0,
-            lo: -1e-300
-        }
-        .is_sign_positive());
-        assert!(!TwoFloat {
-            hi: -1.0,
-            lo: -1e-300
-        }
-        .is_sign_positive());
+        assert!(TwoFloat { hi: 1.0, lo: -1e-300}.is_sign_positive());
+        assert!(!TwoFloat { hi: -1.0, lo: -1e-300 }.is_sign_positive());
     }
 
     #[test]
@@ -93,15 +104,7 @@ mod tests {
         assert!(!TwoFloat { hi: 0.0, lo: -0.0 }.is_sign_negative());
         assert!(TwoFloat { hi: -0.0, lo: 0.0 }.is_sign_negative());
         assert!(TwoFloat { hi: -0.0, lo: -0.0 }.is_sign_negative());
-        assert!(!TwoFloat {
-            hi: 1.0,
-            lo: -1e-300
-        }
-        .is_sign_negative());
-        assert!(TwoFloat {
-            hi: -1.0,
-            lo: -1e-300
-        }
-        .is_sign_negative());
+        assert!(!TwoFloat { hi: 1.0, lo: -1e-300 }.is_sign_negative());
+        assert!(TwoFloat { hi: -1.0, lo: -1e-300 }.is_sign_negative());
     }
 }
