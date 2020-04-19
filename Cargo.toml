@@ -5,7 +5,7 @@ authors = ["Andrew Tribick"]
 
 keywords = ["float", "precision", "numerics", "floating-point", "arithmetic"]
 categories = ["algorithms", "mathematics", "science"]
-exclude = ["/.travis.yml", ".gitignore"]
+exclude = ["/.travis.yml", ".gitignore", "sollya"]
 edition = "2018"
 
 readme = "README.md"

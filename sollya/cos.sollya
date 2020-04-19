@@ -1,0 +1,13 @@
+prec=512;
+f=cos(x)-1+x^2/2;
+I=[0,round(pi/4, prec, RN)];
+L=[|0,4,6,8,10,12,14,16|];
+p=remez(f,L,I,1,1e-15);
+print("Target=", 2^-107);
+print("Actual=", dirtyinfnorm(p-f,I));
+display=hexadecimal;
+for l in L do {
+    xh = double(coeff(p, l));
+    xl = double(coeff(p, l) - xh);
+    print(xh, ",", xl, ",");
+};
