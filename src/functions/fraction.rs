@@ -13,7 +13,7 @@ impl TwoFloat {
     ///
     /// assert_eq!(a, TwoFloat::from(1e-200));
     /// assert_eq!(b, TwoFloat::new_add(-1.0, 1e-200));
-    pub fn fract(&self) -> TwoFloat {
+    pub fn fract(self) -> TwoFloat {
         let hi_fract = self.hi.fract();
         let lo_fract = self.lo.fract();
         let (a, b) = if lo_fract == 0.0 {
@@ -42,7 +42,7 @@ impl TwoFloat {
     ///
     /// assert_eq!(a, TwoFloat::from(1.0));
     /// assert_eq!(b, TwoFloat::from(0.0));
-    pub fn trunc(&self) -> TwoFloat {
+    pub fn trunc(self) -> TwoFloat {
         if self.is_sign_positive() {
             self.floor()
         } else {
@@ -63,7 +63,7 @@ impl TwoFloat {
     /// assert_eq!(a, TwoFloat::from(2.0));
     /// assert_eq!(b, TwoFloat::from(1.0));
     /// assert_eq!(c, TwoFloat::from(0.0));
-    pub fn ceil(&self) -> TwoFloat {
+    pub fn ceil(self) -> TwoFloat {
         let (a, b) = if self.lo.fract() == 0.0 {
             (self.hi.ceil(), self.lo)
         } else if self.hi.fract() == 0.0 {
@@ -88,7 +88,7 @@ impl TwoFloat {
     /// assert_eq!(a, TwoFloat::from(1.0));
     /// assert_eq!(b, TwoFloat::from(0.0));
     /// assert_eq!(c, TwoFloat::from(-1.0));
-    pub fn floor(&self) -> TwoFloat {
+    pub fn floor(self) -> TwoFloat {
         let (a, b) = if self.lo.fract() == 0.0 {
             (self.hi.floor(), self.lo)
         } else if self.hi.fract() == 0.0 {
@@ -114,7 +114,7 @@ impl TwoFloat {
     /// assert_eq!(a, TwoFloat::from(1.0));
     /// assert_eq!(b, TwoFloat::from(1.0));
     /// assert_eq!(c, TwoFloat::from(-1.0));
-    pub fn round(&self) -> TwoFloat {
+    pub fn round(self) -> TwoFloat {
         let (a, b) = if self.lo.fract() == 0.0 {
             (self.hi.round(), self.lo())
         } else if self.hi.fract() == 0.0 {

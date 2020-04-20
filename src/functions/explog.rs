@@ -75,7 +75,7 @@ impl TwoFloat {
     /// let e2 = twofloat::consts::E * twofloat::consts::E;
     ///
     /// assert!((b - e2).abs() / e2 < 1e-16);
-    pub fn exp(&self) -> TwoFloat {
+    pub fn exp(self) -> TwoFloat {
         if self.hi <= EXP_LOWER_LIMIT {
             TwoFloat::from(0.0)
         } else if self.hi >= EXP_UPPER_LIMIT {
@@ -133,7 +133,7 @@ impl TwoFloat {
     /// let a = TwoFloat::from(6.0).exp2();
     ///
     /// assert!((a - 64.0).abs() < 1e-15);
-    pub fn exp2(&self) -> TwoFloat {
+    pub fn exp2(self) -> TwoFloat {
         (self * LN_2).exp()
     }
 
@@ -147,10 +147,10 @@ impl TwoFloat {
     /// ```
     /// let a = twofloat::consts::E.ln();
     /// assert!((a - 1.0).abs() < 1e-11);
-    pub fn ln(&self) -> TwoFloat {
-        if *self == 1.0 {
+    pub fn ln(self) -> TwoFloat {
+        if self == 1.0 {
             TwoFloat::from(0.0)
-        } else if *self <= 0.0 {
+        } else if self <= 0.0 {
             TwoFloat {
                 hi: std::f64::NAN,
                 lo: std::f64::NAN,
@@ -171,10 +171,10 @@ impl TwoFloat {
     ///
     /// let a = TwoFloat::from(81.0);
     /// let b = TwoFloat::from(3.0);
-    /// let c = a.log(&b);
+    /// let c = TwoFloat::log(a, b);
     ///
     /// assert!((c - 4.0).abs() < 1e-12);
-    pub fn log(&self, base: &TwoFloat) -> TwoFloat {
+    pub fn log(self, base: TwoFloat) -> TwoFloat {
         self.ln() / base.ln()
     }
 
@@ -190,7 +190,7 @@ impl TwoFloat {
     /// let a = TwoFloat::from(64.0).log2();
     ///
     /// assert!((a - 6.0).abs() < 1e-12, "{}", a);
-    pub fn log2(&self) -> TwoFloat {
+    pub fn log2(self) -> TwoFloat {
         self.ln() / LN_2
     }
 
@@ -206,7 +206,7 @@ impl TwoFloat {
     /// let a = TwoFloat::from(100.0).log10();
     ///
     /// assert!((a - 2.0).abs() < 1e-12);
-    pub fn log10(&self) -> TwoFloat {
+    pub fn log10(self) -> TwoFloat {
         self.ln() / LN_10
     }
 }

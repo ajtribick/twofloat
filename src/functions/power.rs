@@ -12,7 +12,7 @@ impl TwoFloat {
     /// let difference = b.recip() - a;
     ///
     /// assert!(difference.abs() < 1e-16);
-    pub fn recip(&self) -> TwoFloat {
+    pub fn recip(self) -> TwoFloat {
         1.0 / self
     }
 
@@ -27,7 +27,7 @@ impl TwoFloat {
     /// let b = a.sqrt();
     ///
     /// assert!(b * b - a < 1e-16);
-    pub fn sqrt(&self) -> TwoFloat {
+    pub fn sqrt(self) -> TwoFloat {
         if self.hi < 0.0 || (self.hi == 0.0 && self.lo < 0.0) {
             TwoFloat {
                 hi: std::f64::NAN,
@@ -52,7 +52,7 @@ impl TwoFloat {
     /// let b = a.cbrt();
     ///
     /// assert!(b.powi(3) - a < 1e-16);
-    pub fn cbrt(&self) -> TwoFloat {
+    pub fn cbrt(self) -> TwoFloat {
         let mut x = TwoFloat::from(self.hi.cbrt());
         let mut x2 = &x * &x;
         x -= (&x2 * &x - self) / (3.0 * &x2);
@@ -69,10 +69,10 @@ impl TwoFloat {
     /// # use twofloat::TwoFloat;
     /// let a = TwoFloat::from(3.0);
     /// let b = TwoFloat::from(4.0);
-    /// let c = a.hypot(&b);
+    /// let c = TwoFloat::hypot(a, b);
     ///
     /// assert!((c - 5.0).abs() < 1e-10);
-    pub fn hypot(&self, other: &TwoFloat) -> TwoFloat {
+    pub fn hypot(self, other: TwoFloat) -> TwoFloat {
         (self * self + other * other).sqrt()
     }
 
@@ -87,7 +87,7 @@ impl TwoFloat {
     ///
     /// assert!(a - TwoFloat::from(8.0) <= 1e-16);
     /// assert!(!b.is_valid());
-    pub fn powi(&self, n: i32) -> TwoFloat {
+    pub fn powi(self, n: i32) -> TwoFloat {
         match n {
             0 => {
                 if self.hi == 0.0 && self.lo == 0.0 {
@@ -132,11 +132,11 @@ impl TwoFloat {
     /// # use twofloat::TwoFloat;
     /// let a = TwoFloat::from(-5.0);
     /// let b = TwoFloat::from(3.0);
-    /// let c = a.powf(&b);
+    /// let c = a.powf(b);
     ///
     /// assert!((c + 125.0).abs() < 1e-9, "{}", c);
-    pub fn powf(&self, y: &TwoFloat) -> TwoFloat {
-        match (*self == 0.0, *y == 0.0) {
+    pub fn powf(self, y: TwoFloat) -> TwoFloat {
+        match (self == 0.0, y == 0.0) {
             (true, true) => TwoFloat {
                 hi: std::f64::NAN,
                 lo: std::f64::NAN,

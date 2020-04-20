@@ -218,7 +218,7 @@ randomized_test!(min_test, |rng: F64Rand| {
     let a = get_twofloat(rng);
     let b = get_twofloat(rng);
     let expected = if a < b { a } else { b };
-    let result = a.min(&b);
+    let result = a.min(b);
 
     assert_eq!(
         result, expected,
@@ -231,7 +231,7 @@ randomized_test!(max_test, |rng: F64Rand| {
     let a = get_twofloat(rng);
     let b = get_twofloat(rng);
     let expected = if a > b { a } else { b };
-    let result = a.max(&b);
+    let result = a.max(b);
 
     assert_eq!(
         result, expected,

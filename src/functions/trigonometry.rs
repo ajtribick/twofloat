@@ -244,9 +244,9 @@ const ATAN_FRAC_3_2: TwoFloat = TwoFloat {
     lo: 1.3903311031230998e-17,
 };
 
-fn quadrant(value: &TwoFloat) -> (TwoFloat, i8) {
+fn quadrant(value: TwoFloat) -> (TwoFloat, i8) {
     if value.abs() < FRAC_PI_4 {
-        (*value, 0)
+        (value, 0)
     } else {
         let quotient = (value / FRAC_PI_2).round();
         let remainder = value - &quotient * FRAC_PI_2;
@@ -270,27 +270,27 @@ fn quadrant(value: &TwoFloat) -> (TwoFloat, i8) {
     }
 }
 
-fn restricted_sin(x: &TwoFloat) -> TwoFloat {
+fn restricted_sin(x: TwoFloat) -> TwoFloat {
     let x2 = x * x;
     x * polynomial!(x2, 1.0, S1, S2, S3, S4, S5, S6, S7)
 }
 
-fn restricted_cos(x: &TwoFloat) -> TwoFloat {
+fn restricted_cos(x: TwoFloat) -> TwoFloat {
     let x2 = x * x;
     polynomial!(x2, 1.0, -0.5, C1, C2, C3, C4, C5, C6, C7)
 }
 
-fn restricted_tan(x: &TwoFloat) -> TwoFloat {
+fn restricted_tan(x: TwoFloat) -> TwoFloat {
     let x2 = x * x;
     x * polynomial!(x2, 1.0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)
 }
 
-fn restricted_asin(x: &TwoFloat) -> TwoFloat {
+fn restricted_asin(x: TwoFloat) -> TwoFloat {
     let x2 = x * x;
     x * polynomial!(x2, 1.0, AS1, AS2, AS3, AS4, AS5, AS6, AS7, AS8, AS9, AS10)
 }
 
-fn restricted_atan(x: &TwoFloat) -> TwoFloat {
+fn restricted_atan(x: TwoFloat) -> TwoFloat {
     let x2 = x * x;
     x * polynomial!(
         x2, 1.0, AT1, AT2, AT3, AT4, AT5, AT6, AT7, AT8, AT9, AT10, AT11, AT12, AT13, AT14, AT15
@@ -308,7 +308,7 @@ impl TwoFloat {
     /// let b = a.to_radians();
     ///
     /// assert!((b - twofloat::consts::FRAC_PI_2).abs() < 1e-16);
-    pub fn to_radians(&self) -> TwoFloat {
+    pub fn to_radians(self) -> TwoFloat {
         self * &RAD_PER_DEG
     }
 
@@ -321,7 +321,7 @@ impl TwoFloat {
     /// let b = a.to_degrees();
     ///
     /// assert!((b - 180.0).abs() < 1e-16);
-    pub fn to_degrees(&self) -> TwoFloat {
+    pub fn to_degrees(self) -> TwoFloat {
         self * &DEG_PER_RAD
     }
 
@@ -336,16 +336,19 @@ impl TwoFloat {
     /// let c = 2.5f64.sin();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn sin(&self) -> TwoFloat {
+    pub fn sin(self) -> TwoFloat {
         if !self.is_valid() {
-            return *self;
+            return TwoFloat {
+                hi: std::f64::NAN,
+                lo: std::f64::NAN
+            };
         }
         let (x, quadrant) = quadrant(self);
         match quadrant {
-            0 => restricted_sin(&x),
-            1 => restricted_cos(&x),
-            2 => -restricted_sin(&x),
-            _ => -restricted_cos(&x),
+            0 => restricted_sin(x),
+            1 => restricted_cos(x),
+            2 => -restricted_sin(x),
+            _ => -restricted_cos(x),
         }
     }
 
@@ -360,16 +363,19 @@ impl TwoFloat {
     /// let c = 2.5f64.cos();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn cos(&self) -> TwoFloat {
+    pub fn cos(self) -> TwoFloat {
         if !self.is_valid() {
-            return *self;
+            return TwoFloat {
+                hi: std::f64::NAN,
+                lo: std::f64::NAN
+            };
         }
         let (x, quadrant) = quadrant(self);
         match quadrant {
-            0 => restricted_cos(&x),
-            1 => -restricted_sin(&x),
-            2 => -restricted_cos(&x),
-            _ => restricted_sin(&x),
+            0 => restricted_cos(x),
+            1 => -restricted_sin(x),
+            2 => -restricted_cos(x),
+            _ => restricted_sin(x),
         }
     }
 
@@ -386,13 +392,16 @@ impl TwoFloat {
     ///
     /// assert!((s - 2.5f64.sin()).abs() < 1e-10);
     /// assert!((c - 2.5f64.cos()).abs() < 1e-10);
-    pub fn sin_cos(&self) -> (TwoFloat, TwoFloat) {
+    pub fn sin_cos(self) -> (TwoFloat, TwoFloat) {
         if !self.is_valid() {
-            return (*self, *self);
+            return (
+                TwoFloat { hi: std::f64::NAN, lo: std::f64::NAN },
+                TwoFloat { hi: std::f64::NAN, lo: std::f64::NAN }
+            );
         }
         let (x, quadrant) = quadrant(self);
-        let s = restricted_sin(&x);
-        let c = restricted_cos(&x);
+        let s = restricted_sin(x);
+        let c = restricted_cos(x);
         match quadrant {
             0 => (s, c),
             1 => (c, -s),
@@ -412,14 +421,14 @@ impl TwoFloat {
     /// let c = 2.5f64.tan();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn tan(&self) -> TwoFloat {
+    pub fn tan(self) -> TwoFloat {
         if !self.is_valid() {
-            return *self;
+            return self;
         }
         let (x, quadrant) = quadrant(self);
         match quadrant {
-            0 | 2 => restricted_tan(&x),
-            _ => -1.0 / restricted_tan(&x),
+            0 | 2 => restricted_tan(x),
+            _ => -1.0 / restricted_tan(x),
         }
     }
 
@@ -436,7 +445,7 @@ impl TwoFloat {
     /// let c = 0.7f64.asin();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn asin(&self) -> TwoFloat {
+    pub fn asin(self) -> TwoFloat {
         let abs_val = self.abs();
         if !self.is_valid() || abs_val > 1.0 {
             TwoFloat {
@@ -446,7 +455,7 @@ impl TwoFloat {
         } else if abs_val <= 0.5 {
             restricted_asin(self)
         } else {
-            let result = FRAC_PI_2 - 2.0 * restricted_asin(&(((1.0 - self.abs()) / 2.0).sqrt()));
+            let result = FRAC_PI_2 - 2.0 * restricted_asin(((1.0 - self.abs()) / 2.0).sqrt());
             if self.is_sign_positive() {
                 result
             } else {
@@ -468,7 +477,7 @@ impl TwoFloat {
     /// let c = (-0.8f64).acos();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn acos(&self) -> TwoFloat {
+    pub fn acos(self) -> TwoFloat {
         let x = self.asin();
         if x.is_valid() {
             FRAC_PI_2 - x
@@ -489,7 +498,7 @@ impl TwoFloat {
     /// let c = 3.5f64.atan();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn atan(&self) -> TwoFloat {
+    pub fn atan(self) -> TwoFloat {
         if !self.is_valid() {
             TwoFloat {
                 hi: std::f64::NAN,
@@ -509,13 +518,13 @@ impl TwoFloat {
             }
 
             let result = if k < 3.0 {
-                ATAN_FRAC_1_2 + restricted_atan(&((x - 0.5) / (1.0 + 0.5 * x)))
+                ATAN_FRAC_1_2 + restricted_atan((x - 0.5) / (1.0 + 0.5 * x))
             } else if k < 5.0 {
-                FRAC_PI_4 + restricted_atan(&((x - 1.0) / (1.0 + x)))
+                FRAC_PI_4 + restricted_atan((x - 1.0) / (1.0 + x))
             } else if k < 10.0 {
-                ATAN_FRAC_3_2 + restricted_atan(&((x - 1.5) / (1.0 + 1.5 * x)))
+                ATAN_FRAC_3_2 + restricted_atan((x - 1.5) / (1.0 + 1.5 * x))
             } else {
-                FRAC_PI_2 - restricted_atan(&x.recip())
+                FRAC_PI_2 - restricted_atan(x.recip())
             };
 
             if self.is_sign_positive() {
@@ -535,10 +544,10 @@ impl TwoFloat {
     /// # use twofloat::TwoFloat;
     /// let y = TwoFloat::from(-1.0);
     /// let x = TwoFloat::from(-1.0);
-    /// let theta = y.atan2(&x);
+    /// let theta = TwoFloat::atan2(y, x);
     ///
     /// assert!((theta + 3.0 * twofloat::consts::FRAC_PI_4).abs() < 1e-10);
-    pub fn atan2(&self, other: &TwoFloat) -> TwoFloat {
+    pub fn atan2(self, other: TwoFloat) -> TwoFloat {
         if self.hi == 0.0 {
             if other.hi.is_sign_positive() {
                 TwoFloat::from(0.0)
@@ -574,20 +583,20 @@ mod tests {
 
     #[test]
     fn quadrant_test() {
-        assert_eq!(0, quadrant(&TwoFloat::from(0.5)).1);
-        assert_eq!(0, quadrant(&TwoFloat::from(-0.5)).1);
+        assert_eq!(0, quadrant(TwoFloat::from(0.5)).1);
+        assert_eq!(0, quadrant(TwoFloat::from(-0.5)).1);
 
-        assert_eq!(1, quadrant(&TwoFloat::from(2.0)).1);
-        assert_eq!(3, quadrant(&TwoFloat::from(-2.0)).1);
+        assert_eq!(1, quadrant(TwoFloat::from(2.0)).1);
+        assert_eq!(3, quadrant(TwoFloat::from(-2.0)).1);
 
-        assert_eq!(2, quadrant(&TwoFloat::from(3.14)).1);
-        assert_eq!(2, quadrant(&TwoFloat::from(-3.14)).1);
+        assert_eq!(2, quadrant(TwoFloat::from(3.14)).1);
+        assert_eq!(2, quadrant(TwoFloat::from(-3.14)).1);
 
-        assert_eq!(3, quadrant(&TwoFloat::from(4.0)).1);
-        assert_eq!(1, quadrant(&TwoFloat::from(-4.0)).1);
+        assert_eq!(3, quadrant(TwoFloat::from(4.0)).1);
+        assert_eq!(1, quadrant(TwoFloat::from(-4.0)).1);
 
-        assert_eq!(0, quadrant(&TwoFloat::from(6.0)).1);
-        assert_eq!(0, quadrant(&TwoFloat::from(-6.0)).1);
+        assert_eq!(0, quadrant(TwoFloat::from(6.0)).1);
+        assert_eq!(0, quadrant(TwoFloat::from(-6.0)).1);
     }
 
     #[test]
@@ -685,14 +694,14 @@ mod tests {
 
     #[test]
     fn atan2_test() {
-        assert_eq!(0.0, TwoFloat::from(0.0).atan2(&TwoFloat::from(0.0)));
-        assert_eq!(0.0, TwoFloat::from(0.0).atan2(&TwoFloat::from(1.0)));
-        assert_eq!(PI, TwoFloat::from(0.0).atan2(&TwoFloat::from(-1.0)));
-        assert_eq!(-PI, TwoFloat::from(-0.0).atan2(&TwoFloat::from(-1.0)));
-        assert_eq!(FRAC_PI_2, TwoFloat::from(1.0).atan2(&TwoFloat::from(0.0)));
-        assert_eq!(-FRAC_PI_2, TwoFloat::from(-1.0).atan2(&TwoFloat::from(0.0)));
+        assert_eq!(0.0, TwoFloat::from(0.0).atan2(TwoFloat::from(0.0)));
+        assert_eq!(0.0, TwoFloat::from(0.0).atan2(TwoFloat::from(1.0)));
+        assert_eq!(PI, TwoFloat::from(0.0).atan2(TwoFloat::from(-1.0)));
+        assert_eq!(-PI, TwoFloat::from(-0.0).atan2(TwoFloat::from(-1.0)));
+        assert_eq!(FRAC_PI_2, TwoFloat::from(1.0).atan2(TwoFloat::from(0.0)));
+        assert_eq!(-FRAC_PI_2, TwoFloat::from(-1.0).atan2(TwoFloat::from(0.0)));
         assert!(
-            (0.73f64.atan2(0.21f64) - TwoFloat::from(0.73).atan2(&TwoFloat::from(0.21))).abs()
+            (0.73f64.atan2(0.21f64) - TwoFloat::from(0.73).atan2(TwoFloat::from(0.21))).abs()
                 < THRESHOLD
         );
     }

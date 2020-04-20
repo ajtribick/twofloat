@@ -130,7 +130,7 @@ fn sin_cos_atan2_test() {
     for _ in 0..TEST_ITERS {
         let source = TwoFloat::from(rng.sample(dist));
         let (s, c) = source.sin_cos();
-        let result = s.atan2(&c);
+        let result = TwoFloat::atan2(s, c);
         assert!(
             result.is_valid(),
             "Angle {:?} does not produce valid value for sin_cos/atan2 round trip",

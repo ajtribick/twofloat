@@ -152,7 +152,7 @@ fn powi_reciprocal_test() {
 
 randomized_test!(zero_powf_test, |rng: F64Rand| {
     let source = get_twofloat(rng);
-    let result = TwoFloat::from(0.0).powf(&source);
+    let result = TwoFloat::from(0.0).powf(source);
 
     if source == 0.0 {
         assert!(!result.is_valid(), "0^0 returned valid result");
@@ -164,7 +164,7 @@ randomized_test!(zero_powf_test, |rng: F64Rand| {
 
 randomized_test!(powf_zero_test, |rng: F64Rand| {
     let source = get_twofloat(rng);
-    let result = source.powf(&TwoFloat::from(0.0));
+    let result = source.powf(TwoFloat::from(0.0));
 
     if source == 0.0 {
         assert!(!result.is_valid(), "0^0 returned valid result");
@@ -183,7 +183,7 @@ fn powf_test() {
         let b = rng.sample(value_dist);
 
         let expected = a.powf(b);
-        let result = TwoFloat::from(a).powf(&TwoFloat::from(b));
+        let result = TwoFloat::from(a).powf(TwoFloat::from(b));
 
         assert!(result.is_valid(), "{}^{} resulted in invalid value", a, b);
 

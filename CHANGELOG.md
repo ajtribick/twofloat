@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.2.0
+
+* Prefer by-value passing to increase interface ergonomics.
+
 ## Version 0.1.4
 
 * Added `copysign`, `hypot`, `round`, `signum` functions.
