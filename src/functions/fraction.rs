@@ -43,7 +43,11 @@ impl TwoFloat {
     /// assert_eq!(a, TwoFloat::from(1.0));
     /// assert_eq!(b, TwoFloat::from(0.0));
     pub fn trunc(&self) -> TwoFloat {
-        if self.is_sign_positive() { self.floor() } else { self.ceil() }
+        if self.is_sign_positive() {
+            self.floor()
+        } else {
+            self.ceil()
+        }
     }
 
     /// Returns the smallest integer greater than or equal to the number.
@@ -153,10 +157,22 @@ mod tests {
         assert_eq!(TwoFloat::new_add(-5.0, 1e-200).trunc(), -4.0);
         assert_eq!(TwoFloat::new_add(-5.0, -1e-200).trunc(), -5.0);
 
-        assert_eq!(TwoFloat::new_add(EXP2_60, 1.5).trunc(), TwoFloat::new_add(EXP2_60, 1.0));
-        assert_eq!(TwoFloat::new_add(EXP2_60, -1.5).trunc(), TwoFloat::new_add(EXP2_60, -2.0));
-        assert_eq!(TwoFloat::new_add(-EXP2_60, 1.5).trunc(), TwoFloat::new_add(-EXP2_60, 2.0));
-        assert_eq!(TwoFloat::new_add(-EXP2_60, -1.5).trunc(), TwoFloat::new_add(-EXP2_60, -1.0));
+        assert_eq!(
+            TwoFloat::new_add(EXP2_60, 1.5).trunc(),
+            TwoFloat::new_add(EXP2_60, 1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(EXP2_60, -1.5).trunc(),
+            TwoFloat::new_add(EXP2_60, -2.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(-EXP2_60, 1.5).trunc(),
+            TwoFloat::new_add(-EXP2_60, 2.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(-EXP2_60, -1.5).trunc(),
+            TwoFloat::new_add(-EXP2_60, -1.0)
+        );
     }
 
     #[test]
@@ -169,10 +185,22 @@ mod tests {
         assert_eq!(TwoFloat::new_add(-5.0, 1e-200).ceil(), -4.0);
         assert_eq!(TwoFloat::new_add(-5.0, -1e-200).ceil(), -5.0);
 
-        assert_eq!(TwoFloat::new_add(EXP2_60, 1.5).ceil(), TwoFloat::new_add(EXP2_60, 2.0));
-        assert_eq!(TwoFloat::new_add(EXP2_60, -1.5).ceil(), TwoFloat::new_add(EXP2_60, -1.0));
-        assert_eq!(TwoFloat::new_add(-EXP2_60, 1.5).ceil(), TwoFloat::new_add(-EXP2_60, 2.0));
-        assert_eq!(TwoFloat::new_add(-EXP2_60, -1.5).ceil(), TwoFloat::new_add(-EXP2_60, -1.0));
+        assert_eq!(
+            TwoFloat::new_add(EXP2_60, 1.5).ceil(),
+            TwoFloat::new_add(EXP2_60, 2.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(EXP2_60, -1.5).ceil(),
+            TwoFloat::new_add(EXP2_60, -1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(-EXP2_60, 1.5).ceil(),
+            TwoFloat::new_add(-EXP2_60, 2.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(-EXP2_60, -1.5).ceil(),
+            TwoFloat::new_add(-EXP2_60, -1.0)
+        );
     }
 
     #[test]
@@ -185,10 +213,22 @@ mod tests {
         assert_eq!(TwoFloat::new_add(-5.0, 1e-200).floor(), -5.0);
         assert_eq!(TwoFloat::new_add(-5.0, -1e-200).floor(), -6.0);
 
-        assert_eq!(TwoFloat::new_add(EXP2_60, 1.5).floor(), TwoFloat::new_add(EXP2_60, 1.0));
-        assert_eq!(TwoFloat::new_add(EXP2_60, -1.5).floor(), TwoFloat::new_add(EXP2_60, -2.0));
-        assert_eq!(TwoFloat::new_add(-EXP2_60, 1.5).floor(), TwoFloat::new_add(-EXP2_60, 1.0));
-        assert_eq!(TwoFloat::new_add(-EXP2_60, -1.5).floor(), TwoFloat::new_add(-EXP2_60, -2.0));
+        assert_eq!(
+            TwoFloat::new_add(EXP2_60, 1.5).floor(),
+            TwoFloat::new_add(EXP2_60, 1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(EXP2_60, -1.5).floor(),
+            TwoFloat::new_add(EXP2_60, -2.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(-EXP2_60, 1.5).floor(),
+            TwoFloat::new_add(-EXP2_60, 1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(-EXP2_60, -1.5).floor(),
+            TwoFloat::new_add(-EXP2_60, -2.0)
+        );
     }
 
     #[test]
@@ -213,18 +253,54 @@ mod tests {
         assert_eq!(TwoFloat::new_add(-1.5, 1e-200).round(), -1.0);
         assert_eq!(TwoFloat::new_add(-1.5, -1e-200).round(), -2.0);
 
-        assert_eq!(TwoFloat::new_add(EXP2_60, 0.9).round(), TwoFloat::new_add(EXP2_60, 1.0));
-        assert_eq!(TwoFloat::new_add(EXP2_60, 1.1).round(), TwoFloat::new_add(EXP2_60, 1.0));
-        assert_eq!(TwoFloat::new_add(EXP2_60, -0.9).round(), TwoFloat::new_add(EXP2_60, -1.0));
-        assert_eq!(TwoFloat::new_add(EXP2_60, -1.1).round(), TwoFloat::new_add(EXP2_60, -1.0));
-        assert_eq!(TwoFloat::new_add(-EXP2_60, 0.9).round(), TwoFloat::new_add(-EXP2_60, 1.0));
-        assert_eq!(TwoFloat::new_add(-EXP2_60, 1.1).round(), TwoFloat::new_add(-EXP2_60, 1.0));
-        assert_eq!(TwoFloat::new_add(-EXP2_60, -0.9).round(), TwoFloat::new_add(-EXP2_60, -1.0));
-        assert_eq!(TwoFloat::new_add(-EXP2_60, -1.1).round(), TwoFloat::new_add(-EXP2_60, -1.0));
+        assert_eq!(
+            TwoFloat::new_add(EXP2_60, 0.9).round(),
+            TwoFloat::new_add(EXP2_60, 1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(EXP2_60, 1.1).round(),
+            TwoFloat::new_add(EXP2_60, 1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(EXP2_60, -0.9).round(),
+            TwoFloat::new_add(EXP2_60, -1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(EXP2_60, -1.1).round(),
+            TwoFloat::new_add(EXP2_60, -1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(-EXP2_60, 0.9).round(),
+            TwoFloat::new_add(-EXP2_60, 1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(-EXP2_60, 1.1).round(),
+            TwoFloat::new_add(-EXP2_60, 1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(-EXP2_60, -0.9).round(),
+            TwoFloat::new_add(-EXP2_60, -1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(-EXP2_60, -1.1).round(),
+            TwoFloat::new_add(-EXP2_60, -1.0)
+        );
 
-        assert_eq!(TwoFloat::new_add(EXP2_60, 1.5).round(), TwoFloat::new_add(EXP2_60, 2.0));
-        assert_eq!(TwoFloat::new_add(EXP2_60, -1.5).round(), TwoFloat::new_add(EXP2_60, -1.0));
-        assert_eq!(TwoFloat::new_add(-EXP2_60, 1.5).round(), TwoFloat::new_add(-EXP2_60, 1.0));
-        assert_eq!(TwoFloat::new_add(-EXP2_60, -1.5).round(), TwoFloat::new_add(-EXP2_60, -2.0));
+        assert_eq!(
+            TwoFloat::new_add(EXP2_60, 1.5).round(),
+            TwoFloat::new_add(EXP2_60, 2.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(EXP2_60, -1.5).round(),
+            TwoFloat::new_add(EXP2_60, -1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(-EXP2_60, 1.5).round(),
+            TwoFloat::new_add(-EXP2_60, 1.0)
+        );
+        assert_eq!(
+            TwoFloat::new_add(-EXP2_60, -1.5).round(),
+            TwoFloat::new_add(-EXP2_60, -2.0)
+        );
     }
 }

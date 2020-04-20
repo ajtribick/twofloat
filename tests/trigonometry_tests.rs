@@ -125,10 +125,8 @@ fn tan_atan_test() {
 #[test]
 fn sin_cos_atan2_test() {
     let mut rng = rand::thread_rng();
-    let dist = rand::distributions::Uniform::new_inclusive(
-        -std::f64::consts::PI,
-        std::f64::consts::PI,
-    );
+    let dist =
+        rand::distributions::Uniform::new_inclusive(-std::f64::consts::PI, std::f64::consts::PI);
     for _ in 0..TEST_ITERS {
         let source = TwoFloat::from(rng.sample(dist));
         let (s, c) = source.sin_cos();

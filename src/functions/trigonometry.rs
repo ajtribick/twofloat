@@ -691,6 +691,9 @@ mod tests {
         assert_eq!(-PI, TwoFloat::from(-0.0).atan2(&TwoFloat::from(-1.0)));
         assert_eq!(FRAC_PI_2, TwoFloat::from(1.0).atan2(&TwoFloat::from(0.0)));
         assert_eq!(-FRAC_PI_2, TwoFloat::from(-1.0).atan2(&TwoFloat::from(0.0)));
-        assert!((0.73f64.atan2(0.21f64) - TwoFloat::from(0.73).atan2(&TwoFloat::from(0.21))).abs() < THRESHOLD);
+        assert!(
+            (0.73f64.atan2(0.21f64) - TwoFloat::from(0.73).atan2(&TwoFloat::from(0.21))).abs()
+                < THRESHOLD
+        );
     }
 }

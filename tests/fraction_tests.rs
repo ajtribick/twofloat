@@ -423,12 +423,18 @@ randomized_test!(round_hi_half_test, |rng: F64Rand| {
     };
     let result = source.round();
 
-    assert!(result.is_valid(), "round({:?}) produced invalid value", source);
+    assert!(
+        result.is_valid(),
+        "round({:?}) produced invalid value",
+        source
+    );
     assert_eq!(result, expected, "Incorrect value of round({:?})", source);
 });
 
 randomized_test!(round_lo_fract_test, |rng: F64Rand| {
-    let (a_fract, b) = get_valid_pair(rng, |x, y| y.fract() != 0.0 && y.fract().abs() != 0.5 && no_overlap(x.trunc(), y));
+    let (a_fract, b) = get_valid_pair(rng, |x, y| {
+        y.fract() != 0.0 && y.fract().abs() != 0.5 && no_overlap(x.trunc(), y)
+    });
     let a = a_fract.trunc();
     let source = TwoFloat::try_new(a, b).unwrap();
     let expected = TwoFloat::new_add(a, b.round());
@@ -455,7 +461,11 @@ randomized_test!(round_lo_half_test, |rng: F64Rand| {
 
     let result = source.round();
 
-    assert!(result.is_valid(), "round({:?}) produced invalid value", source);
+    assert!(
+        result.is_valid(),
+        "round({:?}) produced invalid value",
+        source
+    );
     assert_eq!(result, expected, "Incorrect value of round({:?})", source);
 });
 
