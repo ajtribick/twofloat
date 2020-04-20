@@ -408,6 +408,52 @@ op_impl!(
     }
 );
 
+impl TwoFloat {
+    /// Calculates Euclidean division, the matching method for `rem_euclid`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(9.0);
+    /// let b = TwoFloat::from(5.0);
+    ///
+    /// assert_eq!(a.div_euclid(&b), TwoFloat::from(1.0));
+    /// assert_eq!((-a).div_euclid(&b), TwoFloat::from(-2.0));
+    /// assert_eq!(a.div_euclid(&(-b)), TwoFloat::from(-1.0));
+    /// assert_eq!((-a).div_euclid(&(-b)), TwoFloat::from(2.0));
+    pub fn div_euclid(&self, rhs: &TwoFloat) -> TwoFloat {
+        let quotient = (self / rhs).trunc();
+        if (self - &quotient * rhs) < 0.0 {
+            if *rhs > 0.0 { quotient - 1.0 } else { quotient + 1.0 }
+        } else {
+            quotient
+        }
+    }
+
+    /// Calculates the least nonnegative remainder of `self (mod rhs)`.
+    ///
+    /// The return value `r` usually satisfies `0.0 <= r < rhs.abs()`,
+    /// although the errors in numerical computation may result in violations
+    /// of this constraint.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(9.0);
+    /// let b = TwoFloat::from(5.0);
+    ///
+    /// assert_eq!(a.rem_euclid(&b), TwoFloat::from(4.0));
+    /// assert_eq!((-a).rem_euclid(&b), TwoFloat::from(1.0));
+    /// assert_eq!(a.rem_euclid(&(-b)), TwoFloat::from(4.0));
+    /// assert_eq!((-a).rem_euclid(&(-b)), TwoFloat::from(1.0));
+    pub fn rem_euclid(&self, rhs: &TwoFloat) -> TwoFloat {
+        let remainder = self % rhs;
+        if remainder < 0.0 { remainder + rhs.abs() } else { remainder }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

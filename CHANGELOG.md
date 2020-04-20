@@ -5,6 +5,8 @@
 * Added `copysign`, `hypot`, `round`, `signum` functions.
 * Added trigonometric functions `cos`, `sin`, `sin_cos`, `tan` and inverse
   functions `asin`, `acos`, `atan`, `atan2`.
+* Added Euclidean division and remainder functions `div_euclid`,
+  `rem_euclid`.
 
 ## Version 0.1.3
 
