@@ -1,9 +1,9 @@
-use std::convert::{From, TryFrom};
 use std::cmp::Eq;
+use std::convert::{From, TryFrom};
 use std::error;
 use std::fmt;
 
-use crate::base::{TwoFloat, no_overlap};
+use crate::base::{no_overlap, TwoFloat};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct ConversionError;
@@ -52,7 +52,10 @@ impl TryFrom<(f64, f64)> for TwoFloat {
 
     fn try_from(value: (f64, f64)) -> Result<Self, Self::Error> {
         if no_overlap(value.0, value.1) {
-            Ok(Self { hi: value.0, lo: value.1 })
+            Ok(Self {
+                hi: value.0,
+                lo: value.1,
+            })
         } else {
             Err(Self::Error {})
         }
@@ -66,7 +69,10 @@ impl TryFrom<[f64; 2]> for TwoFloat {
 
     fn try_from(value: [f64; 2]) -> Result<Self, Self::Error> {
         if no_overlap(value[0], value[1]) {
-            Ok(Self { hi: value[0], lo: value[1] })
+            Ok(Self {
+                hi: value[0],
+                lo: value[1],
+            })
         } else {
             Err(Self::Error {})
         }

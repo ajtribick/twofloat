@@ -39,7 +39,10 @@ impl TwoFloat {
     /// Algorithm 3 from Joldes et al. (2017).
     pub fn new_mul(a: f64, b: f64) -> Self {
         let p = a * b;
-        Self { hi: p, lo: a.mul_add(b, -p) }
+        Self {
+            hi: p,
+            lo: a.mul_add(b, -p),
+        }
     }
 
     /// Creates a new `TwoFloat` by dividing two `f64` values using Algorithm

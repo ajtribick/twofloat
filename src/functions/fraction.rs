@@ -63,7 +63,10 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(0.0));
     pub fn ceil(self) -> TwoFloat {
         if self.lo.fract() == 0.0 {
-            TwoFloat { hi: self.hi.ceil(), lo: self.lo }
+            TwoFloat {
+                hi: self.hi.ceil(),
+                lo: self.lo,
+            }
         } else if self.hi.fract() == 0.0 {
             fast_two_sum(self.hi, self.lo.ceil())
         } else {
@@ -86,7 +89,10 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(-1.0));
     pub fn floor(self) -> TwoFloat {
         if self.lo.fract() == 0.0 {
-            TwoFloat { hi: self.hi.floor(), lo: self.lo }
+            TwoFloat {
+                hi: self.hi.floor(),
+                lo: self.lo,
+            }
         } else if self.hi.fract() == 0.0 {
             fast_two_sum(self.hi, self.lo.floor())
         } else {
@@ -110,7 +116,10 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(-1.0));
     pub fn round(self) -> TwoFloat {
         if self.lo.fract() == 0.0 {
-            TwoFloat { hi: self.hi.round(), lo: self.lo() }
+            TwoFloat {
+                hi: self.hi.round(),
+                lo: self.lo(),
+            }
         } else if self.hi.fract() == 0.0 {
             if self.lo.fract().abs() == 0.5 {
                 if self.is_sign_positive() {

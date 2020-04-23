@@ -18,31 +18,32 @@ const EXP_UPPER_LIMIT: f64 = 709.782712893384;
 const EXP_LOWER_LIMIT: f64 = -745.1332191019412;
 
 // Coefficients for polynomial approximation of x*(exp(x)+1)/(exp(x)-1)
-
-const P1: TwoFloat = TwoFloat {
-    hi: 0.16666666666666666,
-    lo: 8.301559840894034e-18,
-};
-const P2: TwoFloat = TwoFloat {
-    hi: -0.0027777777777776512,
-    lo: 1.1664268064351513e-19,
-};
-const P3: TwoFloat = TwoFloat {
-    hi: 6.613756613123634e-05,
-    lo: 3.613966532258593e-21,
-};
-const P4: TwoFloat = TwoFloat {
-    hi: -1.6534390027595268e-06,
-    lo: 2.6408090483313454e-23,
-};
-const P5: TwoFloat = TwoFloat {
-    hi: 4.175167193059256e-08,
-    lo: -2.949837910669653e-24,
-};
-const P6: TwoFloat = TwoFloat {
-    hi: -1.0456596683715461e-09,
-    lo: -9.375356618962057e-26,
-};
+const EXP_COEFFS: [TwoFloat; 6] = [
+    TwoFloat {
+        hi: 0.16666666666666666,
+        lo: 8.301559840894034e-18,
+    },
+    TwoFloat {
+        hi: -0.0027777777777776512,
+        lo: 1.1664268064351513e-19,
+    },
+    TwoFloat {
+        hi: 6.613756613123634e-05,
+        lo: 3.613966532258593e-21,
+    },
+    TwoFloat {
+        hi: -1.6534390027595268e-06,
+        lo: 2.6408090483313454e-23,
+    },
+    TwoFloat {
+        hi: 4.175167193059256e-08,
+        lo: -2.949837910669653e-24,
+    },
+    TwoFloat {
+        hi: -1.0456596683715461e-09,
+        lo: -9.375356618962057e-26,
+    },
+];
 
 fn mul_pow2(mut x: f64, mut y: i32) -> f64 {
     loop {
@@ -104,7 +105,7 @@ impl TwoFloat {
             // where R1 = r - (P1*r^2 + P2*r^4 + ...)
 
             let rr = &r * &r;
-            let r1 = r - rr * polynomial!(rr, P1, P2, P3, P4, P5, P6);
+            let r1 = r - rr * polynomial!(rr, EXP_COEFFS);
 
             let exp_r = 1.0 - ((&r * &r1) / (&r1 - 2.0) - &r);
 

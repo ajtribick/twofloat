@@ -1,6 +1,6 @@
-use std::convert::TryFrom;
 use rand::Rng;
-use twofloat::{TwoFloat, no_overlap};
+use std::convert::TryFrom;
+use twofloat::{no_overlap, TwoFloat};
 
 pub mod common;
 use common::*;

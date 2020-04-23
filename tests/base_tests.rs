@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use std::convert::TryFrom;
-use twofloat::{TwoFloat};
+use twofloat::TwoFloat;
 
 pub mod common;
 use common::*;

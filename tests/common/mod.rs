@@ -1,8 +1,8 @@
 #![macro_use]
 
-use std::convert::TryFrom;
 use rand::Rng;
-use twofloat::{TwoFloat, ConversionError};
+use std::convert::TryFrom;
+use twofloat::{ConversionError, TwoFloat};
 
 pub const TEST_ITERS: usize = 100000;
 
