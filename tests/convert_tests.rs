@@ -1,4 +1,4 @@
-use std::convert::TryFrom;
+use core::convert::TryFrom;
 
 use rand::Rng;
 use twofloat::{no_overlap, ConversionError, TwoFloat};
@@ -13,7 +13,7 @@ fn right_bit(f: f64) -> Option<i16> {
         -1023 => {
             let mantissa = fbits & ((1 << 52) - 1);
             if mantissa == 0 {
-                Some(std::i16::MIN)
+                Some(i16::MIN)
             } else {
                 Some(-1074)
             }
@@ -127,7 +127,7 @@ macro_rules! float_test {
 float_test!(f64, from_f64_test, into_f64_test);
 float_test!(f32, from_f32_test, into_f32_test);
 
-fn check_try_from_result<T: std::fmt::Debug + PartialEq>(
+fn check_try_from_result<T: core::fmt::Debug + PartialEq>(
     expected: Result<T, ConversionError>,
     result: Result<T, ConversionError>,
     source: TwoFloat,
@@ -155,8 +155,8 @@ fn check_try_from_result<T: std::fmt::Debug + PartialEq>(
 
 macro_rules! from_twofloat_test {
     ($type:tt) => {
-        const LOWER_BOUND: f64 = std::$type::MIN as f64 - 1.0;
-        const UPPER_BOUND: f64 = std::$type::MAX as f64 + 1.0;
+        const LOWER_BOUND: f64 = $type::MIN as f64 - 1.0;
+        const UPPER_BOUND: f64 = $type::MAX as f64 + 1.0;
 
         randomized_test!(from_twofloat_lower_bound, |rng: F64Rand| {
             let source = loop {
@@ -166,7 +166,7 @@ macro_rules! from_twofloat_test {
             };
 
             let expected = if source.lo() > 0.0 {
-                Ok(std::$type::MIN)
+                Ok($type::MIN)
             } else {
                 Err(ConversionError {})
             };
@@ -189,7 +189,7 @@ macro_rules! from_twofloat_test {
                 }
             };
             let expected = if source.lo() < 0.0 {
-                Ok(std::$type::MAX)
+                Ok($type::MAX)
             } else {
                 Err(ConversionError {})
             };
@@ -309,7 +309,7 @@ macro_rules! int_test {
             fn to_twofloat() {
                 let mut rng = rand::thread_rng();
                 let dist =
-                    rand::distributions::Uniform::new_inclusive(std::$type::MIN, std::$type::MAX);
+                    rand::distributions::Uniform::new_inclusive($type::MIN, $type::MAX);
                 for _ in 0..TEST_ITERS {
                     let source = rng.sample(dist);
 
@@ -341,7 +341,7 @@ macro_rules! int_test {
 
             #[test]
             fn to_twofloat() {
-                let mut source = std::$type::MIN;
+                let mut source = $type::MIN;
                 loop {
                     let result: TwoFloat = source.into();
 
@@ -359,7 +359,7 @@ macro_rules! int_test {
                         source
                     );
 
-                    if source == std::$type::MAX {
+                    if source == $type::MAX {
                         break;
                     }
                     source += 1;
@@ -388,15 +388,15 @@ macro_rules! int64_test {
             fn to_twofloat() {
                 let mut rng = rand::thread_rng();
                 let source_dist =
-                    rand::distributions::Uniform::new_inclusive(std::$type::MIN, std::$type::MAX);
+                    rand::distributions::Uniform::new_inclusive($type::MIN, $type::MAX);
                 for _ in 0..TEST_ITERS {
                     let source = rng.sample(source_dist);
                     let result: TwoFloat = source.into();
 
                     assert!(result.is_valid(), "Conversion of {} was invalid", source);
                     assert!(
-                        result.hi() >= std::$type::MIN as f64
-                            && result.hi() <= std::$type::MAX as f64,
+                        result.hi() >= $type::MIN as f64
+                            && result.hi() <= $type::MAX as f64,
                         "Conversion of {} high word out of range",
                         source
                     );
@@ -411,7 +411,7 @@ macro_rules! int64_test {
                         source
                     );
 
-                    if result.hi() == std::$type::MAX as f64 {
+                    if result.hi() == $type::MAX as f64 {
                         assert!(
                             result.lo() < 0.0,
                             "Converted result of {} out of range",
@@ -419,11 +419,11 @@ macro_rules! int64_test {
                         );
                         assert_eq!(
                             (-result.lo()) as $type - 1,
-                            std::$type::MAX - source,
+                            $type::MAX - source,
                             "Conversion of {} did not produce matching value",
                             source
                         );
-                    } else if result.hi() == std::$type::MIN as f64 {
+                    } else if result.hi() == $type::MIN as f64 {
                         assert!(
                             result.lo() >= 0.0,
                             "Converted result of {} out of range",
@@ -431,7 +431,7 @@ macro_rules! int64_test {
                         );
                         assert_eq!(
                             result.lo() as $type,
-                            source - std::$type::MIN,
+                            source - $type::MIN,
                             "Conversion of {} did not produce matching value",
                             source
                         );
@@ -453,8 +453,8 @@ macro_rules! int64_test {
                 }
             }
 
-            const LOWER_BOUND: f64 = std::$type::MIN as f64 - 1.0;
-            const UPPER_BOUND: f64 = std::$type::MAX as f64;
+            const LOWER_BOUND: f64 = $type::MIN as f64 - 1.0;
+            const UPPER_BOUND: f64 = $type::MAX as f64;
 
             randomized_test!(from_twofloat_lower_bound, |rng: F64Rand| {
                 let source = loop {
@@ -463,7 +463,7 @@ macro_rules! int64_test {
                     }
                 };
                 let expected = if source.lo() >= 0.0 {
-                    Ok(std::$type::MIN + source.lo() as $type)
+                    Ok($type::MIN + source.lo() as $type)
                 } else {
                     Err(ConversionError {})
                 };
@@ -487,7 +487,7 @@ macro_rules! int64_test {
                     }
                 };
                 let expected = if source.lo() < 0.0 {
-                    Ok(std::$type::MAX - ((-source.lo().floor()) as $type) + 1)
+                    Ok($type::MAX - ((-source.lo().floor()) as $type) + 1)
                 } else {
                     Err(ConversionError {})
                 };
@@ -514,7 +514,7 @@ macro_rules! int64_test {
                     let x = f64::from_bits(
                         rng.sample(mantissa_dist) | (rng.sample(exponent_dist) << 52),
                     );
-                    if std::$type::MIN == 0 || rng.gen() {
+                    if $type::MIN == 0 || rng.gen() {
                         x
                     } else {
                         -x
@@ -526,7 +526,7 @@ macro_rules! int64_test {
                         let a = get_valid_f64(&mut gen_valid_f64, |x| {
                             x > LOWER_BOUND && x < UPPER_BOUND && x.fract() != 0.0
                         });
-                        let rb = right_bit(a).unwrap_or(std::i16::MIN);
+                        let rb = right_bit(a).unwrap_or(i16::MIN);
                         if (rb < -1019) {
                             continue;
                         }
@@ -563,7 +563,7 @@ macro_rules! int64_test {
                     let x = f64::from_bits(
                         rng.sample(mantissa_dist) | (rng.sample(exponent_dist) << 52),
                     );
-                    if std::$type::MIN == 0 || rng.gen() {
+                    if $type::MIN == 0 || rng.gen() {
                         x
                     } else {
                         -x

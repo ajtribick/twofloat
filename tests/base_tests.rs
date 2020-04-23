@@ -1,5 +1,5 @@
-use std::cmp::Ordering;
-use std::convert::TryFrom;
+use core::cmp::Ordering;
+use core::convert::TryFrom;
 use twofloat::TwoFloat;
 
 pub mod common;

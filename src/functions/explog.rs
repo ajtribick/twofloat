@@ -81,7 +81,7 @@ impl TwoFloat {
             TwoFloat::from(0.0)
         } else if self.hi >= EXP_UPPER_LIMIT {
             TwoFloat {
-                hi: std::f64::INFINITY,
+                hi: f64::INFINITY,
                 lo: 0.0,
             }
         } else if self.hi == 0.0 {

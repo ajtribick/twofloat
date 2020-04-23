@@ -1,5 +1,5 @@
-use std::cmp::Ordering;
-use std::fmt;
+use core::cmp::Ordering;
+use core::fmt;
 
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
@@ -17,7 +17,7 @@ fn right_bit(f: f64) -> Option<i16> {
         -1023 => {
             let mantissa = fbits & ((1 << 52) - 1);
             if mantissa == 0 {
-                Some(std::i16::MIN)
+                Some(i16::MIN)
             } else {
                 Some(-1074)
             }
@@ -35,7 +35,7 @@ fn left_bit(f: f64) -> Option<i16> {
         -1023 => {
             let mantissa = fbits & ((1 << 52) - 1);
             if mantissa == 0 {
-                Some(std::i16::MIN)
+                Some(i16::MIN)
             } else {
                 Some(-1011 - mantissa.leading_zeros() as i16)
             }
@@ -152,8 +152,8 @@ impl TwoFloat {
 
     /// Represents an error value equivalent to `f64::NAN`.
     pub const NAN: Self = Self {
-        hi: std::f64::NAN,
-        lo: std::f64::NAN,
+        hi: f64::NAN,
+        lo: f64::NAN,
     };
 }
 
@@ -203,9 +203,9 @@ mod tests {
 
     #[test]
     fn right_bit_test() {
-        assert_eq!(right_bit(std::f64::INFINITY), None);
-        assert_eq!(right_bit(std::f64::NEG_INFINITY), None);
-        assert_eq!(right_bit(std::f64::NAN), None);
+        assert_eq!(right_bit(f64::INFINITY), None);
+        assert_eq!(right_bit(f64::NEG_INFINITY), None);
+        assert_eq!(right_bit(f64::NAN), None);
         assert_eq!(right_bit(1.0), Some(-52));
         assert_eq!(right_bit(2.0), Some(-51));
         assert_eq!(right_bit(0.5), Some(-53));
@@ -217,9 +217,9 @@ mod tests {
 
     #[test]
     fn left_bit_test() {
-        assert_eq!(left_bit(std::f64::INFINITY), None);
-        assert_eq!(left_bit(std::f64::NEG_INFINITY), None);
-        assert_eq!(left_bit(std::f64::NAN), None);
+        assert_eq!(left_bit(f64::INFINITY), None);
+        assert_eq!(left_bit(f64::NEG_INFINITY), None);
+        assert_eq!(left_bit(f64::NAN), None);
         assert_eq!(left_bit(1.0), Some(0));
         assert_eq!(left_bit(2.0), Some(1));
         assert_eq!(left_bit(0.5), Some(-1));

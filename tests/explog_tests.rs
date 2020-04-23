@@ -35,7 +35,7 @@ fn exp_test() {
 #[test]
 fn ln_test() {
     let mut rng = rand::thread_rng();
-    let src_dist = rand::distributions::Uniform::new(f64::from_bits(1u64), std::f64::MAX);
+    let src_dist = rand::distributions::Uniform::new(f64::from_bits(1u64), f64::MAX);
 
     for _ in 0..TEST_ITERS {
         let a = rng.sample(src_dist);

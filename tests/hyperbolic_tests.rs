@@ -1,5 +1,5 @@
 use rand::Rng;
-use std::convert::TryFrom;
+use core::convert::TryFrom;
 use twofloat::*;
 
 pub mod common;

@@ -132,7 +132,7 @@ mod tests {
 
                 #[test]
                 fn value_test() {
-                    assert_eq!($name.hi, std::f64::consts::$name);
+                    assert_eq!($name.hi, core::f64::consts::$name);
                 }
             }
         };
@@ -150,7 +150,7 @@ mod tests {
                 #[cfg($feature)]
                 #[test]
                 fn value_test() {
-                    assert_eq!($name.hi, std::f64::consts::$name);
+                    assert_eq!($name.hi, core::f64::consts::$name);
                 }
             }
         };

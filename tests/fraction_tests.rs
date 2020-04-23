@@ -1,4 +1,4 @@
-use std::convert::TryFrom;
+use core::convert::TryFrom;
 use twofloat::{no_overlap, TwoFloat};
 
 pub mod common;

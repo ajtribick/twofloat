@@ -1,5 +1,5 @@
 use rand::Rng;
-use std::convert::TryFrom;
+use core::convert::TryFrom;
 use twofloat::TwoFloat;
 
 pub mod common;
@@ -58,8 +58,8 @@ fn sin_cos_test() {
 fn sin_asin_test() {
     let mut rng = rand::thread_rng();
     let dist = rand::distributions::Uniform::new_inclusive(
-        -std::f64::consts::FRAC_PI_2,
-        std::f64::consts::FRAC_PI_2,
+        -core::f64::consts::FRAC_PI_2,
+        core::f64::consts::FRAC_PI_2,
     );
     for _ in 0..TEST_ITERS {
         let source = TwoFloat::from(rng.sample(dist));
@@ -81,7 +81,7 @@ fn sin_asin_test() {
 #[test]
 fn cos_acos_test() {
     let mut rng = rand::thread_rng();
-    let dist = rand::distributions::Uniform::new_inclusive(0.0, std::f64::consts::PI);
+    let dist = rand::distributions::Uniform::new_inclusive(0.0, core::f64::consts::PI);
     for _ in 0..TEST_ITERS {
         let source = TwoFloat::from(rng.sample(dist));
         let result = source.cos().acos();
@@ -103,8 +103,8 @@ fn cos_acos_test() {
 fn tan_atan_test() {
     let mut rng = rand::thread_rng();
     let dist = rand::distributions::Uniform::new_inclusive(
-        -std::f64::consts::FRAC_PI_2,
-        std::f64::consts::FRAC_PI_2,
+        -core::f64::consts::FRAC_PI_2,
+        core::f64::consts::FRAC_PI_2,
     );
     for _ in 0..TEST_ITERS {
         let source = TwoFloat::from(rng.sample(dist));
@@ -127,7 +127,7 @@ fn tan_atan_test() {
 fn sin_cos_atan2_test() {
     let mut rng = rand::thread_rng();
     let dist =
-        rand::distributions::Uniform::new_inclusive(-std::f64::consts::PI, std::f64::consts::PI);
+        rand::distributions::Uniform::new_inclusive(-core::f64::consts::PI, core::f64::consts::PI);
     for _ in 0..TEST_ITERS {
         let source = TwoFloat::from(rng.sample(dist));
         let (s, c) = source.sin_cos();

@@ -1,7 +1,7 @@
-use std::cmp::Eq;
-use std::convert::{From, TryFrom};
+use core::cmp::Eq;
+use core::convert::{From, TryFrom};
 use std::error;
-use std::fmt;
+use core::fmt;
 
 use crate::base::{no_overlap, TwoFloat};
 
@@ -109,19 +109,19 @@ macro_rules! int_convert {
         }
 
         from_conversion!(|value: TwoFloat| -> Result<$type, ConversionError> {
-            const LOWER_BOUND: f64 = std::$type::MIN as f64 - 1.0;
-            const UPPER_BOUND: f64 = std::$type::MAX as f64 + 1.0;
+            const LOWER_BOUND: f64 = $type::MIN as f64 - 1.0;
+            const UPPER_BOUND: f64 = $type::MAX as f64 + 1.0;
             if value.hi < LOWER_BOUND || value.hi > UPPER_BOUND {
                 Err(ConversionError {})
             } else if value.hi == LOWER_BOUND {
                 if value.lo > 0.0 {
-                    Ok(std::$type::MIN)
+                    Ok($type::MIN)
                 } else {
                     Err(ConversionError {})
                 }
             } else if value.hi == UPPER_BOUND {
                 if value.lo < 0.0 {
-                    Ok(std::$type::MAX)
+                    Ok($type::MAX)
                 } else {
                     Err(ConversionError {})
                 }
@@ -150,8 +150,8 @@ int_convert!(u8);
 impl From<i64> for TwoFloat {
     fn from(value: i64) -> Self {
         let a = value as f64;
-        let b = if a == std::i64::MAX as f64 {
-            ((value - std::i64::MAX) - 1) as f64
+        let b = if a == i64::MAX as f64 {
+            ((value - i64::MAX) - 1) as f64
         } else {
             (value - a as i64) as f64
         };
@@ -161,20 +161,20 @@ impl From<i64> for TwoFloat {
 }
 
 from_conversion!(|value: TwoFloat| -> Result<i64, ConversionError> {
-    const LOWER_BOUND: f64 = std::i64::MIN as f64;
-    const UPPER_BOUND: f64 = std::i64::MAX as f64;
+    const LOWER_BOUND: f64 = i64::MIN as f64;
+    const UPPER_BOUND: f64 = i64::MAX as f64;
 
     if value.hi < LOWER_BOUND || value.hi > UPPER_BOUND {
         Err(ConversionError {})
     } else if value.hi == LOWER_BOUND {
         if value.lo >= 0.0 {
-            Ok(std::i64::MIN + value.lo as i64)
+            Ok(i64::MIN + value.lo as i64)
         } else {
             Err(ConversionError {})
         }
     } else if value.hi == UPPER_BOUND {
         if value.lo < 0.0 {
-            Ok(std::i64::MAX + value.lo.floor() as i64 + 1)
+            Ok(i64::MAX + value.lo.floor() as i64 + 1)
         } else {
             Err(ConversionError {})
         }
@@ -198,8 +198,8 @@ from_conversion!(|value: TwoFloat| -> Result<i64, ConversionError> {
 impl From<u64> for TwoFloat {
     fn from(value: u64) -> Self {
         let a = value as f64;
-        let b = if a == std::u64::MAX as f64 {
-            -(((std::u64::MAX - value) + 1) as f64)
+        let b = if a == u64::MAX as f64 {
+            -(((u64::MAX - value) + 1) as f64)
         } else if value >= a as u64 {
             (value - a as u64) as f64
         } else {
@@ -212,7 +212,7 @@ impl From<u64> for TwoFloat {
 
 from_conversion!(|value: TwoFloat| -> Result<u64, ConversionError> {
     const LOWER_BOUND: f64 = -1.0;
-    const UPPER_BOUND: f64 = std::u64::MAX as f64;
+    const UPPER_BOUND: f64 = u64::MAX as f64;
 
     if value.hi < LOWER_BOUND || value.hi > UPPER_BOUND {
         Err(ConversionError {})
@@ -224,7 +224,7 @@ from_conversion!(|value: TwoFloat| -> Result<u64, ConversionError> {
         }
     } else if value.hi == UPPER_BOUND {
         if value.lo < 0.0 {
-            Ok(std::u64::MAX - (-value.lo.floor() as u64) + 1)
+            Ok(u64::MAX - (-value.lo.floor() as u64) + 1)
         } else {
             Err(ConversionError {})
         }
