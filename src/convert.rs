@@ -1,6 +1,24 @@
 use std::convert::{From, TryFrom};
+use std::cmp::Eq;
+use std::error;
+use std::fmt;
 
 use crate::base::TwoFloat;
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct ConversionError;
+
+impl fmt::Display for ConversionError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "invalid TwoFloat conversion")
+    }
+}
+
+impl error::Error for ConversionError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        None
+    }
+}
 
 macro_rules! from_conversion {
     (|$source_i:ident : TwoFloat| -> $dest:tt $code:block) => {
@@ -56,22 +74,22 @@ macro_rules! int_convert {
             }
         }
 
-        from_conversion!(|value: TwoFloat| -> Result<$type, ()> {
+        from_conversion!(|value: TwoFloat| -> Result<$type, ConversionError> {
             const LOWER_BOUND: f64 = std::$type::MIN as f64 - 1.0;
             const UPPER_BOUND: f64 = std::$type::MAX as f64 + 1.0;
             if value.hi < LOWER_BOUND || value.hi > UPPER_BOUND {
-                Err(())
+                Err(ConversionError {})
             } else if value.hi == LOWER_BOUND {
                 if value.lo > 0.0 {
                     Ok(std::$type::MIN)
                 } else {
-                    Err(())
+                    Err(ConversionError {})
                 }
             } else if value.hi == UPPER_BOUND {
                 if value.lo < 0.0 {
                     Ok(std::$type::MAX)
                 } else {
-                    Err(())
+                    Err(ConversionError {})
                 }
             } else if value.hi.fract() == 0.0 {
                 if value.hi < 0.0 && value.lo > 0.0 {
@@ -108,23 +126,23 @@ impl From<i64> for TwoFloat {
     }
 }
 
-from_conversion!(|value: TwoFloat| -> Result<i64, ()> {
+from_conversion!(|value: TwoFloat| -> Result<i64, ConversionError> {
     const LOWER_BOUND: f64 = std::i64::MIN as f64;
     const UPPER_BOUND: f64 = std::i64::MAX as f64;
 
     if value.hi < LOWER_BOUND || value.hi > UPPER_BOUND {
-        Err(())
+        Err(ConversionError {})
     } else if value.hi == LOWER_BOUND {
         if value.lo >= 0.0 {
             Ok(std::i64::MIN + value.lo as i64)
         } else {
-            Err(())
+            Err(ConversionError {})
         }
     } else if value.hi == UPPER_BOUND {
         if value.lo < 0.0 {
             Ok(std::i64::MAX + value.lo.floor() as i64 + 1)
         } else {
-            Err(())
+            Err(ConversionError {})
         }
     } else if value.hi.fract() == 0.0 {
         if value.lo.trunc() == 0.0 {
@@ -158,23 +176,23 @@ impl From<u64> for TwoFloat {
     }
 }
 
-from_conversion!(|value: TwoFloat| -> Result<u64, ()> {
+from_conversion!(|value: TwoFloat| -> Result<u64, ConversionError> {
     const LOWER_BOUND: f64 = -1.0;
     const UPPER_BOUND: f64 = std::u64::MAX as f64;
 
     if value.hi < LOWER_BOUND || value.hi > UPPER_BOUND {
-        Err(())
+        Err(ConversionError {})
     } else if value.hi == LOWER_BOUND {
         if value.lo >= 0.0 {
             Ok(0)
         } else {
-            Err(())
+            Err(ConversionError {})
         }
     } else if value.hi == UPPER_BOUND {
         if value.lo < 0.0 {
             Ok(std::u64::MAX - (-value.lo.floor() as u64) + 1)
         } else {
-            Err(())
+            Err(ConversionError {})
         }
     } else if value.hi.fract() == 0.0 {
         if value.lo.trunc() == 0.0 {

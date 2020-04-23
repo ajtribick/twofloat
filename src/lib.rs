@@ -52,3 +52,4 @@ mod convert;
 mod functions;
 
 pub use base::{no_overlap, TwoFloat};
+pub use convert::ConversionError;

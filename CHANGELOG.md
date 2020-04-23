@@ -2,7 +2,9 @@
 
 ## Version 0.2.0
 
-* Prefer by-value passing to increase interface ergonomics.
+* Breaking change: prefer value-like arguments to improve ergonomics.
+* Breaking change: use `ConversionError` type to represent failure of
+  `try_into`.
 
 ## Version 0.1.4
 

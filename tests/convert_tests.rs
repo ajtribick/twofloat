@@ -72,8 +72,8 @@ float_test!(f64, from_f64_test, into_f64_test);
 float_test!(f32, from_f32_test, into_f32_test);
 
 fn check_try_from_result<T: std::fmt::Debug + PartialEq>(
-    expected: Result<T, ()>,
-    result: Result<T, ()>,
+    expected: Result<T, ConversionError>,
+    result: Result<T, ConversionError>,
     source: TwoFloat,
 ) {
     if let Ok(expected_value) = expected {
@@ -112,7 +112,7 @@ macro_rules! from_twofloat_test {
             let expected = if source.lo() > 0.0 {
                 Ok(std::$type::MIN)
             } else {
-                Err(())
+                Err(ConversionError {})
             };
             let result = $type::try_from(source);
 
@@ -135,7 +135,7 @@ macro_rules! from_twofloat_test {
             let expected = if source.lo() < 0.0 {
                 Ok(std::$type::MAX)
             } else {
-                Err(())
+                Err(ConversionError {})
             };
             let result = $type::try_from(source);
 
@@ -409,7 +409,7 @@ macro_rules! int64_test {
                 let expected = if source.lo() >= 0.0 {
                     Ok(std::$type::MIN + source.lo() as $type)
                 } else {
-                    Err(())
+                    Err(ConversionError {})
                 };
 
                 let result = $type::try_from(source);
@@ -433,7 +433,7 @@ macro_rules! int64_test {
                 let expected = if source.lo() < 0.0 {
                     Ok(std::$type::MAX - ((-source.lo().floor()) as $type) + 1)
                 } else {
-                    Err(())
+                    Err(ConversionError {})
                 };
                 let result = $type::try_from(source);
 

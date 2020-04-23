@@ -1,6 +1,8 @@
 use std::cmp::Ordering;
 use std::fmt;
 
+use crate::convert::ConversionError;
+
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -79,9 +81,9 @@ impl TwoFloat {
     /// # Examples
     ///
     /// ```
-    /// # use twofloat::TwoFloat;
+    /// # use twofloat::{ConversionError, TwoFloat};
     /// #
-    /// # fn main() -> Result<(), ()> {
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let a = 1.0;
     /// let b = 1.0e-200;
     /// let result1 = TwoFloat::try_new(a, b)?;
@@ -91,11 +93,11 @@ impl TwoFloat {
     /// assert!(result2.is_err());
     /// #     Ok(())
     /// # }
-    pub fn try_new(a: f64, b: f64) -> Result<TwoFloat, ()> {
+    pub fn try_new(a: f64, b: f64) -> Result<TwoFloat, ConversionError> {
         if no_overlap(a, b) {
             Ok(TwoFloat { hi: a, lo: b })
         } else {
-            Err(())
+            Err(ConversionError {})
         }
     }
 
