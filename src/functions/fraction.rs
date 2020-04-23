@@ -1,5 +1,5 @@
 use crate::arithmetic::*;
-use crate::base::*;
+use crate::base::TwoFloat;
 
 impl TwoFloat {
     /// Returns the fractional part of the number.
@@ -16,19 +16,17 @@ impl TwoFloat {
     pub fn fract(self) -> TwoFloat {
         let hi_fract = self.hi.fract();
         let lo_fract = self.lo.fract();
-        let (a, b) = if lo_fract == 0.0 {
-            (hi_fract, 0.0)
+        if lo_fract == 0.0 {
+            hi_fract.into()
         } else if hi_fract == 0.0 {
             match (self.hi >= 0.0, self.lo >= 0.0) {
                 (true, false) => fast_two_sum(1.0, lo_fract),
                 (false, true) => fast_two_sum(-1.0, lo_fract),
-                _ => (self.lo.fract(), 0.0),
+                _ => self.lo.fract().into(),
             }
         } else {
             fast_two_sum(self.hi.fract(), self.lo)
-        };
-
-        TwoFloat { hi: a, lo: b }
+        }
     }
 
     /// Returns the integer part of the number.
@@ -64,15 +62,13 @@ impl TwoFloat {
     /// assert_eq!(b, TwoFloat::from(1.0));
     /// assert_eq!(c, TwoFloat::from(0.0));
     pub fn ceil(self) -> TwoFloat {
-        let (a, b) = if self.lo.fract() == 0.0 {
-            (self.hi.ceil(), self.lo)
+        if self.lo.fract() == 0.0 {
+            TwoFloat { hi: self.hi.ceil(), lo: self.lo }
         } else if self.hi.fract() == 0.0 {
             fast_two_sum(self.hi, self.lo.ceil())
         } else {
-            (self.hi.ceil(), 0.0)
-        };
-
-        TwoFloat { hi: a, lo: b }
+            self.hi.ceil().into()
+        }
     }
 
     /// Returns the smallest integer less than or equal to the number.
@@ -89,15 +85,13 @@ impl TwoFloat {
     /// assert_eq!(b, TwoFloat::from(0.0));
     /// assert_eq!(c, TwoFloat::from(-1.0));
     pub fn floor(self) -> TwoFloat {
-        let (a, b) = if self.lo.fract() == 0.0 {
-            (self.hi.floor(), self.lo)
+        if self.lo.fract() == 0.0 {
+            TwoFloat { hi: self.hi.floor(), lo: self.lo }
         } else if self.hi.fract() == 0.0 {
             fast_two_sum(self.hi, self.lo.floor())
         } else {
-            (self.hi.floor(), 0.0)
-        };
-
-        TwoFloat { hi: a, lo: b }
+            self.hi.floor().into()
+        }
     }
 
     /// Returns the nearest integer to the value. Round half-way cases away
@@ -115,8 +109,8 @@ impl TwoFloat {
     /// assert_eq!(b, TwoFloat::from(1.0));
     /// assert_eq!(c, TwoFloat::from(-1.0));
     pub fn round(self) -> TwoFloat {
-        let (a, b) = if self.lo.fract() == 0.0 {
-            (self.hi.round(), self.lo())
+        if self.lo.fract() == 0.0 {
+            TwoFloat { hi: self.hi.round(), lo: self.lo() }
         } else if self.hi.fract() == 0.0 {
             if self.lo.fract().abs() == 0.5 {
                 if self.is_sign_positive() {
@@ -129,15 +123,13 @@ impl TwoFloat {
             }
         } else if self.hi.fract().abs() == 0.5 {
             if self.hi.is_sign_positive() == self.lo.is_sign_positive() {
-                (self.hi.round(), 0.0)
+                self.hi.round().into()
             } else {
-                (self.hi.trunc(), 0.0)
+                self.hi.trunc().into()
             }
         } else {
-            (self.hi.round(), 0.0)
-        };
-
-        TwoFloat { hi: a, lo: b }
+            self.hi.round().into()
+        }
     }
 }
 

@@ -1,5 +1,6 @@
+use std::convert::TryFrom;
 use rand::Rng;
-use twofloat::*;
+use twofloat::{TwoFloat, no_overlap};
 
 pub mod common;
 use common::*;
@@ -180,7 +181,7 @@ macro_rules! op_test_f64_common {
                     if no_overlap(b, c) { break (b, c); }
                 };
 
-                let value = TwoFloat::try_new(b, c).unwrap();
+                let value = TwoFloat::try_from((b, c)).unwrap();
                 let expected = a $op b;
                 if (!expected.is_finite()) { continue; }
                 let result = a $op value;
@@ -214,7 +215,7 @@ macro_rules! op_test_f64 {
                         if no_overlap(b, c) { break (b, c); }
                     };
 
-                    let value = TwoFloat::try_new(b, c).unwrap();
+                    let value = TwoFloat::try_from((b, c)).unwrap();
                     let expected = a $op value;
                     if (!expected.is_valid()) { continue; }
 
@@ -246,7 +247,7 @@ macro_rules! op_test_f64 {
                         if no_overlap(b, c) { break (b, c); }
                     };
 
-                    let value = TwoFloat::try_new(b, c).unwrap();
+                    let value = TwoFloat::try_from((b, c)).unwrap();
                     let expected = b $op a;
                     if (!expected.is_finite()) { continue; }
                     let result = value $op a;
@@ -322,8 +323,8 @@ macro_rules! op_test {
                         if no_overlap(x, y) { break (x, y); }
                     };
 
-                    let value1 = TwoFloat::try_new(a, b).unwrap();
-                    let value2 = TwoFloat::try_new(c, d).unwrap();
+                    let value1 = TwoFloat::try_from((a, b)).unwrap();
+                    let value2 = TwoFloat::try_from((c, d)).unwrap();
 
                     let expected = a $op c;
                     if (!expected.is_finite()) { continue; }

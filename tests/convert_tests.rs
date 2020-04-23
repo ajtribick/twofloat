@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 
 use rand::Rng;
-use twofloat::*;
+use twofloat::{ConversionError, TwoFloat, no_overlap};
 
 pub mod common;
 use common::*;
@@ -22,6 +22,62 @@ fn right_bit(f: f64) -> Option<i16> {
         _ => Some(exponent - 52),
     }
 }
+
+randomized_test!(try_from_tuple_no_overlap_test, |rng: F64Rand| {
+    let (a, b) = get_valid_pair(rng, |x, y| no_overlap(x, y));
+    let result = TwoFloat::try_from((a, b));
+    assert!(
+        result.is_ok(),
+        "Creation from non-overlapping pair {}, {} resulted in error",
+        a,
+        b
+    );
+    let unwrapped = result.unwrap();
+    assert_eq!(
+        (unwrapped.hi(), unwrapped.lo()),
+        (a, b),
+        "Value mismatch in creation of TwoFloat"
+    );
+});
+
+randomized_test!(try_from_tuple_overlap_test, |rng: F64Rand| {
+    let (a, b) = get_valid_pair(rng, |x, y| !no_overlap(x, y));
+    let result = TwoFloat::try_from((a, b));
+    assert!(
+        result.is_err(),
+        "Creation from overlapping pair {}, {} resulted in value",
+        a,
+        b
+    );
+});
+
+randomized_test!(try_from_array_no_overlap_test, |rng: F64Rand| {
+    let (a, b) = get_valid_pair(rng, |x, y| no_overlap(x, y));
+    let result = TwoFloat::try_from([a, b]);
+    assert!(
+        result.is_ok(),
+        "Creation from non-overlapping pair {}, {} resulted in error",
+        a,
+        b
+    );
+    let unwrapped = result.unwrap();
+    assert_eq!(
+        (unwrapped.hi(), unwrapped.lo()),
+        (a, b),
+        "Value mismatch in creation of TwoFloat"
+    );
+});
+
+randomized_test!(try_from_array_overlap_test, |rng: F64Rand| {
+    let (a, b) = get_valid_pair(rng, |x, y| !no_overlap(x, y));
+    let result = TwoFloat::try_from([a, b]);
+    assert!(
+        result.is_err(),
+        "Creation from overlapping pair {}, {} resulted in value",
+        a,
+        b
+    );
+});
 
 macro_rules! float_test {
     ($type:tt, $from_test:ident, $into_test:ident) => {
@@ -162,7 +218,7 @@ macro_rules! from_twofloat_test {
                 let (a, b, source) = loop {
                     let a = rng.sample(valid_dist).trunc();
                     let b = if i == 0 { 0.0 } else { get_f64() };
-                    if let Ok(source) = TwoFloat::try_new(a, b) {
+                    if let Ok(source) = TwoFloat::try_from((a, b)) {
                         break (a, b, source);
                     }
                 };
@@ -204,7 +260,7 @@ macro_rules! from_twofloat_test {
                         continue;
                     }
                     let b = if i == 0 { 0.0 } else { get_f64() };
-                    if let Ok(source) = TwoFloat::try_new(a, b) {
+                    if let Ok(source) = TwoFloat::try_from((a, b)) {
                         break (a, source);
                     }
                 };
@@ -482,7 +538,7 @@ macro_rules! int64_test {
                         }
                     };
 
-                    let source = TwoFloat::try_new(a, b).unwrap();
+                    let source = TwoFloat::try_from((a, b)).unwrap();
                     let expected = Ok(a as $type);
                     let result = $type::try_from(source);
 
@@ -529,7 +585,7 @@ macro_rules! int64_test {
                         }
                     };
 
-                    let source = TwoFloat::try_new(a, b).unwrap();
+                    let source = TwoFloat::try_from((a, b)).unwrap();
                     let expected = if a < 0.0 && b > 0.0 {
                         Ok(a as $type + 1)
                     } else if a > 0.0 && b < 0.0 {
@@ -572,7 +628,7 @@ macro_rules! int64_test {
                         }
                     };
 
-                    let source = TwoFloat::try_new(a, b).unwrap();
+                    let source = TwoFloat::try_from((a, b)).unwrap();
                     let expected = if b >= 0.0 {
                         Ok(a as $type + b as $type)
                     } else {

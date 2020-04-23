@@ -5,6 +5,8 @@
 * Breaking change: prefer value-like arguments to improve ergonomics.
 * Breaking change: use `ConversionError` type to represent failure of
   `try_into`.
+* Breaking change: replaced `try_new` and `data` with conversions to/from
+  `(f64, f64)` and `[f64; 2]`.
 
 ## Version 0.1.4
 

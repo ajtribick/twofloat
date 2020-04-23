@@ -1,8 +1,6 @@
 use std::cmp::Ordering;
 use std::fmt;
 
-use crate::convert::ConversionError;
-
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -70,49 +68,6 @@ pub fn no_overlap(a: f64, b: f64) -> bool {
 }
 
 impl TwoFloat {
-    /// Attempts to construct a new `TwoFloat` from two `f64` values. This can
-    /// be used to reconstitute a `TwoFloat` from the values returned by the
-    /// `data` method.
-    ///
-    /// # Errors
-    ///
-    /// An error will be returned if the supplied `f64` values overlap.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use twofloat::{ConversionError, TwoFloat};
-    /// #
-    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let a = 1.0;
-    /// let b = 1.0e-200;
-    /// let result1 = TwoFloat::try_new(a, b)?;
-    /// let result2 = TwoFloat::try_new(1.0, 2.0);
-    ///
-    /// assert_eq!(result1.data(), (a, b));
-    /// assert!(result2.is_err());
-    /// #     Ok(())
-    /// # }
-    pub fn try_new(a: f64, b: f64) -> Result<TwoFloat, ConversionError> {
-        if no_overlap(a, b) {
-            Ok(TwoFloat { hi: a, lo: b })
-        } else {
-            Err(ConversionError {})
-        }
-    }
-
-    /// Returns the high and low words of `self` as a tuple.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use twofloat::TwoFloat;
-    /// let value = TwoFloat::new_add(1.0, 1.0e-200);
-    /// assert_eq!(value.data(), (1.0, 1.0e-200));
-    pub fn data(&self) -> (f64, f64) {
-        (self.hi, self.lo)
-    }
-
     /// Returns the high word of `self`.
     ///
     /// # Examples

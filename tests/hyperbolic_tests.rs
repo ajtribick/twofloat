@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use rand::Rng;
 use twofloat::*;
 
@@ -13,7 +14,7 @@ fn cosh_sinh_test() {
         let source = loop {
             let a = rng.sample(dist);
             let b = get_f64();
-            if let Ok(result) = TwoFloat::try_new(a, b) {
+            if let Ok(result) = TwoFloat::try_from((a, b)) {
                 break result;
             }
         };

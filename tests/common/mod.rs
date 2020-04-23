@@ -1,5 +1,6 @@
 #![macro_use]
 
+use std::convert::TryFrom;
 use rand::Rng;
 use twofloat::{TwoFloat, ConversionError};
 
@@ -45,7 +46,7 @@ pub fn get_valid_f64<F: Fn(f64) -> bool>(rng: F64Rand, pred: F) -> f64 {
 
 pub fn get_twofloat(rng: F64Rand) -> TwoFloat {
     loop {
-        if let Ok(result) = TwoFloat::try_new(rng(), rng()) {
+        if let Ok(result) = TwoFloat::try_from((rng(), rng())) {
             return result;
         }
     }
@@ -57,7 +58,7 @@ pub fn try_get_twofloat_with_hi(rng: F64Rand, hi: f64) -> Result<TwoFloat, Conve
     }
 
     for _ in 0..10 {
-        let result = TwoFloat::try_new(hi, rng() % hi);
+        let result = TwoFloat::try_from((hi, rng() % hi));
         if result.is_ok() {
             return result;
         }
@@ -68,7 +69,7 @@ pub fn try_get_twofloat_with_hi(rng: F64Rand, hi: f64) -> Result<TwoFloat, Conve
 
 pub fn try_get_twofloat_with_lo(rng: F64Rand, lo: f64) -> Result<TwoFloat, ConversionError> {
     for _ in 0..10 {
-        let result = TwoFloat::try_new(rng(), lo);
+        let result = TwoFloat::try_from((rng(), lo));
         if result.is_ok() {
             return result;
         }
@@ -85,7 +86,7 @@ pub fn get_valid_twofloat<F: Fn(f64, f64) -> bool>(rng: F64Rand, pred: F) -> Two
             continue;
         }
 
-        if let Ok(result) = TwoFloat::try_new(a, b) {
+        if let Ok(result) = TwoFloat::try_from((a, b)) {
             return result;
         }
     }

@@ -1,4 +1,5 @@
-use twofloat::*;
+use std::convert::TryFrom;
+use twofloat::{TwoFloat, no_overlap};
 
 pub mod common;
 use common::*;
@@ -37,7 +38,7 @@ randomized_test!(fract_hi_fract_test, |rng: F64Rand| {
 randomized_test!(fract_lo_fract_test, |rng: F64Rand| {
     let (a_fract, b) = get_valid_pair(rng, |x, y| y.fract() != 0.0 && no_overlap(x.trunc(), y));
     let a = a_fract.trunc();
-    let source = TwoFloat::try_new(a, b).unwrap();
+    let source = TwoFloat::try_from((a, b)).unwrap();
     let expected = match (a >= 0.0, b >= 0.0) {
         (true, false) => 1.0 + b.fract(),
         (false, true) => -1.0 + b.fract(),
@@ -90,7 +91,7 @@ randomized_test!(fract_no_lo_word_test, |rng: F64Rand| {
 
 randomized_test!(fract_no_fract_test, |rng: F64Rand| {
     let (a_fract, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x.trunc(), y.trunc()));
-    let source = TwoFloat::try_new(a_fract.trunc(), b_fract.trunc()).unwrap();
+    let source = TwoFloat::try_from((a_fract.trunc(), b_fract.trunc())).unwrap();
     let expected = TwoFloat::from(0.0);
     let result = source.fract();
     assert_eq!(
@@ -128,7 +129,7 @@ randomized_test!(trunc_hi_fract_test, |rng: F64Rand| {
 randomized_test!(trunc_lo_fract_test, |rng: F64Rand| {
     let (a_fract, b) = get_valid_pair(rng, |x, y| y.fract() != 0.0 && no_overlap(x.trunc(), y));
     let a = a_fract.trunc();
-    let source = TwoFloat::try_new(a, b).unwrap();
+    let source = TwoFloat::try_from((a, b)).unwrap();
     let expected = if a.is_sign_positive() {
         TwoFloat::new_add(a, b.floor())
     } else {
@@ -175,7 +176,7 @@ randomized_test!(trunc_no_lo_word_test, |rng: F64Rand| {
 randomized_test!(trunc_no_lo_fract_test, |rng: F64Rand| {
     let (a, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x, y.trunc()));
     let b = b_fract.trunc();
-    let source = TwoFloat::try_new(a, b).unwrap();
+    let source = TwoFloat::try_from((a, b)).unwrap();
     let result = source.trunc();
 
     assert!(
@@ -199,7 +200,7 @@ randomized_test!(trunc_no_lo_fract_test, |rng: F64Rand| {
 
 randomized_test!(trunc_no_fract_test, |rng: F64Rand| {
     let (a_fract, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x.trunc(), y.trunc()));
-    let source = TwoFloat::try_new(a_fract.trunc(), b_fract.trunc()).unwrap();
+    let source = TwoFloat::try_from((a_fract.trunc(), b_fract.trunc())).unwrap();
     let expected = source;
     let result = source.trunc();
 
@@ -233,7 +234,7 @@ randomized_test!(ceil_hi_fract_test, |rng: F64Rand| {
 randomized_test!(ceil_lo_fract_test, |rng: F64Rand| {
     let (a_fract, b) = get_valid_pair(rng, |x, y| y.fract() != 0.0 && no_overlap(x.trunc(), y));
     let a = a_fract.trunc();
-    let source = TwoFloat::try_new(a, b).unwrap();
+    let source = TwoFloat::try_from((a, b)).unwrap();
     let expected = TwoFloat::new_add(a, b.ceil());
     let result = source.ceil();
 
@@ -266,7 +267,7 @@ randomized_test!(ceil_no_lo_word_test, |rng: F64Rand| {
 randomized_test!(ceil_no_lo_fract_test, |rng: F64Rand| {
     let (a, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x, y.trunc()));
     let b = b_fract.trunc();
-    let source = TwoFloat::try_new(a, b).unwrap();
+    let source = TwoFloat::try_from((a, b)).unwrap();
     let result = source.ceil();
 
     assert!(
@@ -290,7 +291,7 @@ randomized_test!(ceil_no_lo_fract_test, |rng: F64Rand| {
 
 randomized_test!(ceil_no_fract_test, |rng: F64Rand| {
     let (a_fract, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x.trunc(), y.trunc()));
-    let source = TwoFloat::try_new(a_fract.trunc(), b_fract.trunc()).unwrap();
+    let source = TwoFloat::try_from((a_fract.trunc(), b_fract.trunc())).unwrap();
     let expected = source;
     let result = source.ceil();
 
@@ -324,7 +325,7 @@ randomized_test!(floor_hi_fract_test, |rng: F64Rand| {
 randomized_test!(floor_lo_fract_test, |rng: F64Rand| {
     let (a_fract, b) = get_valid_pair(rng, |x, y| y.fract() != 0.0 && no_overlap(x.trunc(), y));
     let a = a_fract.trunc();
-    let source = TwoFloat::try_new(a, b).unwrap();
+    let source = TwoFloat::try_from((a, b)).unwrap();
     let expected = TwoFloat::new_add(a, b.floor());
     let result = source.floor();
     assert!(
@@ -356,7 +357,7 @@ randomized_test!(floor_no_lo_word_test, |rng: F64Rand| {
 randomized_test!(floor_no_lo_fract_test, |rng: F64Rand| {
     let (a, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x, y.trunc()));
     let b = b_fract.trunc();
-    let source = TwoFloat::try_new(a, b).unwrap();
+    let source = TwoFloat::try_from((a, b)).unwrap();
     let result = source.floor();
 
     assert!(
@@ -380,7 +381,7 @@ randomized_test!(floor_no_lo_fract_test, |rng: F64Rand| {
 
 randomized_test!(floor_no_fract_test, |rng: F64Rand| {
     let (a_fract, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x.trunc(), y.trunc()));
-    let source = TwoFloat::try_new(a_fract.trunc(), b_fract.trunc()).unwrap();
+    let source = TwoFloat::try_from((a_fract.trunc(), b_fract.trunc())).unwrap();
     let expected = source;
     let result = source.floor();
     assert!(
@@ -415,7 +416,7 @@ randomized_test!(round_hi_half_test, |rng: F64Rand| {
         let x_half = x.trunc() + 0.5;
         return x_half.fract().abs() == 0.5 && no_overlap(x_half, y);
     });
-    let source = TwoFloat::try_new(a.trunc() + 0.5, b).unwrap();
+    let source = TwoFloat::try_from((a.trunc() + 0.5, b)).unwrap();
     let expected = if source.hi().is_sign_positive() == source.lo().is_sign_positive() {
         TwoFloat::from(source.hi().round())
     } else {
@@ -436,7 +437,7 @@ randomized_test!(round_lo_fract_test, |rng: F64Rand| {
         y.fract() != 0.0 && y.fract().abs() != 0.5 && no_overlap(x.trunc(), y)
     });
     let a = a_fract.trunc();
-    let source = TwoFloat::try_new(a, b).unwrap();
+    let source = TwoFloat::try_from((a, b)).unwrap();
     let expected = TwoFloat::new_add(a, b.round());
     let result = source.round();
     assert!(
@@ -452,7 +453,7 @@ randomized_test!(round_lo_half_test, |rng: F64Rand| {
         let y_half = y.trunc() + 0.5;
         return y_half.fract().abs() == 0.5 && no_overlap(x, y_half);
     });
-    let source = TwoFloat::try_new(a, b.trunc() + 0.5).unwrap();
+    let source = TwoFloat::try_from((a, b.trunc() + 0.5)).unwrap();
     let expected = if source.hi().is_sign_positive() == source.lo().is_sign_positive() {
         TwoFloat::new_add(source.hi(), source.lo().round())
     } else {
@@ -490,7 +491,7 @@ randomized_test!(round_no_lo_word_test, |rng: F64Rand| {
 randomized_test!(round_no_lo_fract_test, |rng: F64Rand| {
     let (a, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x, y.trunc()));
     let b = b_fract.trunc();
-    let source = TwoFloat::try_new(a, b).unwrap();
+    let source = TwoFloat::try_from((a, b)).unwrap();
     let result = source.round();
 
     assert!(
@@ -514,7 +515,7 @@ randomized_test!(round_no_lo_fract_test, |rng: F64Rand| {
 
 randomized_test!(round_no_fract_test, |rng: F64Rand| {
     let (a_fract, b_fract) = get_valid_pair(rng, |x, y| no_overlap(x.trunc(), y.trunc()));
-    let source = TwoFloat::try_new(a_fract.trunc(), b_fract.trunc()).unwrap();
+    let source = TwoFloat::try_from((a_fract.trunc(), b_fract.trunc())).unwrap();
     let expected = source;
     let result = source.round();
     assert!(

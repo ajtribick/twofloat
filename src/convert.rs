@@ -3,7 +3,7 @@ use std::cmp::Eq;
 use std::error;
 use std::fmt;
 
-use crate::base::TwoFloat;
+use crate::base::{TwoFloat, no_overlap};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct ConversionError;
@@ -43,6 +43,34 @@ macro_rules! from_conversion {
             fn try_from($source_i: &'a TwoFloat) -> Result<Self, Self::Error> $code
         }
     };
+}
+
+from_conversion!(|value: TwoFloat| -> (f64, f64) { (value.hi, value.lo) });
+
+impl TryFrom<(f64, f64)> for TwoFloat {
+    type Error = ConversionError;
+
+    fn try_from(value: (f64, f64)) -> Result<Self, Self::Error> {
+        if no_overlap(value.0, value.1) {
+            Ok(Self { hi: value.0, lo: value.1 })
+        } else {
+            Err(Self::Error {})
+        }
+    }
+}
+
+from_conversion!(|value: TwoFloat| -> [f64; 2] { [value.hi, value.lo] });
+
+impl TryFrom<[f64; 2]> for TwoFloat {
+    type Error = ConversionError;
+
+    fn try_from(value: [f64; 2]) -> Result<Self, Self::Error> {
+        if no_overlap(value[0], value[1]) {
+            Ok(Self { hi: value[0], lo: value[1] })
+        } else {
+            Err(Self::Error {})
+        }
+    }
 }
 
 macro_rules! float_convert {
