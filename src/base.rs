@@ -93,7 +93,7 @@ impl TwoFloat {
     }
 
     /// Returns `true` if `self` is a valid value, where both components are
-    /// finite (not infinity or NaN).
+    /// finite (not infinity or `NAN`).
     ///
     /// # Examples
     ///
@@ -108,7 +108,7 @@ impl TwoFloat {
         self.hi.is_finite() && self.lo.is_finite() && no_overlap(self.hi, self.lo)
     }
 
-    /// Returns the minimum of two numbers. If one of the arguments is NAN,
+    /// Returns the minimum of two numbers. If one of the arguments is `NAN`,
     /// the other is returned.
     ///
     /// # Examples
@@ -129,7 +129,7 @@ impl TwoFloat {
         }
     }
 
-    /// Returns the maximum of two numbers. If one of the arguments is NAN,
+    /// Returns the maximum of two numbers. If one of the arguments is `NAN`,
     /// the other is returned.
     ///
     /// # Examples
@@ -149,6 +149,12 @@ impl TwoFloat {
             other.clone()
         }
     }
+
+    /// Represents an error value equivalent to `f64::NAN`.
+    pub const NAN: Self = Self {
+        hi: std::f64::NAN,
+        lo: std::f64::NAN,
+    };
 }
 
 impl fmt::Display for TwoFloat {

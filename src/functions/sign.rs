@@ -100,10 +100,7 @@ impl TwoFloat {
                 TwoFloat::from(-1.0)
             }
         } else {
-            TwoFloat {
-                hi: std::f64::NAN,
-                lo: std::f64::NAN,
-            }
+            TwoFloat::NAN
         }
     }
 }

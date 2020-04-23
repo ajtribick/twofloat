@@ -261,21 +261,9 @@ fn quadrant(value: TwoFloat) -> (TwoFloat, i8) {
         let quotient = (value / FRAC_PI_2).round();
         let remainder = value - &quotient * FRAC_PI_2;
         match i8::try_from(quotient % 4.0) {
-            Ok(quadrant) => (
-                remainder,
-                if quadrant >= 0 {
-                    quadrant
-                } else {
-                    4 + quadrant
-                },
-            ),
-            _ => (
-                TwoFloat {
-                    hi: std::f64::NAN,
-                    lo: std::f64::NAN,
-                },
-                0,
-            ),
+            Ok(quadrant) if quadrant >= 0 => (remainder, quadrant),
+            Ok(quadrant) if quadrant >= -4 => (remainder, 4 + quadrant),
+            _ => (TwoFloat::NAN, 0),
         }
     }
 }
@@ -346,10 +334,7 @@ impl TwoFloat {
     /// assert!((b - c).abs() < 1e-10);
     pub fn sin(self) -> TwoFloat {
         if !self.is_valid() {
-            return TwoFloat {
-                hi: std::f64::NAN,
-                lo: std::f64::NAN,
-            };
+            return TwoFloat::NAN;
         }
         let (x, quadrant) = quadrant(self);
         match quadrant {
@@ -373,10 +358,7 @@ impl TwoFloat {
     /// assert!((b - c).abs() < 1e-10);
     pub fn cos(self) -> TwoFloat {
         if !self.is_valid() {
-            return TwoFloat {
-                hi: std::f64::NAN,
-                lo: std::f64::NAN,
-            };
+            return TwoFloat::NAN;
         }
         let (x, quadrant) = quadrant(self);
         match quadrant {
@@ -402,16 +384,7 @@ impl TwoFloat {
     /// assert!((c - 2.5f64.cos()).abs() < 1e-10);
     pub fn sin_cos(self) -> (TwoFloat, TwoFloat) {
         if !self.is_valid() {
-            return (
-                TwoFloat {
-                    hi: std::f64::NAN,
-                    lo: std::f64::NAN,
-                },
-                TwoFloat {
-                    hi: std::f64::NAN,
-                    lo: std::f64::NAN,
-                },
-            );
+            return (TwoFloat::NAN, TwoFloat::NAN);
         }
         let (x, quadrant) = quadrant(self);
         let s = restricted_sin(x);
@@ -462,10 +435,7 @@ impl TwoFloat {
     pub fn asin(self) -> TwoFloat {
         let abs_val = self.abs();
         if !self.is_valid() || abs_val > 1.0 {
-            TwoFloat {
-                hi: std::f64::NAN,
-                lo: std::f64::NAN,
-            }
+            TwoFloat::NAN
         } else if abs_val <= 0.5 {
             restricted_asin(self)
         } else {
@@ -514,10 +484,7 @@ impl TwoFloat {
     /// assert!((b - c).abs() < 1e-10);
     pub fn atan(self) -> TwoFloat {
         if !self.is_valid() {
-            TwoFloat {
-                hi: std::f64::NAN,
-                lo: std::f64::NAN,
-            }
+            TwoFloat::NAN
         } else if self.hi.is_infinite() {
             if self.hi.is_sign_positive() {
                 FRAC_PI_2

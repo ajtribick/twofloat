@@ -7,6 +7,7 @@
   `try_into`.
 * Breaking change: replaced `try_new` and `data` with conversions to/from
   `(f64, f64)` and `[f64; 2]`.
+* Added `NAN` constant.
 
 ## Version 0.1.4
 

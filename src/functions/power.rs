@@ -29,10 +29,7 @@ impl TwoFloat {
     /// assert!(b * b - a < 1e-16);
     pub fn sqrt(self) -> TwoFloat {
         if self.hi < 0.0 || (self.hi == 0.0 && self.lo < 0.0) {
-            TwoFloat {
-                hi: std::f64::NAN,
-                lo: std::f64::NAN,
-            }
+            TwoFloat::NAN
         } else if self.hi == 0.0 && self.lo == 0.0 {
             TwoFloat { hi: 0.0, lo: 0.0 }
         } else {
@@ -91,10 +88,7 @@ impl TwoFloat {
         match n {
             0 => {
                 if self.hi == 0.0 && self.lo == 0.0 {
-                    TwoFloat {
-                        hi: std::f64::NAN,
-                        lo: std::f64::NAN,
-                    }
+                    TwoFloat::NAN
                 } else {
                     TwoFloat::from(1.0)
                 }
@@ -137,20 +131,14 @@ impl TwoFloat {
     /// assert!((c + 125.0).abs() < 1e-9, "{}", c);
     pub fn powf(self, y: TwoFloat) -> TwoFloat {
         match (self == 0.0, y == 0.0) {
-            (true, true) => TwoFloat {
-                hi: std::f64::NAN,
-                lo: std::f64::NAN,
-            },
+            (true, true) => TwoFloat::NAN,
             (true, false) => TwoFloat::from(0.0),
             (false, true) => TwoFloat::from(1.0),
             (false, false) => {
                 if self.is_sign_positive() {
                     (y * self.ln()).exp()
                 } else if self.hi.fract() != 0.0 || self.lo.fract() != 0.0 {
-                    TwoFloat {
-                        hi: std::f64::NAN,
-                        lo: std::f64::NAN,
-                    }
+                    TwoFloat::NAN
                 } else {
                     let abs_result = (y * self.abs().ln()).exp();
                     let low_trunc = if self.lo.trunc() == 0.0 {

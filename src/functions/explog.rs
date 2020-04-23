@@ -152,10 +152,7 @@ impl TwoFloat {
         if self == 1.0 {
             TwoFloat::from(0.0)
         } else if self <= 0.0 {
-            TwoFloat {
-                hi: std::f64::NAN,
-                lo: std::f64::NAN,
-            }
+            TwoFloat::NAN
         } else {
             let mut x = TwoFloat::from(self.hi.ln());
             x += self * (-x).exp() - 1.0;
