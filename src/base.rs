@@ -1,5 +1,6 @@
 use core::cmp::Ordering;
 use core::fmt;
+use core::num::FpCategory;
 
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
@@ -9,40 +10,9 @@ pub struct TwoFloat {
     pub(crate) lo: f64,
 }
 
-/// Returns the rightmost included bit of a floating point number
-fn right_bit(f: f64) -> Option<i16> {
-    let fbits = f.to_bits();
-    let exponent = ((fbits >> 52) & 0x7ff) as i16 - 1023;
-    match exponent {
-        -1023 => {
-            let mantissa = fbits & ((1 << 52) - 1);
-            if mantissa == 0 {
-                Some(i16::MIN)
-            } else {
-                Some(-1074)
-            }
-        }
-        1024 => None,
-        _ => Some(exponent - 52),
-    }
-}
-
-/// Returns the leftmost set bit of a floating point number
-fn left_bit(f: f64) -> Option<i16> {
-    let fbits = f.to_bits();
-    let exponent = ((fbits >> 52) & 0x7ff) as i16 - 1023;
-    match exponent {
-        -1023 => {
-            let mantissa = fbits & ((1 << 52) - 1);
-            if mantissa == 0 {
-                Some(i16::MIN)
-            } else {
-                Some(-1011 - mantissa.leading_zeros() as i16)
-            }
-        }
-        1024 => None,
-        _ => Some(exponent),
-    }
+#[inline]
+fn exponent(x: f64) -> u32 {
+    ((x.to_bits() >> 52) & 0x7ff) as u32
 }
 
 /// Checks if two `f64` values do not overlap, with the first value being the
@@ -60,11 +30,25 @@ fn left_bit(f: f64) -> Option<i16> {
 /// assert!(!b);
 /// assert!(!c);
 pub fn no_overlap(a: f64, b: f64) -> bool {
-    (a == 0.0 && b == 0.0)
-        || match (right_bit(a), left_bit(b)) {
-            (Some(r), Some(l)) => r > l,
-            _ => false,
-        }
+    match (a.classify(), b.classify()) {
+        (FpCategory::Normal, FpCategory::Normal) => {
+            exponent(a) >= exponent(b) + f64::MANTISSA_DIGITS
+        },
+        (FpCategory::Normal, FpCategory::Subnormal) => {
+            let a_exponent = exponent(a);
+            println!("a_exponent = {}", a_exponent);
+            if a_exponent >= f64::MANTISSA_DIGITS {
+                true
+            } else {
+                let b_mantissa = b.to_bits() & ((1 << 52) - 1);
+                a_exponent >= 65 - b_mantissa.leading_zeros()
+            }
+        },
+        (FpCategory::Normal, FpCategory::Zero) => true,
+        (FpCategory::Subnormal, FpCategory::Zero) => true,
+        (FpCategory::Zero, FpCategory::Zero) => true,
+        _ => false
+    }
 }
 
 impl TwoFloat {
@@ -202,30 +186,29 @@ mod tests {
     use super::*;
 
     #[test]
-    fn right_bit_test() {
-        assert_eq!(right_bit(f64::INFINITY), None);
-        assert_eq!(right_bit(f64::NEG_INFINITY), None);
-        assert_eq!(right_bit(f64::NAN), None);
-        assert_eq!(right_bit(1.0), Some(-52));
-        assert_eq!(right_bit(2.0), Some(-51));
-        assert_eq!(right_bit(0.5), Some(-53));
-        assert_eq!(right_bit(2.2250738585072014e-308), Some(-1074));
-        assert_eq!(right_bit(2.2250738585072009e-308), Some(-1074));
-        assert_eq!(right_bit(4.9406564584124654e-324), Some(-1074));
-        assert!(right_bit(0.0).unwrap_or(0) < -1074);
-    }
+    fn no_overlap_test() {
+        assert!(!no_overlap(1.0, (-52f64).exp2()));
+        assert!(!no_overlap(-1.0, -(-52f64).exp2()));
+        assert!(no_overlap(1.0, (-53f64).exp2()));
+        assert!(no_overlap(-1.0, -(-53f64).exp2()));
+        assert!(no_overlap(1.0, (-1023f64).exp2()));
+        assert!(no_overlap(1.0, -(-1023f64).exp2()));
+        assert!(no_overlap(1.0, 0.0));
+        assert!(no_overlap(-1.0, -0.0));
 
-    #[test]
-    fn left_bit_test() {
-        assert_eq!(left_bit(f64::INFINITY), None);
-        assert_eq!(left_bit(f64::NEG_INFINITY), None);
-        assert_eq!(left_bit(f64::NAN), None);
-        assert_eq!(left_bit(1.0), Some(0));
-        assert_eq!(left_bit(2.0), Some(1));
-        assert_eq!(left_bit(0.5), Some(-1));
-        assert_eq!(left_bit(2.2250738585072014e-308), Some(-1022));
-        assert_eq!(left_bit(2.2250738585072009e-308), Some(-1023));
-        assert_eq!(left_bit(4.9406564584124654e-324), Some(-1074));
-        assert!(left_bit(0.0).unwrap_or(0) < -1074);
+        assert!(!no_overlap((-970f64).exp2(), (-1022f64).exp2()));
+        assert!(no_overlap((-970f64).exp2(), (-1023f64).exp2()));
+        assert!(!no_overlap((-971f64).exp2(), (-1023f64).exp2()));
+        assert!(no_overlap((-971f64).exp2(), (-1024f64).exp2()));
+
+        assert!(no_overlap((-1023f64).exp2(), 0.0));
+        assert!(!no_overlap((-1023f64).exp2(), f64::MIN));
+
+        assert!(!no_overlap(f64::INFINITY, 1.0));
+        assert!(!no_overlap(f64::NAN, 1.0));
+
+        assert!(!no_overlap(0.0, 1.0));
+        assert!(!no_overlap(0.0, f64::MIN));
+        assert!(no_overlap(0.0, 0.0));
     }
 }
