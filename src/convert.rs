@@ -1,7 +1,7 @@
 use core::cmp::Eq;
 use core::convert::{From, TryFrom};
-use std::error;
 use core::fmt;
+use std::error;
 
 use crate::base::{no_overlap, TwoFloat};
 

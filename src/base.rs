@@ -33,7 +33,7 @@ pub fn no_overlap(a: f64, b: f64) -> bool {
     match (a.classify(), b.classify()) {
         (FpCategory::Normal, FpCategory::Normal) => {
             exponent(a) >= exponent(b) + f64::MANTISSA_DIGITS
-        },
+        }
         (FpCategory::Normal, FpCategory::Subnormal) => {
             let a_exponent = exponent(a);
             println!("a_exponent = {}", a_exponent);
@@ -43,11 +43,11 @@ pub fn no_overlap(a: f64, b: f64) -> bool {
                 let b_mantissa = b.to_bits() & ((1 << 52) - 1);
                 a_exponent >= 65 - b_mantissa.leading_zeros()
             }
-        },
+        }
         (FpCategory::Normal, FpCategory::Zero) => true,
         (FpCategory::Subnormal, FpCategory::Zero) => true,
         (FpCategory::Zero, FpCategory::Zero) => true,
-        _ => false
+        _ => false,
     }
 }
 

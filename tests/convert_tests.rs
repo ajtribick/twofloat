@@ -308,8 +308,7 @@ macro_rules! int_test {
             #[test]
             fn to_twofloat() {
                 let mut rng = rand::thread_rng();
-                let dist =
-                    rand::distributions::Uniform::new_inclusive($type::MIN, $type::MAX);
+                let dist = rand::distributions::Uniform::new_inclusive($type::MIN, $type::MAX);
                 for _ in 0..TEST_ITERS {
                     let source = rng.sample(dist);
 
@@ -395,8 +394,7 @@ macro_rules! int64_test {
 
                     assert!(result.is_valid(), "Conversion of {} was invalid", source);
                     assert!(
-                        result.hi() >= $type::MIN as f64
-                            && result.hi() <= $type::MAX as f64,
+                        result.hi() >= $type::MIN as f64 && result.hi() <= $type::MAX as f64,
                         "Conversion of {} high word out of range",
                         source
                     );

@@ -1,5 +1,5 @@
-use rand::Rng;
 use core::convert::TryFrom;
+use rand::Rng;
 use twofloat::*;
 
 pub mod common;

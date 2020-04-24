@@ -1,7 +1,7 @@
 #![macro_use]
 
-use rand::Rng;
 use core::convert::TryFrom;
+use rand::Rng;
 use twofloat::{ConversionError, TwoFloat};
 
 pub const TEST_ITERS: usize = 100000;
