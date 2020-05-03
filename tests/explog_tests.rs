@@ -33,6 +33,32 @@ fn exp_test() {
 }
 
 #[test]
+fn exp_m1_test() {
+    let mut rng = rand::thread_rng();
+    let src_dist = rand::distributions::Uniform::<f64>::new(-10.0, 10.0);
+
+    for _ in 0..TEST_ITERS {
+        let a = rng.sample(src_dist);
+        let b = TwoFloat::from(a);
+
+        let exp_a = a.exp_m1();
+        let exp_b = b.exp_m1();
+
+        assert!(exp_b.is_valid(), "exp_m1({}) produced invalid value", a);
+
+        let difference = exp_b - exp_a;
+
+        assert!(
+            difference < 1e-10,
+            "Mismatch in exp({}): {} vs {:?}",
+            a,
+            exp_a,
+            exp_b
+        );
+    }
+}
+
+#[test]
 fn ln_test() {
     let mut rng = rand::thread_rng();
     let src_dist = rand::distributions::Uniform::new(f64::from_bits(1u64), f64::MAX);

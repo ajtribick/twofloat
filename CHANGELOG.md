@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.2.1
+
+* Added `exp_m1` function.
+
 ## Version 0.2.0
 
 * Breaking change: prefer value-like arguments to improve ergonomics.

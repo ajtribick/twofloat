@@ -13,6 +13,12 @@ const LN_10: TwoFloat = TwoFloat {
     lo: -2.1707562233822494e-16,
 };
 
+// ln(3/2)
+const LN_FRAC_3_2: TwoFloat = TwoFloat {
+    hi: 0.4054651081081644,
+    lo: -2.8811380259626426e-18,
+};
+
 // limits
 const EXP_UPPER_LIMIT: f64 = 709.782712893384;
 const EXP_LOWER_LIMIT: f64 = -745.1332191019412;
@@ -45,6 +51,57 @@ const EXP_COEFFS: [TwoFloat; 6] = [
     },
 ];
 
+const EXP_M1_COEFFS: [TwoFloat; 12] = [
+    TwoFloat {
+        hi: 0.5,
+        lo: 2.4147853280441852e-17,
+    },
+    TwoFloat {
+        hi: 0.1666666666666666,
+        lo: -1.0126242119486759e-17,
+    },
+    TwoFloat {
+        hi: 0.04166666666666422,
+        lo: -3.1228374568246144e-18,
+    },
+    TwoFloat {
+        hi: 0.00833333333333542,
+        lo: 5.220576901966033e-19,
+    },
+    TwoFloat {
+        hi: 0.0013888888889601945,
+        lo: -6.710675996026077e-20,
+    },
+    TwoFloat {
+        hi: 0.00019841269843008256,
+        lo: 7.744211626999651e-22,
+    },
+    TwoFloat {
+        hi: 2.4801586443947164e-05,
+        lo: 1.2547780925434967e-21,
+    },
+    TwoFloat {
+        hi: 2.755731053267803e-06,
+        lo: -1.0646797628167905e-23,
+    },
+    TwoFloat {
+        hi: 2.755775448074009e-07,
+        lo: -8.322155420550663e-24,
+    },
+    TwoFloat {
+        hi: 2.505957492948909e-08,
+        lo: -5.793840740452254e-25,
+    },
+    TwoFloat {
+        hi: 2.0819091856857293e-09,
+        lo: -3.914736871893147e-26,
+    },
+    TwoFloat {
+        hi: 1.412762092583865e-10,
+        lo: 2.8362941933894766e-27,
+    },
+];
+
 fn mul_pow2(mut x: f64, mut y: i32) -> f64 {
     loop {
         if y < -1074 {
@@ -63,9 +120,6 @@ fn mul_pow2(mut x: f64, mut y: i32) -> f64 {
 
 impl TwoFloat {
     /// Returns `e^(self)`, (the exponential function).
-    ///
-    /// Note that this function returns an approximate value, in particular
-    /// the low word of the core polynomial approximation is not guaranteed.
     ///
     /// # Examples
     ///
@@ -119,6 +173,27 @@ impl TwoFloat {
                     lo: mul_pow2(exp_r.lo, k as i32),
                 }
             }
+        }
+    }
+
+    /// Returns `e^(self) - 1` in a way that provides additional accuracy
+    /// when the value is close to zero.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(0.05);
+    /// let b = a.exp_m1();
+    /// let c = 0.05f64.exp_m1();
+    ///
+    /// assert!((b - c).abs() < 1e-16);
+    pub fn exp_m1(self) -> Self {
+        if self < -LN_2 || self > LN_FRAC_3_2 {
+            self.exp() - 1.0
+        } else {
+            let r = polynomial!(self, 1.0, EXP_M1_COEFFS);
+            self * r
         }
     }
 
