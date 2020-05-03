@@ -1,4 +1,4 @@
-use crate::base::*;
+use crate::base::TwoFloat;
 
 impl TwoFloat {
     /// Takes the reciprocal (inverse) of the number, `1/x`.
@@ -12,7 +12,7 @@ impl TwoFloat {
     /// let difference = b.recip() - a;
     ///
     /// assert!(difference.abs() < 1e-16);
-    pub fn recip(self) -> TwoFloat {
+    pub fn recip(self) -> Self {
         1.0 / self
     }
 
@@ -27,15 +27,15 @@ impl TwoFloat {
     /// let b = a.sqrt();
     ///
     /// assert!(b * b - a < 1e-16);
-    pub fn sqrt(self) -> TwoFloat {
+    pub fn sqrt(self) -> Self {
         if self.hi < 0.0 || (self.hi == 0.0 && self.lo < 0.0) {
-            TwoFloat::NAN
+            Self::NAN
         } else if self.hi == 0.0 && self.lo == 0.0 {
-            TwoFloat { hi: 0.0, lo: 0.0 }
+            Self { hi: 0.0, lo: 0.0 }
         } else {
             let x = self.hi.sqrt().recip();
             let y = self.hi * x;
-            TwoFloat::new_add(y, (self - TwoFloat::new_mul(y, y)).hi * (x * 0.5))
+            Self::new_add(y, (self - Self::new_mul(y, y)).hi * (x * 0.5))
         }
     }
 
@@ -49,8 +49,8 @@ impl TwoFloat {
     /// let b = a.cbrt();
     ///
     /// assert!(b.powi(3) - a < 1e-16);
-    pub fn cbrt(self) -> TwoFloat {
-        let mut x = TwoFloat::from(self.hi.cbrt());
+    pub fn cbrt(self) -> Self {
+        let mut x = Self::from(self.hi.cbrt());
         let mut x2 = &x * &x;
         x -= (&x2 * &x - self) / (3.0 * &x2);
         x2 = &x * &x;
@@ -69,7 +69,7 @@ impl TwoFloat {
     /// let c = TwoFloat::hypot(a, b);
     ///
     /// assert!((c - 5.0).abs() < 1e-10);
-    pub fn hypot(self, other: TwoFloat) -> TwoFloat {
+    pub fn hypot(self, other: Self) -> Self {
         (self * self + other * other).sqrt()
     }
 
@@ -84,19 +84,19 @@ impl TwoFloat {
     ///
     /// assert!(a - TwoFloat::from(8.0) <= 1e-16);
     /// assert!(!b.is_valid());
-    pub fn powi(self, n: i32) -> TwoFloat {
+    pub fn powi(self, n: i32) -> Self {
         match n {
             0 => {
                 if self.hi == 0.0 && self.lo == 0.0 {
-                    TwoFloat::NAN
+                    Self::NAN
                 } else {
-                    TwoFloat::from(1.0)
+                    Self::from(1.0)
                 }
             }
             1 => self.clone(),
             -1 => self.recip(),
             _ => {
-                let mut result = TwoFloat::from(1.0);
+                let mut result = Self::from(1.0);
                 let mut n_pos = n.abs();
                 let mut value = self.clone();
                 while n_pos > 0 {
@@ -129,16 +129,16 @@ impl TwoFloat {
     /// let c = a.powf(b);
     ///
     /// assert!((c + 125.0).abs() < 1e-9, "{}", c);
-    pub fn powf(self, y: TwoFloat) -> TwoFloat {
+    pub fn powf(self, y: Self) -> Self {
         match (self == 0.0, y == 0.0) {
-            (true, true) => TwoFloat::NAN,
-            (true, false) => TwoFloat::from(0.0),
-            (false, true) => TwoFloat::from(1.0),
+            (true, true) => Self::NAN,
+            (true, false) => Self::from(0.0),
+            (false, true) => Self::from(1.0),
             (false, false) => {
                 if self.is_sign_positive() {
                     (y * self.ln()).exp()
                 } else if self.hi.fract() != 0.0 || self.lo.fract() != 0.0 {
-                    TwoFloat::NAN
+                    Self::NAN
                 } else {
                     let abs_result = (y * self.abs().ln()).exp();
                     let low_trunc = if self.lo.trunc() == 0.0 {

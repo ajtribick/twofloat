@@ -63,7 +63,7 @@ impl Neg for TwoFloat {
 
     /// Returns a new `TwoFloat` with the negated value of `self`.
     fn neg(self) -> Self::Output {
-        TwoFloat {
+        Self::Output {
             hi: -self.hi,
             lo: -self.lo,
         }
@@ -75,7 +75,7 @@ impl<'a> Neg for &'a TwoFloat {
 
     /// Returns a new `TwoFloat` with the negated value of `self`.
     fn neg(self) -> Self::Output {
-        TwoFloat {
+        Self::Output {
             hi: -self.hi,
             lo: -self.lo,
         }
@@ -392,7 +392,7 @@ impl TwoFloat {
     /// assert_eq!((-a).div_euclid(b), TwoFloat::from(-2.0));
     /// assert_eq!(a.div_euclid(-b), TwoFloat::from(-1.0));
     /// assert_eq!((-a).div_euclid(-b), TwoFloat::from(2.0));
-    pub fn div_euclid(self, rhs: TwoFloat) -> TwoFloat {
+    pub fn div_euclid(self, rhs: Self) -> Self {
         let quotient = (self / rhs).trunc();
         if (self - &quotient * rhs) < 0.0 {
             if rhs > 0.0 {
@@ -422,7 +422,7 @@ impl TwoFloat {
     /// assert_eq!((-a).rem_euclid(b), TwoFloat::from(1.0));
     /// assert_eq!(a.rem_euclid(-b), TwoFloat::from(4.0));
     /// assert_eq!((-a).rem_euclid(-b), TwoFloat::from(1.0));
-    pub fn rem_euclid(self, rhs: TwoFloat) -> TwoFloat {
+    pub fn rem_euclid(self, rhs: Self) -> Self {
         let remainder = self % rhs;
         if remainder < 0.0 {
             remainder + rhs.abs()

@@ -83,7 +83,7 @@ macro_rules! float_convert {
     ($type:tt) => {
         impl From<$type> for TwoFloat {
             fn from(value: $type) -> Self {
-                TwoFloat {
+                Self {
                     hi: value as f64,
                     lo: 0.0,
                 }
@@ -156,7 +156,7 @@ impl From<i64> for TwoFloat {
             (value - a as i64) as f64
         };
 
-        TwoFloat { hi: a, lo: b }
+        Self { hi: a, lo: b }
     }
 }
 
@@ -206,7 +206,7 @@ impl From<u64> for TwoFloat {
             -((a as u64 - value) as f64)
         };
 
-        TwoFloat { hi: a, lo: b }
+        Self { hi: a, lo: b }
     }
 }
 

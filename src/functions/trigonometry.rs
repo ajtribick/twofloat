@@ -1,7 +1,7 @@
 use core::convert::TryFrom;
 
-use crate::base::*;
-use crate::consts::*;
+use crate::base::TwoFloat;
+use crate::consts::{FRAC_PI_2, FRAC_PI_4, PI};
 
 const DEG_PER_RAD: TwoFloat = TwoFloat {
     hi: 57.29577951308232,
@@ -304,7 +304,7 @@ impl TwoFloat {
     /// let b = a.to_radians();
     ///
     /// assert!((b - twofloat::consts::FRAC_PI_2).abs() < 1e-16);
-    pub fn to_radians(self) -> TwoFloat {
+    pub fn to_radians(self) -> Self {
         self * &RAD_PER_DEG
     }
 
@@ -317,7 +317,7 @@ impl TwoFloat {
     /// let b = a.to_degrees();
     ///
     /// assert!((b - 180.0).abs() < 1e-16);
-    pub fn to_degrees(self) -> TwoFloat {
+    pub fn to_degrees(self) -> Self {
         self * &DEG_PER_RAD
     }
 
@@ -332,9 +332,9 @@ impl TwoFloat {
     /// let c = 2.5f64.sin();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn sin(self) -> TwoFloat {
+    pub fn sin(self) -> Self {
         if !self.is_valid() {
-            return TwoFloat::NAN;
+            return Self::NAN;
         }
         let (x, quadrant) = quadrant(self);
         match quadrant {
@@ -356,9 +356,9 @@ impl TwoFloat {
     /// let c = 2.5f64.cos();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn cos(self) -> TwoFloat {
+    pub fn cos(self) -> Self {
         if !self.is_valid() {
-            return TwoFloat::NAN;
+            return Self::NAN;
         }
         let (x, quadrant) = quadrant(self);
         match quadrant {
@@ -382,9 +382,9 @@ impl TwoFloat {
     ///
     /// assert!((s - 2.5f64.sin()).abs() < 1e-10);
     /// assert!((c - 2.5f64.cos()).abs() < 1e-10);
-    pub fn sin_cos(self) -> (TwoFloat, TwoFloat) {
+    pub fn sin_cos(self) -> (Self, Self) {
         if !self.is_valid() {
-            return (TwoFloat::NAN, TwoFloat::NAN);
+            return (Self::NAN, Self::NAN);
         }
         let (x, quadrant) = quadrant(self);
         let s = restricted_sin(x);
@@ -408,7 +408,7 @@ impl TwoFloat {
     /// let c = 2.5f64.tan();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn tan(self) -> TwoFloat {
+    pub fn tan(self) -> Self {
         if !self.is_valid() {
             return self;
         }
@@ -432,10 +432,10 @@ impl TwoFloat {
     /// let c = 0.7f64.asin();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn asin(self) -> TwoFloat {
+    pub fn asin(self) -> Self {
         let abs_val = self.abs();
         if !self.is_valid() || abs_val > 1.0 {
-            TwoFloat::NAN
+            Self::NAN
         } else if abs_val <= 0.5 {
             restricted_asin(self)
         } else {
@@ -461,7 +461,7 @@ impl TwoFloat {
     /// let c = (-0.8f64).acos();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn acos(self) -> TwoFloat {
+    pub fn acos(self) -> Self {
         let x = self.asin();
         if x.is_valid() {
             FRAC_PI_2 - x
@@ -482,9 +482,9 @@ impl TwoFloat {
     /// let c = 3.5f64.atan();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn atan(self) -> TwoFloat {
+    pub fn atan(self) -> Self {
         if !self.is_valid() {
-            TwoFloat::NAN
+            Self::NAN
         } else if self.hi.is_infinite() {
             if self.hi.is_sign_positive() {
                 FRAC_PI_2
@@ -528,10 +528,10 @@ impl TwoFloat {
     /// let theta = TwoFloat::atan2(y, x);
     ///
     /// assert!((theta + 3.0 * twofloat::consts::FRAC_PI_4).abs() < 1e-10);
-    pub fn atan2(self, other: TwoFloat) -> TwoFloat {
+    pub fn atan2(self, other: Self) -> Self {
         if self.hi == 0.0 {
             if other.hi.is_sign_positive() {
-                TwoFloat::from(0.0)
+                Self::from(0.0)
             } else if self.hi.is_sign_positive() {
                 PI
             } else {

@@ -1,4 +1,4 @@
-use crate::base::*;
+use crate::base::TwoFloat;
 
 impl TwoFloat {
     /// Hyperbolic cosine function.
@@ -15,7 +15,7 @@ impl TwoFloat {
     /// let c = 2.0f64.cosh();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn cosh(self) -> TwoFloat {
+    pub fn cosh(self) -> Self {
         self.exp() / 2.0 + (-self).exp() / 2.0
     }
 
@@ -33,7 +33,7 @@ impl TwoFloat {
     /// let c = 2.0f64.sinh();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn sinh(self) -> TwoFloat {
+    pub fn sinh(self) -> Self {
         self.exp() / 2.0 - (-self).exp() / 2.0
     }
 
@@ -51,7 +51,7 @@ impl TwoFloat {
     /// let c = 2.0f64.tanh();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn tanh(self) -> TwoFloat {
+    pub fn tanh(self) -> Self {
         let e_plus = self.exp();
         let e_minus = (-self).exp();
         (e_plus - e_minus) / (e_plus + e_minus)
@@ -71,7 +71,7 @@ impl TwoFloat {
     /// let c = 2.0f64.acosh();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn acosh(self) -> TwoFloat {
+    pub fn acosh(self) -> Self {
         (self + (self * self - 1.0).sqrt()).ln()
     }
 
@@ -89,7 +89,7 @@ impl TwoFloat {
     /// let c = 2.0f64.asinh();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn asinh(self) -> TwoFloat {
+    pub fn asinh(self) -> Self {
         (self + (self * self + 1.0).sqrt()).ln()
     }
 
@@ -107,7 +107,7 @@ impl TwoFloat {
     /// let c = 0.5f64.atanh();
     ///
     /// assert!((b - c).abs() < 1e-10);
-    pub fn atanh(self) -> TwoFloat {
+    pub fn atanh(self) -> Self {
         ((1.0 + self) / (1.0 - self)).ln() / 2.0
     }
 }

@@ -1,4 +1,4 @@
-use crate::arithmetic::*;
+use crate::arithmetic::fast_two_sum;
 use crate::base::TwoFloat;
 
 impl TwoFloat {
@@ -13,7 +13,7 @@ impl TwoFloat {
     ///
     /// assert_eq!(a, TwoFloat::from(1e-200));
     /// assert_eq!(b, TwoFloat::new_add(-1.0, 1e-200));
-    pub fn fract(self) -> TwoFloat {
+    pub fn fract(self) -> Self {
         let hi_fract = self.hi.fract();
         let lo_fract = self.lo.fract();
         if lo_fract == 0.0 {
@@ -40,7 +40,7 @@ impl TwoFloat {
     ///
     /// assert_eq!(a, TwoFloat::from(1.0));
     /// assert_eq!(b, TwoFloat::from(0.0));
-    pub fn trunc(self) -> TwoFloat {
+    pub fn trunc(self) -> Self {
         if self.is_sign_positive() {
             self.floor()
         } else {
@@ -61,9 +61,9 @@ impl TwoFloat {
     /// assert_eq!(a, TwoFloat::from(2.0));
     /// assert_eq!(b, TwoFloat::from(1.0));
     /// assert_eq!(c, TwoFloat::from(0.0));
-    pub fn ceil(self) -> TwoFloat {
+    pub fn ceil(self) -> Self {
         if self.lo.fract() == 0.0 {
-            TwoFloat {
+            Self {
                 hi: self.hi.ceil(),
                 lo: self.lo,
             }
@@ -87,9 +87,9 @@ impl TwoFloat {
     /// assert_eq!(a, TwoFloat::from(1.0));
     /// assert_eq!(b, TwoFloat::from(0.0));
     /// assert_eq!(c, TwoFloat::from(-1.0));
-    pub fn floor(self) -> TwoFloat {
+    pub fn floor(self) -> Self {
         if self.lo.fract() == 0.0 {
-            TwoFloat {
+            Self {
                 hi: self.hi.floor(),
                 lo: self.lo,
             }
@@ -114,9 +114,9 @@ impl TwoFloat {
     /// assert_eq!(a, TwoFloat::from(1.0));
     /// assert_eq!(b, TwoFloat::from(1.0));
     /// assert_eq!(c, TwoFloat::from(-1.0));
-    pub fn round(self) -> TwoFloat {
+    pub fn round(self) -> Self {
         if self.lo.fract() == 0.0 {
-            TwoFloat {
+            Self {
                 hi: self.hi.round(),
                 lo: self.lo(),
             }
