@@ -235,6 +235,33 @@ impl TwoFloat {
         }
     }
 
+    /// Returns the natural logarithm of `1 + self`.
+    ///
+    /// Uses Newton–Raphson iteration which depends on the `expm1` function,
+    /// so may not be fully accurate to the full precision of a `TwoFloat`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(0.1);
+    /// let b = a.ln_1p();
+    /// let c = 0.1f64.ln_1p();
+    /// assert!((b - c).abs() < 1e-10);
+    pub fn ln_1p(self) -> Self {
+        if self == 0.0 {
+            Self::from(0.0)
+        } else if self <= -1.0 {
+            Self::NAN
+        } else {
+            let mut x = Self::from(self.hi.ln_1p());
+            let mut e = x.exp_m1();
+            x -= (e - self) / (e + 1.0);
+            e = x.exp_m1();
+            x - (e - self) / (e + 1.0)
+        }
+    }
+
     /// Returns the logarithm of the number with respect to an arbitrary base.
     ///
     /// This is a convenience method that computes `self.ln() / base.ln()`, no

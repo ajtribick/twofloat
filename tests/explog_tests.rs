@@ -89,3 +89,29 @@ randomized_test!(ln_negative_test, |rng: F64Rand| {
     let result = a.ln();
     assert!(!result.is_valid(), "ln({:?}) produced a valid result", a);
 });
+
+#[test]
+fn ln_1p_test() {
+    let mut rng = rand::thread_rng();
+    let src_dist = rand::distributions::Uniform::new(-1.0 + f64::EPSILON, f64::MAX);
+
+    for _ in 0..TEST_ITERS {
+        let a = rng.sample(src_dist);
+        let b = TwoFloat::from(a);
+
+        let ln_a = a.ln_1p();
+        let ln_b = b.ln_1p();
+
+        assert!(ln_b.is_valid(), "ln({}) produced invalid value", a);
+
+        let difference = (ln_b - ln_a).abs();
+
+        assert!(
+            difference < 1e-10,
+            "Mismatch in ln({}): {} vs {:?}",
+            a,
+            ln_a,
+            ln_b
+        );
+    }
+}

@@ -2,7 +2,7 @@
 
 ## Version 0.2.1
 
-* Added `exp_m1` function.
+* Added `exp_m1`, `ln_1p` functions.
 
 ## Version 0.2.0
 
