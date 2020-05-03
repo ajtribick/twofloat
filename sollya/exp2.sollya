@@ -1,0 +1,13 @@
+prec=512;
+f=2^x;
+I=[-0.5, 0.5];
+L=[|0,1,2,3,4,5,6,7,8,9,10,11,12,13,14|];
+p=remez(f,L,I,1,1e-15);
+print("Target=", 2^-107);
+print("Actual=", dirtyinfnorm(p-f,I));
+display=hexadecimal;
+for l in L do {
+    xh = double(coeff(p, l));
+    xl = double(coeff(p, l) - xh);
+    print(xh, ",", xl, ",");
+};

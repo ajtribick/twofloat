@@ -102,6 +102,66 @@ const EXP_M1_COEFFS: [TwoFloat; 12] = [
     },
 ];
 
+// Coefficients for polynomial approximation of 2^x on [-0.5, 0.5]
+const EXP2_COEFFS: [TwoFloat; 14] = [
+    TwoFloat {
+        hi: 0.6931471805599453,
+        lo: 2.3190643482818175e-17,
+    },
+    TwoFloat {
+        hi: 0.24022650695910072,
+        lo: -9.493874028535377e-18,
+    },
+    TwoFloat {
+        hi: 0.05550410866482158,
+        lo: -3.192006150784052e-18,
+    },
+    TwoFloat {
+        hi: 0.009618129107628477,
+        lo: 2.7893564000728505e-19,
+    },
+    TwoFloat {
+        hi: 0.0013333558146428454,
+        lo: 6.081607270943552e-20,
+    },
+    TwoFloat {
+        hi: 0.00015403530393381622,
+        lo: 1.481577195325289e-21,
+    },
+    TwoFloat {
+        hi: 1.5252733804038298e-05,
+        lo: -5.2457376024944265e-22,
+    },
+    TwoFloat {
+        hi: 1.3215486790126266e-06,
+        lo: 5.182514493196138e-23,
+    },
+    TwoFloat {
+        hi: 1.0178086030302029e-07,
+        lo: -9.783640823461531e-25,
+    },
+    TwoFloat {
+        hi: 7.054911635035306e-09,
+        lo: -1.8596402662109374e-25,
+    },
+    TwoFloat {
+        hi: 4.445527244701503e-10,
+        lo: 2.2736481131821772e-26,
+    },
+    TwoFloat {
+        hi: 2.567837336021261e-11,
+        lo: -5.1428171225883105e-28,
+    },
+    TwoFloat {
+        hi: 1.3720884847209076e-12,
+        lo: 8.060868050272103e-29,
+    },
+    TwoFloat {
+        hi: 6.793159072191384e-14,
+        lo: 5.621628913936963e-30,
+    },
+];
+
 fn mul_pow2(mut x: f64, mut y: i32) -> f64 {
     loop {
         if y < -1074 {
@@ -199,18 +259,32 @@ impl TwoFloat {
 
     /// Returns `2^(self)`.
     ///
-    /// This is a convenience method that computes `(self * LN_2).exp()`, no
-    /// additional accuracy is provided.
-    ///
     /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
-    /// let a = TwoFloat::from(6.0).exp2();
+    /// let a = TwoFloat::from(0.5).exp2();
+    /// let b = TwoFloat::from(2).sqrt();
     ///
-    /// assert!((a - 64.0).abs() < 1e-15);
+    /// assert!((a - b).abs() < 1e-15);
     pub fn exp2(self) -> Self {
-        (self * LN_2).exp()
+        if self < -1074.0 {
+            Self::from(0.0)
+        } else if self >= 1023.0 {
+            Self { hi: f64::INFINITY, lo: f64::INFINITY }
+        } else {
+            let k = self.hi.round();
+            let r = self - k;
+            let r1 = polynomial!(r, 1.0, EXP2_COEFFS);
+            if k == 0.0 {
+                r1
+            } else {
+                Self {
+                    hi: mul_pow2(r1.hi, k as i32),
+                    lo: mul_pow2(r1.lo, k as i32),
+                }
+            }
+        }
     }
 
     /// Returns the natural logarithm of the value.
@@ -280,8 +354,8 @@ impl TwoFloat {
 
     /// Returns the base 2 logarithm of the number.
     ///
-    /// This is a convenience method that computes `self.ln() / LN_2`, no
-    /// additional accuracy is provided.
+    /// Uses Newton–Raphson iteration which depends on the `exp2` function,
+    /// so may not be fully accurate to the full precision of a `TwoFloat`.
     ///
     /// # Examples
     ///
@@ -291,7 +365,15 @@ impl TwoFloat {
     ///
     /// assert!((a - 6.0).abs() < 1e-12, "{}", a);
     pub fn log2(self) -> Self {
-        self.ln() / LN_2
+        if self == 1.0 {
+            Self::from(1.0)
+        } else if self <= 0.0 {
+            Self::NAN
+        } else {
+            let mut x = Self::from(self.hi.log2());
+            x += (self * (-x).exp2() - 1.0) * FRAC_1_LN_2;
+            x + (self * (-x).exp2() - 1.0) * FRAC_1_LN_2
+        }
     }
 
     /// Returns the base 10 logarithm of the number.
