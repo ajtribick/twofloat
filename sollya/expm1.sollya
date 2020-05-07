@@ -3,7 +3,6 @@ f=expm1(x)/x;
 I=[round(log(1/2), prec, RN), round(log(3/2), prec, RN)];
 L=[|0,1,2,3,4,5,6,7,8,9,10,11,12|];
 p=remez(f,L,I,1,1e-15);
-print("(double)", 2^-53);
 print("Target=", 2^-107);
 print("Actual=", dirtyinfnorm(p-f,I));
 display=hexadecimal;
