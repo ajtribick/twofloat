@@ -4,6 +4,10 @@
 
 * Add specific implementations for `exp2` and `log2` functions.
 
+## Version 0.2.2
+
+* Removed debugging code accidentally left in no_overlap function.
+
 ## Version 0.2.1
 
 * Added `exp_m1`, `ln_1p` functions.

@@ -36,7 +36,6 @@ pub fn no_overlap(a: f64, b: f64) -> bool {
         }
         (FpCategory::Normal, FpCategory::Subnormal) => {
             let a_exponent = exponent(a);
-            println!("a_exponent = {}", a_exponent);
             if a_exponent >= f64::MANTISSA_DIGITS {
                 true
             } else {
