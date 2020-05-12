@@ -50,7 +50,6 @@ randomized_test!(fract_lo_fract_test, |rng: F64Rand| {
         "fract({:?}) produced invalid value",
         source
     );
-    println!("{:?}", result);
     assert!(
         result.hi().trunc() == 0.0
             || (result.hi().trunc().abs() == 1.0 && ((result.hi() >= 0.0) != (result.lo() >= 0.0))),
