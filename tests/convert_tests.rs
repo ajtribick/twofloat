@@ -460,10 +460,18 @@ macro_rules! int64_test {
                         break result;
                     }
                 };
-                let expected = if source.lo() >= 0.0 {
-                    Ok($type::MIN + source.lo() as $type)
+                let expected = if source.hi() < $type::MIN as f64 {
+                    if source.lo() > 0.0 {
+                        Ok($type::MIN)
+                    } else {
+                        Err(ConversionError {})
+                    }
                 } else {
-                    Err(ConversionError {})
+                    if source.lo() > -1.0 {
+                        Ok($type::MIN + source.lo().ceil() as $type)
+                    } else {
+                        Err(ConversionError {})
+                    }
                 };
 
                 let result = $type::try_from(source);
@@ -622,15 +630,27 @@ macro_rules! int64_test {
                     let b = loop {
                         let b = rng.gen_range(1.0, (1 << rb) as f64);
                         if no_overlap(a, b) {
-                            break b;
+                            if rng.gen() {
+                                break b;
+                            } else {
+                                break -b;
+                            }
                         }
                     };
 
                     let source = TwoFloat::try_from((a, b)).unwrap();
-                    let expected = if b >= 0.0 {
-                        Ok(a as $type + b as $type)
+                    let expected = if a >= 0.0 {
+                        if b >= 0.0 {
+                            Ok(a as $type + b as $type)
+                        } else {
+                            Ok(a as $type - (-b) as $type - 1)
+                        }
                     } else {
-                        Ok(a as $type - (-b) as $type)
+                        if b >= 0.0 {
+                            Ok(a as $type + b as $type + 1)
+                        } else {
+                            Ok(a as $type - (-b) as $type)
+                        }
                     };
                     let result = $type::try_from(source);
 

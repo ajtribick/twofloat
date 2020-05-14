@@ -101,7 +101,7 @@ macro_rules! int_convert {
     ($type:tt) => {
         impl From<$type> for TwoFloat {
             fn from(value: $type) -> Self {
-                TwoFloat {
+                Self {
                     hi: value as f64,
                     lo: 0.0,
                 }
@@ -109,32 +109,13 @@ macro_rules! int_convert {
         }
 
         from_conversion!(|value: TwoFloat| -> Result<$type, ConversionError> {
-            const LOWER_BOUND: f64 = $type::MIN as f64 - 1.0;
-            const UPPER_BOUND: f64 = $type::MAX as f64 + 1.0;
-            if value.hi < LOWER_BOUND || value.hi > UPPER_BOUND {
+            const LOWER_BOUND: f64 = $type::MIN as f64;
+            const UPPER_BOUND: f64 = $type::MAX as f64;
+            let truncated = value.trunc();
+            if truncated < LOWER_BOUND || truncated > UPPER_BOUND {
                 Err(ConversionError {})
-            } else if value.hi == LOWER_BOUND {
-                if value.lo > 0.0 {
-                    Ok($type::MIN)
-                } else {
-                    Err(ConversionError {})
-                }
-            } else if value.hi == UPPER_BOUND {
-                if value.lo < 0.0 {
-                    Ok($type::MAX)
-                } else {
-                    Err(ConversionError {})
-                }
-            } else if value.hi.fract() == 0.0 {
-                if value.hi < 0.0 && value.lo > 0.0 {
-                    Ok(value.hi as $type + 1)
-                } else if value.hi >= 0.0 && value.lo < 0.0 {
-                    Ok(value.hi as $type - 1)
-                } else {
-                    Ok(value.hi as $type)
-                }
             } else {
-                Ok(value.hi as $type)
+                Ok(truncated.hi() as $type)
             }
         });
     };
@@ -147,6 +128,52 @@ int_convert!(u32);
 int_convert!(u16);
 int_convert!(u8);
 
+macro_rules! bigint_convert {
+    ($type:tt) => {
+        impl From<$type> for TwoFloat {
+            fn from(value: $type) -> Self {
+                let a = value as f64;
+                let b = if a == $type::MAX as f64 {
+                    -((($type::MAX - value) + 1) as f64)
+                } else if value >= a as $type {
+                    (value - a as $type) as f64
+                } else {
+                    -((a as $type - value) as f64)
+                };
+
+                Self { hi: a, lo: b }
+            }
+        }
+
+        from_conversion!(|value: TwoFloat| -> Result<$type, ConversionError> {
+            const LOWER_BOUND: TwoFloat = TwoFloat {
+                hi: $type::MIN as f64,
+                lo: 0.0,
+            };
+
+            const UPPER_BOUND: TwoFloat = TwoFloat {
+                hi: $type::MAX as f64,
+                lo: -1.0,
+            };
+
+            let truncated = value.trunc();
+            if truncated < LOWER_BOUND || truncated > UPPER_BOUND {
+                Err(ConversionError {})
+            } else if truncated.hi() == UPPER_BOUND.hi() {
+                Ok($type::MAX - (-truncated.lo() as $type) + 1)
+            } else if truncated.lo() >= 0.0 {
+                Ok(truncated.hi() as $type + truncated.lo() as $type)
+            } else {
+                Ok(truncated.hi() as $type - (-truncated.lo()) as $type)
+            }
+        });
+    };
+}
+
+bigint_convert!(i64);
+bigint_convert!(u64);
+
+/*
 impl From<i64> for TwoFloat {
     fn from(value: i64) -> Self {
         let a = value as f64;
@@ -246,3 +273,4 @@ from_conversion!(|value: TwoFloat| -> Result<u64, ConversionError> {
         Ok(value.hi as u64)
     }
 });
+*/
