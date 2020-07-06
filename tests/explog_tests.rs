@@ -1,5 +1,5 @@
 use rand::Rng;
-use twofloat::*;
+use twofloat::TwoFloat;
 
 pub mod common;
 use common::*;

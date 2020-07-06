@@ -1,6 +1,6 @@
 use core::convert::TryFrom;
 use rand::Rng;
-use twofloat::*;
+use twofloat::TwoFloat;
 
 pub mod common;
 use common::*;
