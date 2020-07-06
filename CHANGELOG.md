@@ -3,6 +3,7 @@
 ## Version 0.3.0
 
 * Add specific implementations for `exp2` and `log2` functions.
+* Add optional support for serde (feature "serde_support").
 
 ## Version 0.2.2
 
