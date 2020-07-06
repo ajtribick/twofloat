@@ -689,3 +689,284 @@ macro_rules! int64_test {
 
 int64_test!(i64, i64_test);
 int64_test!(u64, u64_test);
+
+macro_rules! int128_test {
+    ($type:tt, $test_i:ident) => {
+        #[cfg(test)]
+        mod $test_i {
+            use super::*;
+
+            const ROUNDTRIP_MAX: $type = 1 << 107;
+
+            #[test]
+            fn to_twofloat_exact() {
+                let mut rng = rand::thread_rng();
+                let source_dist = rand::distributions::Uniform::new_inclusive(
+                    (0 as $type).saturating_sub(ROUNDTRIP_MAX),
+                    ROUNDTRIP_MAX,
+                );
+                for _ in 0..TEST_ITERS {
+                    let source = rng.sample(source_dist);
+                    let result: TwoFloat = source.into();
+
+                    assert!(result.is_valid(), "Conversion of {} was invalid", source);
+                    assert!(
+                        result.hi() >= $type::MIN as f64 && result.hi() <= $type::MAX as f64,
+                        "Conversion of {} high word out of range",
+                        source
+                    );
+                    assert!(
+                        result.hi().fract() == 0.0,
+                        "Integer conversion of {} produced a fraction",
+                        source
+                    );
+                    assert!(
+                        result.lo().fract() == 0.0,
+                        "Integer conversion of {} produced a fraction",
+                        source
+                    );
+
+                    if result.lo() >= 0.0 {
+                        assert_eq!(
+                            result.hi() as $type + result.lo() as $type,
+                            source,
+                            "Conversion of {} did not produce matching value",
+                            source
+                        );
+                    } else {
+                        assert_eq!(
+                            result.hi() as $type - ((-result.lo()) as $type),
+                            source,
+                            "Conversion of {} did not produce matching value",
+                            source
+                        );
+                    }
+                }
+            }
+
+            #[test]
+            fn inexact_roundtrip() {
+                let mut rng = rand::thread_rng();
+                let source_dist =
+                    rand::distributions::Uniform::new_inclusive(ROUNDTRIP_MAX, $type::MAX);
+                for _ in 0..TEST_ITERS {
+                    let source = rng.sample(source_dist);
+                    let source_signed = if $type::MIN == 0 || rng.gen() {
+                        source
+                    } else {
+                        0 - source
+                    };
+
+                    let value: TwoFloat = source_signed.into();
+
+                    assert!(
+                        value.is_valid(),
+                        "Conversion of {} was invalid",
+                        source_signed
+                    );
+
+                    match $type::try_from(value) {
+                        Ok(result) => {
+                            let difference = if result >= source_signed {
+                                result - source_signed
+                            } else {
+                                source_signed - result
+                            };
+                            assert!(
+                                difference.leading_zeros() > source.leading_zeros() + 106,
+                                "Conversion of {} produced too large error on roundtrip",
+                                source_signed
+                            );
+                        }
+                        Err(_) => {
+                            panic!("Value {} produced error on roundtrip", source_signed);
+                        }
+                    }
+                }
+            }
+
+            const LOWER_BOUND: f64 = $type::MIN as f64 - 1.0;
+            const UPPER_BOUND: f64 = $type::MAX as f64;
+
+            randomized_test!(from_twofloat_lower_bound, |rng: F64Rand| {
+                let source = loop {
+                    if let Ok(result) = try_get_twofloat_with_hi(rng, LOWER_BOUND) {
+                        break result;
+                    }
+                };
+                let expected = if source.hi() < $type::MIN as f64 {
+                    if source.lo() > 0.0 {
+                        Ok($type::MIN)
+                    } else {
+                        Err(ConversionError {})
+                    }
+                } else {
+                    if source.lo() > -1.0 {
+                        Ok($type::MIN + source.lo().ceil() as $type)
+                    } else {
+                        Err(ConversionError {})
+                    }
+                };
+
+                let result = $type::try_from(source);
+
+                check_try_from_result(expected, result, source);
+
+                let result_ref = $type::try_from(&source);
+                assert_eq!(
+                    result, result_ref,
+                    "Different value and reference conversions for {:?}",
+                    source
+                );
+            });
+
+            randomized_test!(from_twofloat_upper_bound, |rng: F64Rand| {
+                let source = loop {
+                    if let Ok(result) = try_get_twofloat_with_hi(rng, UPPER_BOUND) {
+                        break result;
+                    }
+                };
+                let expected = if source.lo() < 0.0 {
+                    Ok($type::MAX - ((-source.lo().floor()) as $type) + 1)
+                } else {
+                    Err(ConversionError {})
+                };
+                let result = $type::try_from(source);
+
+                check_try_from_result(expected, result, source);
+
+                let result_ref = $type::try_from(&source);
+                assert_eq!(
+                    result, result_ref,
+                    "Different value and reference conversions for {:?}",
+                    source
+                );
+            });
+
+            #[test]
+            fn from_twofloat_high_fract() {
+                let mut rng = rand::thread_rng();
+
+                let exponent_dist = rand::distributions::Uniform::new(53u64, 1075u64);
+                let mantissa_dist = rand::distributions::Uniform::new(0u64, 1u64 << 52);
+
+                let mut gen_valid_f64 = move || {
+                    let x = f64::from_bits(
+                        rng.sample(mantissa_dist) | (rng.sample(exponent_dist) << 52),
+                    );
+                    if $type::MIN == 0 || rng.gen() {
+                        x
+                    } else {
+                        -x
+                    }
+                };
+
+                for _ in 0..TEST_ITERS {
+                    let (a, b) = loop {
+                        let a = get_valid_f64(&mut gen_valid_f64, |x| {
+                            x > LOWER_BOUND && x < UPPER_BOUND && x.fract() != 0.0
+                        });
+                        let rb = right_bit(a).unwrap_or(i16::MIN);
+                        if (rb < -1019) {
+                            continue;
+                        }
+                        let b_exponent = (rng.gen_range(-1022, rb) + 1023) as u64;
+                        let b_mantissa = rng.sample(mantissa_dist);
+                        let b = f64::from_bits(b_mantissa | (b_exponent << 52));
+                        if no_overlap(a, b) {
+                            break if rng.gen() { (a, b) } else { (a, -b) };
+                        }
+                    };
+
+                    let source = TwoFloat::try_from((a, b)).unwrap();
+                    let expected = Ok(a as $type);
+                    let result = $type::try_from(source);
+
+                    check_try_from_result(expected, result, source);
+
+                    let result_ref = $type::try_from(&source);
+                    assert_eq!(
+                        result, result_ref,
+                        "Different value and reference conversions for {:?}",
+                        source
+                    );
+                }
+            }
+
+            #[test]
+            fn from_twofloat_split_fract() {
+                let mut rng = rand::thread_rng();
+                let exponent_dist = rand::distributions::Uniform::new(1023u64, 1087u64);
+                let mantissa_dist = rand::distributions::Uniform::new(0u64, 1u64 << 52);
+
+                let mut gen_f64 = move || {
+                    let x = f64::from_bits(
+                        rng.sample(mantissa_dist) | (rng.sample(exponent_dist) << 52),
+                    );
+                    if $type::MIN == 0 || rng.gen() {
+                        x
+                    } else {
+                        -x
+                    }
+                };
+
+                let fract_dist =
+                    rand::distributions::Uniform::new(f64::from_bits((-1.0f64).to_bits() - 1), 1.0);
+                for i in 0..TEST_ITERS {
+                    let (a, b) = loop {
+                        let a = get_valid_f64(&mut gen_f64, |x| x > LOWER_BOUND && x < UPPER_BOUND)
+                            .trunc();
+                        if a == 0.0 {
+                            continue;
+                        }
+                        let b = if i == 0 { 0.0 } else { rng.sample(fract_dist) };
+                        if no_overlap(a, b) {
+                            break (a, b);
+                        }
+                    };
+
+                    let source = TwoFloat::try_from((a, b)).unwrap();
+                    let expected = if a < 0.0 && b > 0.0 {
+                        Ok(a as $type + 1)
+                    } else if a > 0.0 && b < 0.0 {
+                        Ok(a as $type - 1)
+                    } else {
+                        Ok(a as $type)
+                    };
+                    let result = $type::try_from(source);
+
+                    check_try_from_result(expected, result, source);
+
+                    let result_ref = $type::try_from(&source);
+                    assert_eq!(
+                        result, result_ref,
+                        "Different value and reference conversions for {:?}",
+                        source
+                    );
+                }
+            }
+
+            randomized_test!(from_twofloat_out_of_range, |rng: F64Rand| {
+                let source = get_valid_twofloat(rng, |x, _| x < LOWER_BOUND || x > UPPER_BOUND);
+
+                let result = $type::try_from(source);
+
+                assert!(
+                    result.is_err(),
+                    "Conversion of {:?} produced value instead of error",
+                    source
+                );
+
+                let result_ref = $type::try_from(&source);
+                assert_eq!(
+                    result, result_ref,
+                    "Different value and reference conversions for {:?}",
+                    source
+                );
+            });
+        }
+    };
+}
+
+int128_test!(i128, i128_test);
+int128_test!(u128, u128_test);

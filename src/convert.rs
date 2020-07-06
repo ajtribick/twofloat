@@ -170,5 +170,7 @@ macro_rules! bigint_convert {
     };
 }
 
+bigint_convert!(i128);
 bigint_convert!(i64);
+bigint_convert!(u128);
 bigint_convert!(u64);
