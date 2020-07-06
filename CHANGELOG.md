@@ -4,6 +4,7 @@
 
 * Add specific implementations for `exp2` and `log2` functions.
 * Add optional support for serde (feature "serde_support").
+* Add conversions to/from `i128` and `u128`.
 
 ## Version 0.2.2
 
