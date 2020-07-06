@@ -1,9 +1,32 @@
 language: rust
+
 rust:
   - stable
   - beta
   - nightly
-jobs:
+
+env:
+  global:
+    - RUST_BACKTRACE=1 CARGO_FEATURES="serde"
+
+matrix:
+  fast_finish: true
   allow_failures:
     - rust: nightly
-  fast_finish: true
+  include:
+    - name: 'Rust: format check'
+      rust: stable
+      install:
+        - rustup component add rustfmt
+      script:
+        - cargo fmt --verbose --all -- --check
+
+    - name: 'Rust: style check'
+      if: env(ENABLE_CLIPPY) = 1
+      rust: stable
+      install:
+        - rustup component add clippy
+      script:
+        - cargo clippy --verbose --all -- -D warnings
+
+
