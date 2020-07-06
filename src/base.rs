@@ -3,14 +3,14 @@ use core::fmt;
 use core::num::FpCategory;
 
 #[cfg(feature = "serde_support")]
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde_support", serde(try_from="(f64, f64)"))]
-#[cfg_attr(feature = "serde_support", serde(into="(f64, f64)"))]
+#[cfg_attr(feature = "serde_support", serde(try_from = "(f64, f64)"))]
+#[cfg_attr(feature = "serde_support", serde(into = "(f64, f64)"))]
 pub struct TwoFloat {
     pub(crate) hi: f64,
     pub(crate) lo: f64,

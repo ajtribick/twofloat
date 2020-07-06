@@ -271,7 +271,10 @@ impl TwoFloat {
         if self < -1074.0 {
             Self::from(0.0)
         } else if self >= 1023.0 {
-            Self { hi: f64::INFINITY, lo: f64::INFINITY }
+            Self {
+                hi: f64::INFINITY,
+                lo: f64::INFINITY,
+            }
         } else {
             let k = self.hi.round();
             let r = self - k;

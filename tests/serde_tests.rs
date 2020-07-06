@@ -3,17 +3,20 @@ pub mod common;
 #[cfg(feature = "serde_support")]
 pub mod serde_tests {
     use super::common::*;
-    use twofloat::{TwoFloat, no_overlap};
-    use serde_test::{Token, assert_tokens, assert_de_tokens_error};
+    use serde_test::{assert_de_tokens_error, assert_tokens, Token};
+    use twofloat::{no_overlap, TwoFloat};
 
     randomized_test!(serialize_test, |rng: F64Rand| {
         let source = get_twofloat(rng);
-        assert_tokens(&source, &[
-            Token::Tuple { len: 2 },
-            Token::F64(source.hi()),
-            Token::F64(source.lo()),
-            Token::TupleEnd,
-        ]);
+        assert_tokens(
+            &source,
+            &[
+                Token::Tuple { len: 2 },
+                Token::F64(source.hi()),
+                Token::F64(source.lo()),
+                Token::TupleEnd,
+            ],
+        );
     });
 
     randomized_test!(deserialize_invalid_test, |rng: F64Rand| {
@@ -25,7 +28,7 @@ pub mod serde_tests {
                 Token::F64(lo),
                 Token::TupleEnd,
             ],
-            "invalid TwoFloat conversion"
+            "invalid TwoFloat conversion",
         );
     });
 }
