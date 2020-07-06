@@ -2,8 +2,9 @@
 # twofloat
 
 This library provides an implementation of double-double arithmetic for the
-Rust language. Please be aware that this is not the same as the IEEE
-quadruple-precision floating-point format.
+Rust language. Note that this is not the same as the IEEE quadruple-precision
+floating-point format. Instead, higher precision is obtained by representing
+the value as the sum of two non-overlapping `f64` values.
 
 ## Usage
 
@@ -24,10 +25,15 @@ let e = TwoFloat::new_div(1.0, 7.0);
 
 Basic arithmetic operators and comparisons are available, together with the
 utility functions `abs()`, `is_positive_sign()` and `is_negative_sign()`.
+Mathematical functions are provided if the `math_funcs` feature is enabled
+(this is enabled by default), though the implementations should be regarded
+as preliminary.
 
-Operations on non-finite values are not supported but at the moment this is
-not automatically checked. The `is_valid()` method is provided for this
-purpose.
+Operations on non-finite values are not supported. At the moment this is not
+automatically checked. The `is_valid()` method is provided for this purpose.
+
+If the `serde_support` feature is enabled, serialization and deserialization
+is possible through the Serde library.
 
 ## References
 
@@ -35,6 +41,14 @@ purpose.
   error bounds for basic building blocks of double-word arithmetic. ACM
   Transactions on Mathematical Software, Association for Computing Machinery,
   2017, 44 (2), pp.1 - 27. 10.1145/3121432. hal-01351529v3
+
+* Alan H. Karp, Peter Markstein. High Precision Division and Square Root. ACM
+  Transactions on Mathematical Software, Association for Computing Machinery,
+  1997, 23 (4), pp. 561-589. 10.1145/279232.279237.
+
+* S. Chevillard, M. Joldeș and C. Lauter. Sollya: an environment for the
+  development of numerical codes. Mathematical Software - ICMS 2010, pp.
+  28–31.
 */
 
 #[cfg(test)]

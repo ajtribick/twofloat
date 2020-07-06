@@ -5,6 +5,7 @@ use std::error;
 
 use crate::base::{no_overlap, TwoFloat};
 
+/// Error indicating invalid conversions to/from `TwoFloat`.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct ConversionError;
 

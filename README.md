@@ -11,7 +11,7 @@ floating-point format. Instead, higher precision is obtained by representing
 the value as the sum of two non-overlapping `f64` values.
 
 Operator traits are implemented both for reference and value types where
-appropriate. Refer to the source code for the source of the algorithms.
+appropriate. The code indicates the source of the algorithms used.
 
 Mathematical constants are available in the `twofloat::consts` module, which
 provides the same set of constants as `std::f64::consts`.
@@ -21,6 +21,11 @@ Please note that the implementation of the mathematical functions (`exp`,
 operations at the same precision as the result, so they will not return values
 which are correct to the full precision of the `TwoFloat` type. This may be
 addressed in future releases.
+
+## Optional features
+
+* `math_funcs` - include mathematical functions (enabled by default)
+* `serde_support` - enable serialization/deserialization with Serde.
 
 ## References
 
