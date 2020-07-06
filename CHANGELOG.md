@@ -2,11 +2,14 @@
 
 ## Version 0.3.0
 
-* Add specific implementations for `exp2` and `log2` functions.
+* Breaking change: add specific implementations for `exp2` and `log2`
+  functions.
+* Breaking change: update formatting, support exponential formats and
+  precision specifiers.
 * Add optional support for serde (feature "serde_support").
 * Add conversions to/from `i128` and `u128`.
-* Mathematical functions are optional (feature "math_funcs", enabled by
-  default).
+* Mathematical functions are optional but enabled by default (feature
+  "math_funcs").
 
 ## Version 0.2.2
 
