@@ -148,10 +148,22 @@ impl TwoFloat {
 
 impl fmt::Display for TwoFloat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let sign_char = if self.lo().is_sign_positive() { '+' } else { '-' };
+        let sign_char = if self.lo().is_sign_positive() {
+            '+'
+        } else {
+            '-'
+        };
         if f.sign_plus() {
             match f.precision() {
-                Some(p) => write!(f, "{:+.*} {} {:.*}", p, self.hi, sign_char, p, self.lo.abs()),
+                Some(p) => write!(
+                    f,
+                    "{:+.*} {} {:.*}",
+                    p,
+                    self.hi,
+                    sign_char,
+                    p,
+                    self.lo.abs()
+                ),
                 None => write!(f, "{:+} {} {}", self.hi, sign_char, self.lo.abs()),
             }
         } else {
@@ -165,15 +177,35 @@ impl fmt::Display for TwoFloat {
 
 impl fmt::LowerExp for TwoFloat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let sign_char = if self.lo().is_sign_positive() { '+' } else { '-' };
+        let sign_char = if self.lo().is_sign_positive() {
+            '+'
+        } else {
+            '-'
+        };
         if f.sign_plus() {
             match f.precision() {
-                Some(p) => write!(f, "{:+.*e} {} {:.*e}", p, self.hi, sign_char, p, self.lo.abs()),
+                Some(p) => write!(
+                    f,
+                    "{:+.*e} {} {:.*e}",
+                    p,
+                    self.hi,
+                    sign_char,
+                    p,
+                    self.lo.abs()
+                ),
                 None => write!(f, "{:+e} {} {:e}", self.hi, sign_char, self.lo.abs()),
             }
         } else {
             match f.precision() {
-                Some(p) => write!(f, "{:.*e} {} {:.*e}", p, self.hi, sign_char, p, self.lo.abs()),
+                Some(p) => write!(
+                    f,
+                    "{:.*e} {} {:.*e}",
+                    p,
+                    self.hi,
+                    sign_char,
+                    p,
+                    self.lo.abs()
+                ),
                 None => write!(f, "{:e} {} {:e}", self.hi, sign_char, self.lo.abs()),
             }
         }
@@ -182,15 +214,35 @@ impl fmt::LowerExp for TwoFloat {
 
 impl fmt::UpperExp for TwoFloat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let sign_char = if self.lo().is_sign_positive() { '+' } else { '-' };
+        let sign_char = if self.lo().is_sign_positive() {
+            '+'
+        } else {
+            '-'
+        };
         if f.sign_plus() {
             match f.precision() {
-                Some(p) => write!(f, "{:+.*E} {} {:.*E}", p, self.hi, sign_char, p, self.lo.abs()),
+                Some(p) => write!(
+                    f,
+                    "{:+.*E} {} {:.*E}",
+                    p,
+                    self.hi,
+                    sign_char,
+                    p,
+                    self.lo.abs()
+                ),
                 None => write!(f, "{:+E} {} {:E}", self.hi, sign_char, self.lo.abs()),
             }
         } else {
             match f.precision() {
-                Some(p) => write!(f, "{:.*E} {} {:.*E}", p, self.hi, sign_char, p, self.lo.abs()),
+                Some(p) => write!(
+                    f,
+                    "{:.*E} {} {:.*E}",
+                    p,
+                    self.hi,
+                    sign_char,
+                    p,
+                    self.lo.abs()
+                ),
                 None => write!(f, "{:E} {} {:E}", self.hi, sign_char, self.lo.abs()),
             }
         }
