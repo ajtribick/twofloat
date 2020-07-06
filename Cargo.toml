@@ -14,7 +14,8 @@ description = "Double-double arithmetic functionality."
 repository = "https://github.com/ajtribick/twofloat"
 
 [features]
-default = []
+default = ["math_funcs"]
+math_funcs = []
 serde_support = ["serde"]
 
 [dependencies]

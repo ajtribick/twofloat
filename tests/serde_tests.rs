@@ -1,7 +1,7 @@
 pub mod common;
 
 #[cfg(feature = "serde_support")]
-pub mod serde_tests {
+pub mod tests {
     use super::common::*;
     use serde_test::{assert_de_tokens_error, assert_tokens, Token};
     use twofloat::{no_overlap, TwoFloat};
