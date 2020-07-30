@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde_support", serde(try_from = "(f64, f64)"))]
 #[cfg_attr(feature = "serde_support", serde(into = "(f64, f64)"))]
@@ -345,5 +345,11 @@ mod tests {
         assert_eq!(format!("{:.2E}", value), "1.00E0 + 3.00E-1");
         assert_eq!(format!("{:.2E}", -value), "-1.00E0 - 3.00E-1");
         assert_eq!(format!("{:+.2E}", value), "+1.00E0 + 3.00E-1");
+    }
+
+    #[test]
+    fn default_test() {
+        let value: TwoFloat = Default::default();
+        assert_eq!(value, TwoFloat::from(0));
     }
 }
