@@ -51,6 +51,8 @@ is possible through the Serde library.
   28–31.
 */
 
+#![forbid(unsafe_code)]
+
 #[cfg(test)]
 mod test_util;
 
