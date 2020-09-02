@@ -1,25 +1,26 @@
-use core::cmp::Eq;
 use core::convert::{From, TryFrom};
 use core::fmt;
 use std::error;
 
 use crate::base::{no_overlap, TwoFloat};
 
-/// Error indicating invalid conversions to/from `TwoFloat`.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct ConversionError;
+/// The error type for `TwoFloat` operations.
+#[non_exhaustive]
+#[derive(Debug)]
+pub enum TwoFloatError {
+    /// Indicates invalid conversion to/from `TwoFloat`
+    ConversionError,
+}
 
-impl fmt::Display for ConversionError {
+impl fmt::Display for TwoFloatError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid TwoFloat conversion")
+        match self {
+            Self::ConversionError => write!(f, "invalid TwoFloat conversion"),
+        }
     }
 }
 
-impl error::Error for ConversionError {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        None
-    }
-}
+impl error::Error for TwoFloatError {}
 
 macro_rules! from_conversion {
     (|$source_i:ident : TwoFloat| -> $dest:tt $code:block) => {
@@ -49,7 +50,7 @@ macro_rules! from_conversion {
 from_conversion!(|value: TwoFloat| -> (f64, f64) { (value.hi, value.lo) });
 
 impl TryFrom<(f64, f64)> for TwoFloat {
-    type Error = ConversionError;
+    type Error = TwoFloatError;
 
     fn try_from(value: (f64, f64)) -> Result<Self, Self::Error> {
         if no_overlap(value.0, value.1) {
@@ -58,7 +59,7 @@ impl TryFrom<(f64, f64)> for TwoFloat {
                 lo: value.1,
             })
         } else {
-            Err(Self::Error {})
+            Err(Self::Error::ConversionError {})
         }
     }
 }
@@ -66,7 +67,7 @@ impl TryFrom<(f64, f64)> for TwoFloat {
 from_conversion!(|value: TwoFloat| -> [f64; 2] { [value.hi, value.lo] });
 
 impl TryFrom<[f64; 2]> for TwoFloat {
-    type Error = ConversionError;
+    type Error = TwoFloatError;
 
     fn try_from(value: [f64; 2]) -> Result<Self, Self::Error> {
         if no_overlap(value[0], value[1]) {
@@ -75,7 +76,7 @@ impl TryFrom<[f64; 2]> for TwoFloat {
                 lo: value[1],
             })
         } else {
-            Err(Self::Error {})
+            Err(Self::Error::ConversionError {})
         }
     }
 }
@@ -109,12 +110,12 @@ macro_rules! int_convert {
             }
         }
 
-        from_conversion!(|value: TwoFloat| -> Result<$type, ConversionError> {
+        from_conversion!(|value: TwoFloat| -> Result<$type, TwoFloatError> {
             const LOWER_BOUND: f64 = $type::MIN as f64;
             const UPPER_BOUND: f64 = $type::MAX as f64;
             let truncated = value.trunc();
             if truncated < LOWER_BOUND || truncated > UPPER_BOUND {
-                Err(ConversionError {})
+                Err(Self::Error::ConversionError {})
             } else {
                 Ok(truncated.hi() as $type)
             }
@@ -146,7 +147,7 @@ macro_rules! bigint_convert {
             }
         }
 
-        from_conversion!(|value: TwoFloat| -> Result<$type, ConversionError> {
+        from_conversion!(|value: TwoFloat| -> Result<$type, TwoFloatError> {
             const LOWER_BOUND: TwoFloat = TwoFloat {
                 hi: $type::MIN as f64,
                 lo: 0.0,
@@ -159,7 +160,7 @@ macro_rules! bigint_convert {
 
             let truncated = value.trunc();
             if truncated < LOWER_BOUND || truncated > UPPER_BOUND {
-                Err(ConversionError {})
+                Err(Self::Error::ConversionError {})
             } else if truncated.hi() == UPPER_BOUND.hi() {
                 Ok($type::MAX - (-truncated.lo() as $type) + 1)
             } else if truncated.lo() >= 0.0 {

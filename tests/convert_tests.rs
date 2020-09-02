@@ -1,7 +1,8 @@
 use core::convert::TryFrom;
+use core::mem::discriminant;
 
 use rand::Rng;
-use twofloat::{no_overlap, ConversionError, TwoFloat};
+use twofloat::{no_overlap, TwoFloat, TwoFloatError};
 
 pub mod common;
 use common::*;
@@ -128,28 +129,29 @@ float_test!(f64, from_f64_test, into_f64_test);
 float_test!(f32, from_f32_test, into_f32_test);
 
 fn check_try_from_result<T: core::fmt::Debug + PartialEq>(
-    expected: Result<T, ConversionError>,
-    result: Result<T, ConversionError>,
+    expected: &Result<T, TwoFloatError>,
+    result: &Result<T, TwoFloatError>,
     source: TwoFloat,
 ) {
-    if let Ok(expected_value) = expected {
-        assert!(
-            result.is_ok(),
-            "Conversion of {:?} produced error instead of result",
-            source
-        );
-        assert_eq!(
-            result.unwrap(),
-            expected_value,
+    assert_eq!(
+        discriminant(expected),
+        discriminant(result),
+        "Conversion of {:?} produced unexpected Err/Ok state",
+        source
+    );
+    match (expected, result) {
+        (Ok(expected_value), Ok(result_value)) => assert_eq!(
+            expected_value, result_value,
             "Conversion of {:?} produced incorrect result",
             source
-        );
-    } else {
-        assert!(
-            result.is_err(),
-            "Conversion of {:?} produced result instead of error",
+        ),
+        (Err(expected_err), Err(result_err)) => assert_eq!(
+            discriminant(expected_err),
+            discriminant(result_err),
+            "Conversion of {:?} produced mismatched error types",
             source
-        );
+        ),
+        _ => unreachable!(),
     }
 }
 
@@ -168,18 +170,14 @@ macro_rules! from_twofloat_test {
             let expected = if source.lo() > 0.0 {
                 Ok($type::MIN)
             } else {
-                Err(ConversionError {})
+                Err(TwoFloatError::ConversionError {})
             };
             let result = $type::try_from(source);
 
-            check_try_from_result(expected, result, source);
+            check_try_from_result(&expected, &result, source);
 
             let result_ref = $type::try_from(&source);
-            assert_eq!(
-                result, result_ref,
-                "Different value and reference conversions for {:?}",
-                source
-            );
+            check_try_from_result(&expected, &result_ref, source);
         });
 
         randomized_test!(from_twofloat_upper_bound, |rng: F64Rand| {
@@ -188,21 +186,18 @@ macro_rules! from_twofloat_test {
                     break source;
                 }
             };
+
             let expected = if source.lo() < 0.0 {
                 Ok($type::MAX)
             } else {
-                Err(ConversionError {})
+                Err(TwoFloatError::ConversionError {})
             };
-            let result = $type::try_from(source);
 
-            check_try_from_result(expected, result, source);
+            let result = $type::try_from(source);
+            check_try_from_result(&expected, &result, source);
 
             let result_ref = $type::try_from(&source);
-            assert_eq!(
-                result, result_ref,
-                "Different value and reference conversions for {:?}",
-                source
-            );
+            check_try_from_result(&expected, &result_ref, source);
         });
 
         #[test]
@@ -232,15 +227,10 @@ macro_rules! from_twofloat_test {
                 };
 
                 let result = $type::try_from(source);
-
-                check_try_from_result(expected, result, source);
+                check_try_from_result(&expected, &result, source);
 
                 let result_ref = $type::try_from(&source);
-                assert_eq!(
-                    result, result_ref,
-                    "Different value and reference conversions for {:?}",
-                    source
-                );
+                check_try_from_result(&expected, &result_ref, source);
             }
         }
 
@@ -266,16 +256,12 @@ macro_rules! from_twofloat_test {
                 };
 
                 let expected = Ok(a.trunc() as $type);
-                let result = $type::try_from(source);
 
-                check_try_from_result(expected, result, source);
+                let result = $type::try_from(source);
+                check_try_from_result(&expected, &result, source);
 
                 let result_ref = $type::try_from(&source);
-                assert_eq!(
-                    result, result_ref,
-                    "Different value and reference conversions for {:?}",
-                    source
-                );
+                check_try_from_result(&expected, &result_ref, source);
             }
         }
 
@@ -290,9 +276,9 @@ macro_rules! from_twofloat_test {
             );
 
             let result_ref = $type::try_from(&source);
-            assert_eq!(
-                result, result_ref,
-                "Different value and reference conversions for {:?}",
+            assert!(
+                result_ref.is_err(),
+                "Conversion of {:?} produced value instead of error",
                 source
             );
         });
@@ -464,26 +450,21 @@ macro_rules! int64_test {
                     if source.lo() > 0.0 {
                         Ok($type::MIN)
                     } else {
-                        Err(ConversionError {})
+                        Err(TwoFloatError::ConversionError {})
                     }
                 } else {
                     if source.lo() > -1.0 {
                         Ok($type::MIN + source.lo().ceil() as $type)
                     } else {
-                        Err(ConversionError {})
+                        Err(TwoFloatError::ConversionError {})
                     }
                 };
 
                 let result = $type::try_from(source);
-
-                check_try_from_result(expected, result, source);
+                check_try_from_result(&expected, &result, source);
 
                 let result_ref = $type::try_from(&source);
-                assert_eq!(
-                    result, result_ref,
-                    "Different value and reference conversions for {:?}",
-                    source
-                );
+                check_try_from_result(&expected, &result_ref, source);
             });
 
             randomized_test!(from_twofloat_upper_bound, |rng: F64Rand| {
@@ -495,18 +476,14 @@ macro_rules! int64_test {
                 let expected = if source.lo() < 0.0 {
                     Ok($type::MAX - ((-source.lo().floor()) as $type) + 1)
                 } else {
-                    Err(ConversionError {})
+                    Err(TwoFloatError::ConversionError {})
                 };
-                let result = $type::try_from(source);
 
-                check_try_from_result(expected, result, source);
+                let result = $type::try_from(source);
+                check_try_from_result(&expected, &result, source);
 
                 let result_ref = $type::try_from(&source);
-                assert_eq!(
-                    result, result_ref,
-                    "Different value and reference conversions for {:?}",
-                    source
-                );
+                check_try_from_result(&expected, &result_ref, source);
             });
 
             #[test]
@@ -546,16 +523,12 @@ macro_rules! int64_test {
 
                     let source = TwoFloat::try_from((a, b)).unwrap();
                     let expected = Ok(a as $type);
-                    let result = $type::try_from(source);
 
-                    check_try_from_result(expected, result, source);
+                    let result = $type::try_from(source);
+                    check_try_from_result(&expected, &result, source);
 
                     let result_ref = $type::try_from(&source);
-                    assert_eq!(
-                        result, result_ref,
-                        "Different value and reference conversions for {:?}",
-                        source
-                    );
+                    check_try_from_result(&expected, &result_ref, source);
                 }
             }
 
@@ -599,16 +572,12 @@ macro_rules! int64_test {
                     } else {
                         Ok(a as $type)
                     };
-                    let result = $type::try_from(source);
 
-                    check_try_from_result(expected, result, source);
+                    let result = $type::try_from(source);
+                    check_try_from_result(&expected, &result, source);
 
                     let result_ref = $type::try_from(&source);
-                    assert_eq!(
-                        result, result_ref,
-                        "Different value and reference conversions for {:?}",
-                        source
-                    );
+                    check_try_from_result(&expected, &result_ref, source);
                 }
             }
 
@@ -652,16 +621,12 @@ macro_rules! int64_test {
                             Ok(a as $type - (-b) as $type)
                         }
                     };
-                    let result = $type::try_from(source);
 
-                    check_try_from_result(expected, result, source);
+                    let result = $type::try_from(source);
+                    check_try_from_result(&expected, &result, source);
 
                     let result_ref = $type::try_from(&source);
-                    assert_eq!(
-                        result, result_ref,
-                        "Different value and reference conversions for {:?}",
-                        source
-                    );
+                    check_try_from_result(&expected, &result_ref, source);
                 }
             }
 
@@ -677,9 +642,9 @@ macro_rules! int64_test {
                 );
 
                 let result_ref = $type::try_from(&source);
-                assert_eq!(
-                    result, result_ref,
-                    "Different value and reference conversions for {:?}",
+                assert!(
+                    result_ref.is_err(),
+                    "Conversion of {:?} produced value instead of error",
                     source
                 );
             });
@@ -798,26 +763,21 @@ macro_rules! int128_test {
                     if source.lo() > 0.0 {
                         Ok($type::MIN)
                     } else {
-                        Err(ConversionError {})
+                        Err(TwoFloatError::ConversionError {})
                     }
                 } else {
                     if source.lo() > -1.0 {
                         Ok($type::MIN + source.lo().ceil() as $type)
                     } else {
-                        Err(ConversionError {})
+                        Err(TwoFloatError::ConversionError {})
                     }
                 };
 
                 let result = $type::try_from(source);
-
-                check_try_from_result(expected, result, source);
+                check_try_from_result(&expected, &result, source);
 
                 let result_ref = $type::try_from(&source);
-                assert_eq!(
-                    result, result_ref,
-                    "Different value and reference conversions for {:?}",
-                    source
-                );
+                check_try_from_result(&expected, &result_ref, source);
             });
 
             randomized_test!(from_twofloat_upper_bound, |rng: F64Rand| {
@@ -829,18 +789,14 @@ macro_rules! int128_test {
                 let expected = if source.lo() < 0.0 {
                     Ok($type::MAX - ((-source.lo().floor()) as $type) + 1)
                 } else {
-                    Err(ConversionError {})
+                    Err(TwoFloatError::ConversionError {})
                 };
-                let result = $type::try_from(source);
 
-                check_try_from_result(expected, result, source);
+                let result = $type::try_from(source);
+                check_try_from_result(&expected, &result, source);
 
                 let result_ref = $type::try_from(&source);
-                assert_eq!(
-                    result, result_ref,
-                    "Different value and reference conversions for {:?}",
-                    source
-                );
+                check_try_from_result(&expected, &result_ref, source);
             });
 
             #[test]
@@ -880,16 +836,12 @@ macro_rules! int128_test {
 
                     let source = TwoFloat::try_from((a, b)).unwrap();
                     let expected = Ok(a as $type);
-                    let result = $type::try_from(source);
 
-                    check_try_from_result(expected, result, source);
+                    let result = $type::try_from(source);
+                    check_try_from_result(&expected, &result, source);
 
                     let result_ref = $type::try_from(&source);
-                    assert_eq!(
-                        result, result_ref,
-                        "Different value and reference conversions for {:?}",
-                        source
-                    );
+                    check_try_from_result(&expected, &result_ref, source);
                 }
             }
 
@@ -933,16 +885,12 @@ macro_rules! int128_test {
                     } else {
                         Ok(a as $type)
                     };
-                    let result = $type::try_from(source);
 
-                    check_try_from_result(expected, result, source);
+                    let result = $type::try_from(source);
+                    check_try_from_result(&expected, &result, source);
 
                     let result_ref = $type::try_from(&source);
-                    assert_eq!(
-                        result, result_ref,
-                        "Different value and reference conversions for {:?}",
-                        source
-                    );
+                    check_try_from_result(&expected, &result_ref, source);
                 }
             }
 
@@ -958,9 +906,9 @@ macro_rules! int128_test {
                 );
 
                 let result_ref = $type::try_from(&source);
-                assert_eq!(
-                    result, result_ref,
-                    "Different value and reference conversions for {:?}",
+                assert!(
+                    result_ref.is_err(),
+                    "Conversion of {:?} produced value instead of error",
                     source
                 );
             });

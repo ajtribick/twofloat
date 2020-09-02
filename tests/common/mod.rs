@@ -2,7 +2,7 @@
 
 use core::convert::TryFrom;
 use rand::Rng;
-use twofloat::{ConversionError, TwoFloat};
+use twofloat::{TwoFloat, TwoFloatError};
 
 pub const TEST_ITERS: usize = 100000;
 
@@ -52,7 +52,7 @@ pub fn get_twofloat(rng: F64Rand) -> TwoFloat {
     }
 }
 
-pub fn try_get_twofloat_with_hi(rng: F64Rand, hi: f64) -> Result<TwoFloat, ConversionError> {
+pub fn try_get_twofloat_with_hi(rng: F64Rand, hi: f64) -> Result<TwoFloat, TwoFloatError> {
     if hi == 0.0 {
         return Ok(TwoFloat::from(0.0));
     }
@@ -64,10 +64,10 @@ pub fn try_get_twofloat_with_hi(rng: F64Rand, hi: f64) -> Result<TwoFloat, Conve
         }
     }
 
-    Err(ConversionError {})
+    Err(TwoFloatError::ConversionError {})
 }
 
-pub fn try_get_twofloat_with_lo(rng: F64Rand, lo: f64) -> Result<TwoFloat, ConversionError> {
+pub fn try_get_twofloat_with_lo(rng: F64Rand, lo: f64) -> Result<TwoFloat, TwoFloatError> {
     for _ in 0..10 {
         let result = TwoFloat::try_from((rng(), lo));
         if result.is_ok() {
@@ -75,7 +75,7 @@ pub fn try_get_twofloat_with_lo(rng: F64Rand, lo: f64) -> Result<TwoFloat, Conve
         }
     }
 
-    Err(ConversionError {})
+    Err(TwoFloatError::ConversionError {})
 }
 
 pub fn get_valid_twofloat<F: Fn(f64, f64) -> bool>(rng: F64Rand, pred: F) -> TwoFloat {

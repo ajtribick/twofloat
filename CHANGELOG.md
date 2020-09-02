@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.4.0
+
+* Breaking change: update error handling to make it more future-proof.
+
 ## Version 0.3.1
 
 * Support Default trait.
