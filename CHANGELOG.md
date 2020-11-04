@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.4.1
+
+* Internals now checked with clippy.
+
 ## Version 0.4.0
 
 * Breaking change: update error handling to make it more future-proof.
