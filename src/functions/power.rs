@@ -51,10 +51,10 @@ impl TwoFloat {
     /// assert!(b.powi(3) - a < 1e-16);
     pub fn cbrt(self) -> Self {
         let mut x = Self::from(self.hi.cbrt());
-        let mut x2 = &x * &x;
-        x -= (&x2 * &x - self) / (3.0 * &x2);
-        x2 = &x * &x;
-        x - (&x2 * &x - self) / (3.0 * &x2)
+        let mut x2 = x * x;
+        x -= (x2 * x - self) / (3.0 * x2);
+        x2 = x * x;
+        x - (x2 * x - self) / (3.0 * x2)
     }
 
     /// Calculates the length of the hypotenuse of a right-angle triangle
@@ -93,12 +93,12 @@ impl TwoFloat {
                     Self::from(1.0)
                 }
             }
-            1 => self.clone(),
+            1 => self,
             -1 => self.recip(),
             _ => {
                 let mut result = Self::from(1.0);
                 let mut n_pos = n.abs();
-                let mut value = self.clone();
+                let mut value = self;
                 while n_pos > 0 {
                     if (n_pos & 1) != 0 {
                         result *= &value;

@@ -218,10 +218,10 @@ impl TwoFloat {
             //
             // where R1 = r - (P1*r^2 + P2*r^4 + ...)
 
-            let rr = &r * &r;
+            let rr = r * r;
             let r1 = r - rr * polynomial!(rr, EXP_COEFFS);
 
-            let exp_r = 1.0 - ((&r * &r1) / (&r1 - 2.0) - &r);
+            let exp_r = 1.0 - ((r * r1) / (r1 - 2.0) - r);
 
             // then scale back
 

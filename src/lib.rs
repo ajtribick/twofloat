@@ -53,6 +53,13 @@ is possible through the Serde library.
 
 #![forbid(unsafe_code)]
 
+// Disable irrelevant lints
+#![allow(clippy::clippy::approx_constant)]
+#![allow(clippy::excessive_precision)]
+#![allow(clippy::float_cmp)]
+#![allow(clippy::suspicious_arithmetic_impl)]
+#![allow(clippy::suspicious_op_assign_impl)]
+
 #[cfg(test)]
 mod test_util;
 

@@ -110,11 +110,11 @@ impl TwoFloat {
     /// assert_eq!(a.min(b), b);
     pub fn min(self, other: Self) -> Self {
         if !self.is_valid() {
-            other.clone()
+            other
         } else if !other.is_valid() || self <= other {
-            self.clone()
+            self
         } else {
-            other.clone()
+            other
         }
     }
 
@@ -131,11 +131,11 @@ impl TwoFloat {
     /// assert_eq!(a.max(b), a);
     pub fn max(self, other: Self) -> Self {
         if !self.is_valid() {
-            other.clone()
+            other
         } else if !other.is_valid() || self >= other {
-            self.clone()
+            self
         } else {
-            other.clone()
+            other
         }
     }
 

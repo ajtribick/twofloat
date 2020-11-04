@@ -259,7 +259,7 @@ fn quadrant(value: TwoFloat) -> (TwoFloat, i8) {
         (value, 0)
     } else {
         let quotient = (value / FRAC_PI_2).round();
-        let remainder = value - &quotient * FRAC_PI_2;
+        let remainder = value - quotient * FRAC_PI_2;
         match i8::try_from(quotient % 4.0) {
             Ok(quadrant) if quadrant >= 0 => (remainder, quadrant),
             Ok(quadrant) if quadrant >= -4 => (remainder, 4 + quadrant),
@@ -305,7 +305,7 @@ impl TwoFloat {
     ///
     /// assert!((b - twofloat::consts::FRAC_PI_2).abs() < 1e-16);
     pub fn to_radians(self) -> Self {
-        self * &RAD_PER_DEG
+        self * RAD_PER_DEG
     }
 
     /// Converts radians to degrees.
@@ -318,7 +318,7 @@ impl TwoFloat {
     ///
     /// assert!((b - 180.0).abs() < 1e-16);
     pub fn to_degrees(self) -> Self {
-        self * &DEG_PER_RAD
+        self * DEG_PER_RAD
     }
 
     /// Computes the sine of the value (in radians).

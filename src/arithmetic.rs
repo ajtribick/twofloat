@@ -274,8 +274,8 @@ op_impl!(
         let rl = -(rhs.lo * th);
         let (eh, el) = fast_two_sum(rh, rl).into();
         let e = TwoFloat { hi: eh, lo: el };
-        let d = &e * th;
-        let m = &d + th;
+        let d = e * th;
+        let m = d + th;
         let (ch, cl1) = TwoFloat::new_mul(m.hi, lhs).into();
         let cl3 = m.lo.mul_add(lhs, cl1);
         fast_two_sum(ch, cl3)
@@ -363,7 +363,7 @@ op_impl!(
         let e = TwoFloat { hi: eh, lo: el };
         let d = e * th;
         let m = d + th;
-        lhs * &m
+        lhs * m
     }
 );
 
@@ -374,7 +374,7 @@ op_impl!(
     rem,
     |lhs: &TwoFloat, rhs: &TwoFloat| {
         let quotient = (lhs / rhs).trunc();
-        lhs - &quotient * rhs
+        lhs - quotient * rhs
     }
 );
 
@@ -394,7 +394,7 @@ impl TwoFloat {
     /// assert_eq!((-a).div_euclid(-b), TwoFloat::from(2.0));
     pub fn div_euclid(self, rhs: Self) -> Self {
         let quotient = (self / rhs).trunc();
-        if (self - &quotient * rhs) < 0.0 {
+        if (self - quotient * rhs) < 0.0 {
             if rhs > 0.0 {
                 quotient - 1.0
             } else {

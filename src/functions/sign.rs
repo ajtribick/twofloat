@@ -16,7 +16,7 @@ impl TwoFloat {
         if self.hi > 0.0
             || (self.hi == 0.0 && self.hi.is_sign_positive() && self.lo.is_sign_positive())
         {
-            self.clone()
+            self
         } else {
             -self
         }
