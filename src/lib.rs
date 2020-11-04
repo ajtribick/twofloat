@@ -52,7 +52,6 @@ is possible through the Serde library.
 */
 
 #![forbid(unsafe_code)]
-
 // Disable irrelevant lints
 #![allow(clippy::clippy::approx_constant)]
 #![allow(clippy::excessive_precision)]
