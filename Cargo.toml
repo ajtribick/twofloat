@@ -1,6 +1,6 @@
 [package]
 name = "twofloat"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Andrew Tribick"]
 
 keywords = ["float", "precision", "numerics", "floating-point", "arithmetic"]
@@ -24,6 +24,3 @@ serde = { version = "1.0", features = ["derive"], optional = true }
 [dev-dependencies]
 rand = "0.7.3"
 serde_test = "1.0"
-
-[badges]
-travis-ci = { repository = "ajtribick/twofloat", branch = "master" }
