@@ -114,7 +114,7 @@ macro_rules! int_convert {
             const LOWER_BOUND: f64 = $type::MIN as f64;
             const UPPER_BOUND: f64 = $type::MAX as f64;
             let truncated = value.trunc();
-            if truncated < LOWER_BOUND || truncated > UPPER_BOUND {
+            if !(LOWER_BOUND..=UPPER_BOUND).contains(&truncated) {
                 Err(Self::Error::ConversionError {})
             } else {
                 Ok(truncated.hi() as $type)
@@ -159,7 +159,7 @@ macro_rules! bigint_convert {
             };
 
             let truncated = value.trunc();
-            if truncated < LOWER_BOUND || truncated > UPPER_BOUND {
+            if !(LOWER_BOUND..=UPPER_BOUND).contains(&truncated) {
                 Err(Self::Error::ConversionError {})
             } else if truncated.hi() == UPPER_BOUND.hi() {
                 Ok($type::MAX - (-truncated.lo() as $type) + 1)
