@@ -631,7 +631,8 @@ macro_rules! int64_test {
             }
 
             randomized_test!(from_twofloat_out_of_range, |rng: F64Rand| {
-                let source = get_valid_twofloat(rng, |x, _| !(LOWER_BOUND..=UPPER_BOUND).contains(&x));
+                let source =
+                    get_valid_twofloat(rng, |x, _| !(LOWER_BOUND..=UPPER_BOUND).contains(&x));
 
                 let result = $type::try_from(source);
 
@@ -895,7 +896,8 @@ macro_rules! int128_test {
             }
 
             randomized_test!(from_twofloat_out_of_range, |rng: F64Rand| {
-                let source = get_valid_twofloat(rng, |x, _| !(LOWER_BOUND..=UPPER_BOUND).contains(&x));
+                let source =
+                    get_valid_twofloat(rng, |x, _| !(LOWER_BOUND..=UPPER_BOUND).contains(&x));
 
                 let result = $type::try_from(source);
 
