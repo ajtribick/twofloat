@@ -30,48 +30,90 @@ fn equality_f64_test() {
     assert_ne!(a_twofloat, c_twofloat);
 }
 
-macro_rules! comparison_test {
-    ($val_test: ident, $ref_test: ident, $op: tt, $allow_equal: expr) => {
-        #[test]
-        fn $val_test() {
-            repeated_test(|| {
-                let a = get_twofloat();
+// Helper type for comparison tests
 
-                assert_eq!($allow_equal, a $op a, "Self-comparison using {} failed", stringify!($op));
-
-                if let Ok(b) = try_get_twofloat_with_hi(a.hi()) {
-                    assert_eq!(a.lo() $op b.lo(), a $op b, "Comparison using {} failed", stringify!($op));
-                }
-
-                if let Ok(c) = try_get_twofloat_with_lo(a.lo()) {
-                    assert_eq!(a.hi() $op c.hi(), a $op c, "Comparison using {} failed", stringify!($op));
-                }
-            });
-        }
-
-        #[test]
-        fn $ref_test() {
-            repeated_test(|| {
-                let a = get_twofloat();
-
-                assert_eq!($allow_equal, &a $op &a, "Self-comparison using {} failed", stringify!($op));
-
-                if let Ok(b) = try_get_twofloat_with_hi(a.hi()) {
-                    assert_eq!(a.lo() $op b.lo(), &a $op &b, "Comparison using {} failed", stringify!($op));
-                }
-
-                if let Ok(c) = try_get_twofloat_with_lo(a.lo()) {
-                    assert_eq!(a.hi() $op c.hi(), &a $op &c, "Comparison using {} failed", stringify!($op));
-                }
-            });
-        }
-    };
+enum Comparison {
+    Less,
+    Greater,
+    LessEqual,
+    GreaterEqual,
 }
 
-comparison_test!(less_than_test, less_than_ref_test, <, false);
-comparison_test!(greater_than_test, greater_than_ref_test, >, false);
-comparison_test!(less_equal_test, less_equal_ref_test, <=, true);
-comparison_test!(greater_equal_test, greater_equal_ref_test, >=, true);
+impl Comparison {
+    fn symbol(&self) -> &str {
+        match self {
+            Self::Less => "<",
+            Self::Greater => ">",
+            Self::LessEqual => "<=",
+            Self::GreaterEqual => ">=",
+        }
+    }
+
+    fn allows_equal(&self) -> bool {
+        matches!(self, Self::LessEqual | Self::GreaterEqual)
+    }
+
+    fn apply<T>(&self, lhs: T, rhs: T) -> bool
+    where
+        T: PartialOrd,
+    {
+        match self {
+            Self::Less => lhs < rhs,
+            Self::Greater => lhs > rhs,
+            Self::LessEqual => lhs <= rhs,
+            Self::GreaterEqual => lhs >= rhs,
+        }
+    }
+}
+
+fn compare(op: Comparison) {
+    let a = get_twofloat();
+
+    assert_eq!(
+        op.allows_equal(),
+        op.apply(a, a),
+        "Self-comparison using {} failed",
+        op.symbol()
+    );
+
+    if let Ok(b) = try_get_twofloat_with_hi(a.hi()) {
+        assert_eq!(
+            op.apply(a.lo(), b.lo()),
+            op.apply(a, b),
+            "Comparison using {} failed",
+            op.symbol()
+        );
+    }
+
+    if let Ok(c) = try_get_twofloat_with_lo(a.lo()) {
+        assert_eq!(
+            op.apply(a.hi(), c.hi()),
+            op.apply(a, c),
+            "Comparison using {} failed",
+            op.symbol()
+        );
+    }
+}
+
+#[test]
+fn less_than_test() {
+    compare(Comparison::Less);
+}
+
+#[test]
+fn greater_than_test() {
+    compare(Comparison::Greater);
+}
+
+#[test]
+fn less_than_equal_test() {
+    compare(Comparison::LessEqual);
+}
+
+#[test]
+fn greater_than_equal_test() {
+    compare(Comparison::GreaterEqual);
+}
 
 #[test]
 fn compare_f64_test() {
