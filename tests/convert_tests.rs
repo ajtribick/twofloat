@@ -390,13 +390,14 @@ int_test!(u16, u16_test, true);
 int_test!(u8, u8_test, true);
 
 fn random_mantissa() -> u64 {
-    rand::thread_rng().gen_range(0, 1 << 52)
+    const MANTISSA_RANGE: u64 = 1 << 52;
+    rand::thread_rng().gen_range(0..MANTISSA_RANGE)
 }
 
 fn random_positive_float_exp_range(exp_range: Range<u64>) -> f64 {
     let mut rng = rand::thread_rng();
 
-    f64::from_bits((rng.gen_range(exp_range.start, exp_range.end) << 52) | random_mantissa())
+    f64::from_bits((rng.gen_range(exp_range.start..exp_range.end) << 52) | random_mantissa())
 }
 
 fn random_float_exp_range(exp_range: Range<u64>) -> f64 {
@@ -556,7 +557,7 @@ macro_rules! int64_test {
                         if (rb < -1019) {
                             continue;
                         }
-                        let b_exponent = (rng.gen_range(-1022, rb) + 1023) as u64;
+                        let b_exponent = (rng.gen_range(-1022..rb) + 1023) as u64;
                         let b_mantissa = random_mantissa();
                         let b = f64::from_bits(b_mantissa | (b_exponent << 52));
                         if no_overlap(a, b) {
@@ -634,7 +635,7 @@ macro_rules! int64_test {
                         }
                     };
                     let b = loop {
-                        let b = rng.gen_range(1.0, (1 << rb) as f64);
+                        let b = rng.gen_range(1.0..(1 << rb) as f64);
                         if no_overlap(a, b) {
                             if rng.gen() {
                                 break b;
@@ -865,7 +866,7 @@ macro_rules! int128_test {
                         if (rb < -1019) {
                             continue;
                         }
-                        let b_exponent = (rng.gen_range(-1022, rb) + 1023) as u64;
+                        let b_exponent = (rng.gen_range(-1022..rb) + 1023) as u64;
                         let b_mantissa = random_mantissa();
                         let b = f64::from_bits(b_mantissa | (b_exponent << 52));
                         if no_overlap(a, b) {
