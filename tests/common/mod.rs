@@ -1,7 +1,9 @@
 #![macro_use]
 
 use core::convert::TryFrom;
+
 use rand::Rng;
+
 use twofloat::{TwoFloat, TwoFloatError};
 
 pub const TEST_ITERS: usize = 100000;
@@ -18,9 +20,9 @@ pub fn random_float() -> f64 {
     }
 }
 
-pub fn repeated_test<F>(test: F)
+pub fn repeated_test<F>(mut test: F)
 where
-    F: Fn(),
+    F: FnMut(),
 {
     for _ in 0..TEST_ITERS {
         test();
