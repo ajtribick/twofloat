@@ -9,10 +9,12 @@ mod tests {
 
     #[test]
     fn sin_cos_test() {
+        let mut rng = rand::thread_rng();
         let dist = rand::distributions::Uniform::new_inclusive(-20.0, 20.0);
+
         repeated_test(|| {
             let source = loop {
-                let a = rand::thread_rng().sample(dist);
+                let a = rng.sample(dist);
                 let b = random_float();
                 if let Ok(result) = TwoFloat::try_from((a, b)) {
                     break result;
@@ -56,12 +58,13 @@ mod tests {
 
     #[test]
     fn sin_asin_test() {
+        let mut rng = rand::thread_rng();
         let dist = rand::distributions::Uniform::new_inclusive(
             -core::f64::consts::FRAC_PI_2,
             core::f64::consts::FRAC_PI_2,
         );
         repeated_test(|| {
-            let source = TwoFloat::from(rand::thread_rng().sample(dist));
+            let source = TwoFloat::from(rng.sample(dist));
             let result = source.sin().asin();
             assert!(
                 result.is_valid(),
@@ -79,9 +82,10 @@ mod tests {
 
     #[test]
     fn cos_acos_test() {
+        let mut rng = rand::thread_rng();
         let dist = rand::distributions::Uniform::new_inclusive(0.0, core::f64::consts::PI);
         repeated_test(|| {
-            let source = TwoFloat::from(rand::thread_rng().sample(dist));
+            let source = TwoFloat::from(rng.sample(dist));
             let result = source.cos().acos();
             assert!(
                 result.is_valid(),
@@ -99,12 +103,13 @@ mod tests {
 
     #[test]
     fn tan_atan_test() {
+        let mut rng = rand::thread_rng();
         let dist = rand::distributions::Uniform::new_inclusive(
             -core::f64::consts::FRAC_PI_2,
             core::f64::consts::FRAC_PI_2,
         );
         repeated_test(|| {
-            let source = TwoFloat::from(rand::thread_rng().sample(dist));
+            let source = TwoFloat::from(rng.sample(dist));
             let result = source.tan().atan();
             assert!(
                 result.is_valid(),
@@ -122,12 +127,13 @@ mod tests {
 
     #[test]
     fn sin_cos_atan2_test() {
+        let mut rng = rand::thread_rng();
         let dist = rand::distributions::Uniform::new_inclusive(
             -core::f64::consts::PI,
             core::f64::consts::PI,
         );
         repeated_test(|| {
-            let source = TwoFloat::from(rand::thread_rng().sample(dist));
+            let source = TwoFloat::from(rng.sample(dist));
             let (s, c) = source.sin_cos();
             let result = TwoFloat::atan2(s, c);
             assert!(

@@ -122,8 +122,8 @@ mod tests {
 
     #[test]
     fn powi_value_test() {
+        let mut rng = rand::thread_rng();
         repeated_test(|| {
-            let mut rng = rand::thread_rng();
             let source = TwoFloat::new_add(rng.gen_range(-128.0, 128.0), rng.gen_range(-1.0, 1.0));
             let exponent = rng.gen_range(1, 20);
             let mut expected = TwoFloat::from(1.0);
@@ -151,8 +151,8 @@ mod tests {
 
     #[test]
     fn powi_reciprocal_test() {
+        let mut rng = rand::thread_rng();
         repeated_test(|| {
-            let mut rng = rand::thread_rng();
             let source = TwoFloat::new_add(rng.gen_range(-128.0, 128.0), rng.gen_range(-1.0, 1.0));
             let exponent = rng.gen_range(1, 20);
             let expected = 1.0 / source.powi(exponent);
@@ -204,9 +204,9 @@ mod tests {
 
     #[test]
     fn powf_test() {
+        let mut rng = rand::thread_rng();
         let value_dist = rand::distributions::Uniform::new(1.0f64, 20.0f64);
         repeated_test(|| {
-            let mut rng = rand::thread_rng();
             let a = rng.sample(value_dist);
             let b = rng.sample(value_dist);
 

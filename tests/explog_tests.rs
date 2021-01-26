@@ -10,10 +10,11 @@ mod tests {
 
     #[test]
     fn exp_test() {
+        let mut rng = rand::thread_rng();
         let src_dist = rand::distributions::Uniform::new(-600.0, EXP_UPPER_LIMIT);
 
         repeated_test(|| {
-            let a = rand::thread_rng().sample(src_dist);
+            let a = rng.sample(src_dist);
             let b = TwoFloat::from(a);
 
             let exp_a = a.exp();
@@ -35,10 +36,11 @@ mod tests {
 
     #[test]
     fn exp_m1_test() {
+        let mut rng = rand::thread_rng();
         let src_dist = rand::distributions::Uniform::<f64>::new(-10.0, 10.0);
 
         repeated_test(|| {
-            let a = rand::thread_rng().sample(src_dist);
+            let a = rng.sample(src_dist);
             let b = TwoFloat::from(a);
 
             let exp_a = a.exp_m1();
@@ -60,10 +62,11 @@ mod tests {
 
     #[test]
     fn ln_test() {
+        let mut rng = rand::thread_rng();
         let src_dist = rand::distributions::Uniform::new(f64::from_bits(1u64), f64::MAX);
 
         repeated_test(|| {
-            let a = rand::thread_rng().sample(src_dist);
+            let a = rng.sample(src_dist);
             let b = TwoFloat::from(a);
 
             let ln_a = a.ln();
@@ -94,10 +97,11 @@ mod tests {
 
     #[test]
     fn ln_1p_test() {
+        let mut rng = rand::thread_rng();
         let src_dist = rand::distributions::Uniform::new(-1.0 + f64::EPSILON, f64::MAX);
 
         repeated_test(|| {
-            let a = rand::thread_rng().sample(src_dist);
+            let a = rng.sample(src_dist);
             let b = TwoFloat::from(a);
 
             let ln_a = a.ln_1p();

@@ -227,6 +227,7 @@ macro_rules! from_twofloat_test {
 
         #[test]
         fn from_twofloat_split_fract() {
+            let mut rng = rand::thread_rng();
             let valid_dist = rand::distributions::Uniform::new(
                 f64::from_bits(LOWER_BOUND.to_bits() - 1),
                 UPPER_BOUND,
@@ -234,7 +235,7 @@ macro_rules! from_twofloat_test {
 
             for i in 0..TEST_ITERS {
                 let (a, b, source) = loop {
-                    let a = rand::thread_rng().sample(valid_dist).trunc();
+                    let a = rng.sample(valid_dist).trunc();
                     let b = if i == 0 { 0.0 } else { random_float() };
                     if let Ok(source) = TwoFloat::try_from((a, b)) {
                         break (a, b, source);
@@ -259,6 +260,7 @@ macro_rules! from_twofloat_test {
 
         #[test]
         fn from_twofloat_with_fract() {
+            let mut rng = rand::thread_rng();
             let valid_dist = rand::distributions::Uniform::new(
                 f64::from_bits(LOWER_BOUND.to_bits() - 1),
                 UPPER_BOUND,
@@ -266,7 +268,7 @@ macro_rules! from_twofloat_test {
 
             for i in 0..TEST_ITERS {
                 let (a, source) = loop {
-                    let a = rand::thread_rng().sample(valid_dist);
+                    let a = rng.sample(valid_dist);
                     if a.fract() == 0.0 {
                         continue;
                     }
