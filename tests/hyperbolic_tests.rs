@@ -9,13 +9,11 @@ mod tests {
 
     #[test]
     fn cosh_sinh_test() {
-        let mut rng = rand::thread_rng();
-        let mut get_f64 = float_generator();
         let dist = rand::distributions::Uniform::new_inclusive(-20.0, 20.0);
-        for _ in 0..TEST_ITERS {
+        repeated_test(|| {
             let source = loop {
-                let a = rng.sample(dist);
-                let b = get_f64();
+                let a = rand::thread_rng().sample(dist);
+                let b = random_float();
                 if let Ok(result) = TwoFloat::try_from((a, b)) {
                     break result;
                 }
@@ -42,15 +40,14 @@ mod tests {
                 "cosh^2 - sinh^2 for {:?} returned value different from 1",
                 source
             );
-        }
+        });
     }
 
     #[test]
     fn sinh_asinh_test() {
-        let mut rng = rand::thread_rng();
         let dist = rand::distributions::Uniform::new_inclusive(-20.0, 20.0);
-        for _ in 0..TEST_ITERS {
-            let source = TwoFloat::from(rng.sample(dist));
+        repeated_test(|| {
+            let source = TwoFloat::from(rand::thread_rng().sample(dist));
             let result = source.sinh().asinh();
             assert!(
                 result.is_valid(),
@@ -63,15 +60,14 @@ mod tests {
                 source,
                 result
             );
-        }
+        });
     }
 
     #[test]
     fn cosh_acosh_test() {
-        let mut rng = rand::thread_rng();
         let dist = rand::distributions::Uniform::new_inclusive(0.0, 20.0);
-        for _ in 0..TEST_ITERS {
-            let source = TwoFloat::from(rng.sample(dist));
+        repeated_test(|| {
+            let source = TwoFloat::from(rand::thread_rng().sample(dist));
             let result = source.cosh().acosh();
             assert!(
                 result.is_valid(),
@@ -84,15 +80,14 @@ mod tests {
                 source,
                 result
             );
-        }
+        });
     }
 
     #[test]
     fn tanh_atanh_test() {
-        let mut rng = rand::thread_rng();
         let dist = rand::distributions::Uniform::new_inclusive(-10.0, 10.0);
-        for _ in 0..TEST_ITERS {
-            let source = TwoFloat::from(rng.sample(dist));
+        repeated_test(|| {
+            let source = TwoFloat::from(rand::thread_rng().sample(dist));
             let result = source.tanh().atanh();
             assert!(
                 result.is_valid(),
@@ -105,6 +100,6 @@ mod tests {
                 source,
                 result
             );
-        }
+        });
     }
 }

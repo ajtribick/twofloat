@@ -285,7 +285,7 @@ impl PartialOrd<TwoFloat> for f64 {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{no_overlap, TwoFloat};
 
     #[test]
     fn no_overlap_test() {

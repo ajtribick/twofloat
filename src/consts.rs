@@ -116,7 +116,10 @@ pub const TAU: TwoFloat = TwoFloat {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{
+        E, FRAC_1_PI, FRAC_1_SQRT_2, FRAC_2_PI, FRAC_2_SQRT_PI, FRAC_PI_2, FRAC_PI_3, FRAC_PI_4,
+        FRAC_PI_6, FRAC_PI_8, LN_10, LN_2, LOG10_2, LOG10_E, LOG2_10, LOG2_E, PI, SQRT_2, TAU,
+    };
 
     macro_rules! const_check {
         ($name:ident) => {
@@ -136,7 +139,14 @@ mod tests {
                 }
             }
         };
-        ($name:ident, $feature:tt) => {
+        ($name:ident, $($names:ident),+) => {
+            const_check! { $name }
+            const_check! { $($names),+ }
+        };
+        ($($names:ident,)+) => {
+            const_check! { $($names),+ }
+        };
+        (#[cfg($feature:tt)] $name:ident) => {
             #[cfg(test)]
             #[allow(non_snake_case)]
             mod $name {
@@ -154,26 +164,23 @@ mod tests {
                 }
             }
         };
+        (#[cfg($feature:tt)] $name:ident, $($names:ident),+) => {
+            const_check! { #[cfg($feature)] $name }
+            const_check! { #[cfg($feature)] $($names),+ }
+        };
+        (#[cfg($feature:tt)] $($names:ident,)+) => {
+            const_check! { #[cfg($feature)] $($names),+ }
+        }
     }
 
-    const_check!(E);
-    const_check!(FRAC_1_PI);
-    const_check!(FRAC_2_PI);
-    const_check!(FRAC_2_SQRT_PI);
-    const_check!(FRAC_1_SQRT_2);
-    const_check!(FRAC_PI_2);
-    const_check!(FRAC_PI_3);
-    const_check!(FRAC_PI_4);
-    const_check!(FRAC_PI_6);
-    const_check!(FRAC_PI_8);
-    const_check!(LN_2);
-    const_check!(LN_10);
-    const_check!(LOG2_E);
-    const_check!(LOG10_E);
-    const_check!(PI);
-    const_check!(SQRT_2);
+    const_check! {
+        E, FRAC_1_PI, FRAC_2_PI, FRAC_2_SQRT_PI, FRAC_1_SQRT_2, FRAC_PI_2,
+        FRAC_PI_3, FRAC_PI_4, FRAC_PI_6, FRAC_PI_8, LN_2, LN_10, LOG2_E,
+        LOG10_E, PI, SQRT_2,
+    }
 
-    const_check!(LOG10_2, extra_log_consts);
-    const_check!(LOG2_10, extra_log_consts);
-    const_check!(TAU, tau_constant);
+    const_check! {
+        #[cfg(extra_log_consts)]
+        LOG10_2, LOG2_10, TAU
+    }
 }

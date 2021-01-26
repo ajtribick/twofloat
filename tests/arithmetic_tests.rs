@@ -1,3 +1,5 @@
+#![allow(clippy::float_cmp)]
+
 use core::convert::TryFrom;
 use rand::Rng;
 use twofloat::{no_overlap, TwoFloat};
@@ -7,48 +9,55 @@ use common::*;
 
 // Tests for construction from two f64 values
 
-randomized_test!(new_add_test, |rng: F64Rand| {
-    let (a, b) = get_valid_pair(rng, |x, y| (x + y).is_finite());
-    let expected = a + b;
-    let result = TwoFloat::new_add(a, b);
+#[test]
+fn new_add_test() {
+    repeated_test(|| {
+        let (a, b) = get_valid_pair(|x, y| (x + y).is_finite());
+        let expected = a + b;
+        let result = TwoFloat::new_add(a, b);
 
-    assert!(
-        result.is_valid(),
-        "Result of new_add({}, {}) was invalid",
-        a,
-        b
-    );
-    assert_eq!(
-        expected,
-        result.hi(),
-        "Result of new_add({}, {}) had unexpected high word",
-        a,
-        b
-    );
-});
+        assert!(
+            result.is_valid(),
+            "Result of new_add({}, {}) was invalid",
+            a,
+            b
+        );
+        assert_eq!(
+            expected,
+            result.hi(),
+            "Result of new_add({}, {}) had unexpected high word",
+            a,
+            b
+        );
+    })
+}
 
-randomized_test!(new_sub_test, |rng: F64Rand| {
-    let (a, b) = get_valid_pair(rng, |x, y| (x - y).is_finite());
-    let expected = a - b;
-    let result = TwoFloat::new_sub(a, b);
+#[test]
+fn new_sub_test() {
+    repeated_test(|| {
+        let (a, b) = get_valid_pair(|x, y| (x - y).is_finite());
+        let expected = a - b;
+        let result = TwoFloat::new_sub(a, b);
 
-    assert!(
-        result.is_valid(),
-        "Result of new_sub({}, {}) was invalid",
-        a,
-        b
-    );
-    assert_eq!(
-        expected,
-        result.hi(),
-        "Result of new_sub({}, {}) had unexpected high word",
-        a,
-        b
-    );
-});
+        assert!(
+            result.is_valid(),
+            "Result of new_sub({}, {}) was invalid",
+            a,
+            b
+        );
+        assert_eq!(
+            expected,
+            result.hi(),
+            "Result of new_sub({}, {}) had unexpected high word",
+            a,
+            b
+        );
+    })
+}
 
-randomized_test!(new_mul_test, |rng: F64Rand| {
-    let (a, b) = get_valid_pair(rng, |x, y| (x * y).is_finite());
+#[test]
+fn new_mul_test() {
+    let (a, b) = get_valid_pair(|x, y| (x * y).is_finite());
     let expected = a * b;
     let result = TwoFloat::new_mul(a, b);
 
@@ -65,44 +74,50 @@ randomized_test!(new_mul_test, |rng: F64Rand| {
         a,
         b
     );
-});
+}
 
-randomized_test!(new_div_test, |rng: F64Rand| {
-    let (a, b) = get_valid_pair(rng, |x, y| (x / y).is_finite());
-    let result = TwoFloat::new_div(a, b);
+#[test]
+fn new_div_test() {
+    repeated_test(|| {
+        let (a, b) = get_valid_pair(|x, y| (x / y).is_finite());
+        let result = TwoFloat::new_div(a, b);
 
-    assert!(
-        result.is_valid(),
-        "Result of new_div({}, {}) was invalid",
-        a,
-        b
-    );
+        assert!(
+            result.is_valid(),
+            "Result of new_div({}, {}) was invalid",
+            a,
+            b
+        );
 
-    assert_eq_ulp!(
-        result.hi(),
-        a / b,
-        10,
-        "Incorrect result of new_div({}, {})",
-        a,
-        b
-    );
-});
+        assert_eq_ulp!(
+            result.hi(),
+            a / b,
+            10,
+            "Incorrect result of new_div({}, {})",
+            a,
+            b
+        );
+    });
+}
 
 // Test for negation operator
 
-randomized_test!(neg_test, |rng: F64Rand| {
-    let a = get_twofloat(rng);
-    let b = -a;
+#[test]
+fn neg_test() {
+    repeated_test(|| {
+        let a = get_twofloat();
+        let b = -a;
 
-    assert_eq!(a.hi(), -b.hi(), "Negation does not negate high word");
-    assert_eq!(a.lo(), -b.lo(), "Negation does not negate low word");
+        assert_eq!(a.hi(), -b.hi(), "Negation does not negate high word");
+        assert_eq!(a.lo(), -b.lo(), "Negation does not negate low word");
 
-    let c = -b;
-    assert_eq!(c, a, "Double negation does not result in original value");
+        let c = -b;
+        assert_eq!(c, a, "Double negation does not result in original value");
 
-    let b2 = -&a;
-    assert_eq!(b, b2, "Mismatch between -TwoFloat and -&TwoFloat");
-});
+        let b2 = -&a;
+        assert_eq!(b, b2, "Mismatch between -TwoFloat and -&TwoFloat");
+    });
+}
 
 // Tests for binary operators for TwoFloat and f64
 
@@ -140,32 +155,36 @@ macro_rules! diff_test {
 
 macro_rules! op_test_f64_common {
     ($op:tt, $op_assign:tt) => {
-        randomized_test!(ref_overloads_left_test, |rng: F64Rand| {
-            let c = rng();
-            let value = get_valid_twofloat(rng, |x, y| { ((x + y) $op c).is_finite() });
-            let result1 = value $op c;
-            if result1.is_valid() {
-                let result2 = &value $op c;
-                assert!(result2.is_valid(), "Result validity mismatch between TwoFloat {0} f64 and &TwoFloat {0} f64", stringify!($op));
-                assert_eq!(result1, result2, "Mismatch between TwoFloat {0} f64 and &TwoFloat {0} f64", stringify!($op));
+        #[test]
+        fn ref_overloads_left_test() {
+            repeated_test(|| {
+                let c = random_float();
+                let value = get_valid_twofloat(|x, y| { ((x + y) $op c).is_finite() });
+                let result1 = value $op c;
+                if result1.is_valid() {
+                    let result2 = &value $op c;
+                    assert!(result2.is_valid(), "Result validity mismatch between TwoFloat {0} f64 and &TwoFloat {0} f64", stringify!($op));
+                    assert_eq!(result1, result2, "Mismatch between TwoFloat {0} f64 and &TwoFloat {0} f64", stringify!($op));
 
-                let mut result3 = value;
-                result3 $op_assign c;
-                assert!(result3.is_valid(), "Result validity mismatch between TwoFloat {} f64 and TwoFloat {} f64", stringify!($op), stringify!($op_assign));
-                assert_eq!(result1, result3, "Mismatch between TwoFloat {} f64 and TwoFloat {} f64", stringify!($op), stringify!($op_assign));
-            }
-        });
+                    let mut result3 = value;
+                    result3 $op_assign c;
+                    assert!(result3.is_valid(), "Result validity mismatch between TwoFloat {} f64 and TwoFloat {} f64", stringify!($op), stringify!($op_assign));
+                    assert_eq!(result1, result3, "Mismatch between TwoFloat {} f64 and TwoFloat {} f64", stringify!($op), stringify!($op_assign));
+                }
+            });
+        }
 
-        randomized_test!(ref_overloads_right_test, |rng: F64Rand| {
-            let c = rng();
-            let value = get_valid_twofloat(rng, |x, y| { (c $op (x + y)).is_finite() });
+        #[test]
+        fn ref_overloads_right_test() {
+            let c = random_float();
+            let value = get_valid_twofloat(|x, y| { (c $op (x + y)).is_finite() });
             let result1 = c $op value;
             if result1.is_valid() {
                 let result2 = c $op &value;
                 assert!(result2.is_valid(), "Result validity mismatch between f64 {0} TwoFloat and &f64 {0} &TwoFloat", stringify!($op));
                 assert_eq!(result1, result2, "Mismatch between f64 {0} TwoFloat and &TwoFloat {0} &TwoFloat", stringify!($op));
             }
-        });
+        }
 
         #[test]
         fn value_left_test() {
@@ -275,10 +294,11 @@ macro_rules! op_test {
         mod $test_name {
             use super::*;
 
-            randomized_test!(ref_overloads_test, |rng: F64Rand| {
-                let value1 = get_twofloat(rng);
+            #[test]
+            fn ref_overloads_test() {
+                let value1 = get_twofloat();
                 let a = value1.hi();
-                let value2 = get_valid_twofloat(rng, |x, y| { ((x + y) $op a).is_finite() });
+                let value2 = get_valid_twofloat(|x, y| { ((x + y) $op a).is_finite() });
                 let result1 = value1 $op value2;
                 if result1.is_valid() {
                     let result2 = &value1 $op value2;
@@ -303,7 +323,7 @@ macro_rules! op_test {
                     assert!(result6.is_valid(), "Result validity mismatch between TwoFloat {} TwoFloat and TwoFloat {} &TwoFloat", stringify!($op), stringify!($op_assign));
                     assert_eq!(result1, result6, "Mismatch between TwoFloat {} TwoFloat and TwoFloat {} &TwoFloat", stringify!($op), stringify!($op_assign));
                 }
-            });
+            }
 
             #[test]
             fn value_test() {

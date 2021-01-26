@@ -434,30 +434,33 @@ impl TwoFloat {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::test_util::*;
+    use super::fast_two_sum;
+    use crate::test_util::{get_valid_pair, repeated_test};
 
-    randomized_test!(fast_two_sum_test, |rng: F64Rand| {
-        let (a, b) = get_valid_pair(rng, |x, y| (x + y).is_finite());
-        let result = if a.abs() >= b.abs() {
-            fast_two_sum(a, b)
-        } else {
-            fast_two_sum(b, a)
-        };
+    #[test]
+    fn fast_two_sum_test() {
+        repeated_test(|| {
+            let (a, b) = get_valid_pair(|x, y| (x + y).is_finite());
+            let result = if a.abs() >= b.abs() {
+                fast_two_sum(a, b)
+            } else {
+                fast_two_sum(b, a)
+            };
 
-        assert_eq_ulp!(
-            result.hi(),
-            a + b,
-            1,
-            "Incorrect result of fast_two_sum({}, {})",
-            a,
-            b
-        );
-        assert!(
-            result.is_valid(),
-            "Invalid result of fast_two_sum({}, {})",
-            a,
-            b
-        );
-    });
+            assert_eq_ulp!(
+                result.hi(),
+                a + b,
+                1,
+                "Incorrect result of fast_two_sum({}, {})",
+                a,
+                b
+            );
+            assert!(
+                result.is_valid(),
+                "Invalid result of fast_two_sum({}, {})",
+                a,
+                b
+            );
+        });
+    }
 }

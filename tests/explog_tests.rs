@@ -10,11 +10,10 @@ mod tests {
 
     #[test]
     fn exp_test() {
-        let mut rng = rand::thread_rng();
         let src_dist = rand::distributions::Uniform::new(-600.0, EXP_UPPER_LIMIT);
 
-        for _ in 0..TEST_ITERS {
-            let a = rng.sample(src_dist);
+        repeated_test(|| {
+            let a = rand::thread_rng().sample(src_dist);
             let b = TwoFloat::from(a);
 
             let exp_a = a.exp();
@@ -31,16 +30,15 @@ mod tests {
                 exp_a,
                 exp_b
             );
-        }
+        });
     }
 
     #[test]
     fn exp_m1_test() {
-        let mut rng = rand::thread_rng();
         let src_dist = rand::distributions::Uniform::<f64>::new(-10.0, 10.0);
 
-        for _ in 0..TEST_ITERS {
-            let a = rng.sample(src_dist);
+        repeated_test(|| {
+            let a = rand::thread_rng().sample(src_dist);
             let b = TwoFloat::from(a);
 
             let exp_a = a.exp_m1();
@@ -57,16 +55,15 @@ mod tests {
                 exp_a,
                 exp_b
             );
-        }
+        });
     }
 
     #[test]
     fn ln_test() {
-        let mut rng = rand::thread_rng();
         let src_dist = rand::distributions::Uniform::new(f64::from_bits(1u64), f64::MAX);
 
-        for _ in 0..TEST_ITERS {
-            let a = rng.sample(src_dist);
+        repeated_test(|| {
+            let a = rand::thread_rng().sample(src_dist);
             let b = TwoFloat::from(a);
 
             let ln_a = a.ln();
@@ -83,22 +80,24 @@ mod tests {
                 ln_a,
                 ln_b
             );
-        }
+        });
     }
 
-    randomized_test!(ln_negative_test, |rng: F64Rand| {
-        let a = get_valid_twofloat(rng, |x, _| x < 0.0);
-        let result = a.ln();
-        assert!(!result.is_valid(), "ln({:?}) produced a valid result", a);
-    });
+    #[test]
+    fn ln_negative_test() {
+        repeated_test(|| {
+            let a = get_valid_twofloat(|x, _| x < 0.0);
+            let result = a.ln();
+            assert!(!result.is_valid(), "ln({:?}) produced a valid result", a);
+        })
+    }
 
     #[test]
     fn ln_1p_test() {
-        let mut rng = rand::thread_rng();
         let src_dist = rand::distributions::Uniform::new(-1.0 + f64::EPSILON, f64::MAX);
 
-        for _ in 0..TEST_ITERS {
-            let a = rng.sample(src_dist);
+        repeated_test(|| {
+            let a = rand::thread_rng().sample(src_dist);
             let b = TwoFloat::from(a);
 
             let ln_a = a.ln_1p();
@@ -115,6 +114,6 @@ mod tests {
                 ln_a,
                 ln_b
             );
-        }
+        });
     }
 }
