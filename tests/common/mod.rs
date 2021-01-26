@@ -20,12 +20,15 @@ pub fn random_float() -> f64 {
     }
 }
 
-pub fn repeated_test<F>(mut test: F)
-where
-    F: FnMut(),
-{
+pub fn repeated_test(mut test: impl FnMut()) {
     for _ in 0..TEST_ITERS {
         test();
+    }
+}
+
+pub fn repeated_test_enumerate(mut test: impl FnMut(usize)) {
+    for i in 0..TEST_ITERS {
+        test(i);
     }
 }
 
