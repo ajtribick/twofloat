@@ -534,7 +534,7 @@ where
         || random_float_exp_range(53..1075)
     };
 
-    for _ in 0..TEST_ITERS {
+    repeated_test(|| {
         let (a, b) = loop {
             let a = get_valid_f64_gen(&mut gen_f64, |x| {
                 x > T::lower_bound() && x < T::upper_bound() && x.fract() != 0.0
@@ -556,7 +556,7 @@ where
 
         let result = T::try_from(source);
         check_try_from_result(&expected, &result, source);
-    }
+    });
 }
 
 fn from_twofloat_split_fract64<T>()
@@ -573,7 +573,7 @@ where
 
     let fract_dist =
         rand::distributions::Uniform::new(f64::from_bits((-1.0f64).to_bits() - 1), 1.0);
-    for i in 0..TEST_ITERS {
+    repeated_test_enumerate(|i| {
         let (a, b) = loop {
             let a = get_valid_f64_gen(&mut gen_f64, |x| {
                 x > T::lower_bound() && x < T::upper_bound()
@@ -599,7 +599,7 @@ where
 
         let result = T::try_from(source);
         check_try_from_result(&expected, &result, source);
-    }
+    });
 }
 
 fn from_twofloat_large64<T>()
@@ -611,7 +611,7 @@ where
         f64::from_bits(T::lower_bound().to_bits() - 1),
         T::upper_bound(),
     );
-    for _ in 0..TEST_ITERS {
+    repeated_test(|| {
         let (a, rb) = loop {
             let a = rng.sample(valid_dist);
             let rb = right_bit(a).unwrap_or(-1) - 1;
@@ -645,7 +645,7 @@ where
 
         let result = T::try_from(source);
         check_try_from_result(&expected, &result, source);
-    }
+    });
 }
 
 fn from_twofloat_out_of_range64<T>()
@@ -671,7 +671,7 @@ where
 {
     let mut rng = rand::thread_rng();
     let source_dist = rand::distributions::Uniform::new_inclusive(T::min_value(), T::max_value());
-    for _ in 0..TEST_ITERS {
+    repeated_test(|| {
         let source = rng.sample(&source_dist);
         let result: TwoFloat = source.into();
 
@@ -732,7 +732,7 @@ where
                 source
             );
         }
-    }
+    });
 }
 
 macro_rules! int64_test {
@@ -807,7 +807,7 @@ where
         T::zero().saturating_sub(T::roundtrip_max()),
         T::roundtrip_max(),
     );
-    for _ in 0..TEST_ITERS {
+    repeated_test(|| {
         let source = rng.sample(&source_dist);
         let result: TwoFloat = source.into();
 
@@ -844,7 +844,7 @@ where
                 source
             );
         }
-    }
+    });
 }
 
 fn inexact_roundtrip<T>()
@@ -854,7 +854,7 @@ where
     let mut rng = rand::thread_rng();
     let source_dist =
         rand::distributions::Uniform::new_inclusive(T::roundtrip_max(), T::max_value());
-    for _ in 0..TEST_ITERS {
+    repeated_test(|| {
         let source = rng.sample(&source_dist);
         let source_signed = if T::min_value() == zero() || rng.gen() {
             source
@@ -887,7 +887,7 @@ where
                 panic!("Value {:?} produced error on roundtrip", source_signed);
             }
         }
-    }
+    });
 }
 
 macro_rules! int128_test {

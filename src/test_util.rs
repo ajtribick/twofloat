@@ -3,7 +3,7 @@
 
 use rand::Rng;
 
-pub const TEST_ITERS: usize = 100000;
+const TEST_ITERS: usize = 100000;
 
 pub fn random_float() -> f64 {
     let mut engine = rand::thread_rng();
