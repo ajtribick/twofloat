@@ -1,5 +1,4 @@
-use crate::arithmetic::fast_two_sum;
-use crate::base::TwoFloat;
+use crate::{TwoFloat, arithmetic::fast_two_sum};
 
 impl TwoFloat {
     /// Returns the fractional part of the number.

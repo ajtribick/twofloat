@@ -1,4 +1,4 @@
-use crate::base::TwoFloat;
+use crate::TwoFloat;
 
 impl TwoFloat {
     /// Takes the reciprocal (inverse) of the number, `1/x`.

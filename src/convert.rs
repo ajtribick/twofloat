@@ -1,26 +1,6 @@
 use core::convert::{From, TryFrom};
-use core::fmt;
-use std::error;
 
-use crate::base::{no_overlap, TwoFloat};
-
-/// The error type for `TwoFloat` operations.
-#[non_exhaustive]
-#[derive(Debug)]
-pub enum TwoFloatError {
-    /// Indicates invalid conversion to/from `TwoFloat`
-    ConversionError,
-}
-
-impl fmt::Display for TwoFloatError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::ConversionError => write!(f, "invalid TwoFloat conversion"),
-        }
-    }
-}
-
-impl error::Error for TwoFloatError {}
+use crate::{TwoFloat, TwoFloatError, base::no_overlap};
 
 macro_rules! from_conversion {
     (|$source_i:ident : TwoFloat| -> $dest:tt $code:block) => {

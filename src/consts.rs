@@ -1,4 +1,4 @@
-use crate::base::TwoFloat;
+use crate::TwoFloat;
 
 /// Euler's number (e)
 pub const E: TwoFloat = TwoFloat {

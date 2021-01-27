@@ -2,7 +2,7 @@ use core::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
 
-use crate::base::TwoFloat;
+use crate::TwoFloat;
 
 pub(crate) fn fast_two_sum(a: f64, b: f64) -> TwoFloat {
     // Joldes et al. (2017) Algorithm 1

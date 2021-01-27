@@ -1,4 +1,4 @@
-use crate::base::TwoFloat;
+use crate::TwoFloat;
 
 impl TwoFloat {
     /// Returns the absolute value root of `self`.

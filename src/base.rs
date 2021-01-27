@@ -1,20 +1,6 @@
-use core::cmp::Ordering;
-use core::fmt;
-use core::num::FpCategory;
+use core::{cmp::Ordering, fmt, num::FpCategory};
 
-#[cfg(feature = "serde_support")]
-use serde::{Deserialize, Serialize};
-
-/// Represents a two-word floating point type, represented as the sum of two
-/// non-overlapping f64 values.
-#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde_support", serde(try_from = "(f64, f64)"))]
-#[cfg_attr(feature = "serde_support", serde(into = "(f64, f64)"))]
-pub struct TwoFloat {
-    pub(crate) hi: f64,
-    pub(crate) lo: f64,
-}
+use crate::TwoFloat;
 
 #[inline]
 fn exponent(x: f64) -> u32 {

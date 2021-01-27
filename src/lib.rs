@@ -72,5 +72,39 @@ pub mod consts;
 mod convert;
 mod functions;
 
-pub use base::{no_overlap, TwoFloat};
-pub use convert::TwoFloatError;
+pub use base::no_overlap;
+
+use core::fmt;
+use std::error;
+
+#[cfg(feature = "serde_support")]
+use serde::{Deserialize, Serialize};
+
+/// Represents a two-word floating point type, represented as the sum of two
+/// non-overlapping f64 values.
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde_support", serde(try_from = "(f64, f64)"))]
+#[cfg_attr(feature = "serde_support", serde(into = "(f64, f64)"))]
+pub struct TwoFloat {
+    pub(crate) hi: f64,
+    pub(crate) lo: f64,
+}
+
+/// The error type for `TwoFloat` operations.
+#[non_exhaustive]
+#[derive(Debug)]
+pub enum TwoFloatError {
+    /// Indicates invalid conversion to/from `TwoFloat`
+    ConversionError,
+}
+
+impl fmt::Display for TwoFloatError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::ConversionError => write!(f, "invalid TwoFloat conversion"),
+        }
+    }
+}
+
+impl error::Error for TwoFloatError {}

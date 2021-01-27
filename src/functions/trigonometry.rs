@@ -1,7 +1,6 @@
 use core::convert::TryFrom;
 
-use crate::base::TwoFloat;
-use crate::consts::{FRAC_PI_2, FRAC_PI_4, PI};
+use crate::{TwoFloat, consts::{FRAC_PI_2, FRAC_PI_4, PI}};
 
 const DEG_PER_RAD: TwoFloat = TwoFloat {
     hi: 57.29577951308232,

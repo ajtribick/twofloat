@@ -1,4 +1,4 @@
-use crate::base::TwoFloat;
+use crate::TwoFloat;
 
 impl TwoFloat {
     /// Hyperbolic cosine function.
