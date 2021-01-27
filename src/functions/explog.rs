@@ -1,4 +1,4 @@
-use crate::{TwoFloat, consts::LN_2};
+use crate::{consts::LN_2, TwoFloat};
 
 // 1/ln(2)
 const FRAC_1_LN_2: TwoFloat = TwoFloat {
