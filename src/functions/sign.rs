@@ -107,7 +107,7 @@ impl TwoFloat {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::TwoFloat;
 
     #[test]
     fn abs_test() {

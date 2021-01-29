@@ -126,7 +126,7 @@ mod tests {
             #[cfg(test)]
             #[allow(non_snake_case)]
             mod $name {
-                use super::*;
+                use super::$name;
 
                 #[test]
                 fn valid_test() {
@@ -150,7 +150,7 @@ mod tests {
             #[cfg(test)]
             #[allow(non_snake_case)]
             mod $name {
-                use super::*;
+                use super::$name;
 
                 #[test]
                 fn valid_test() {

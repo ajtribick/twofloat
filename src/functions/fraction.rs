@@ -143,7 +143,7 @@ impl TwoFloat {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::TwoFloat;
 
     const EXP2_60: f64 = 1152921504606846976.0; // 2^60
 
