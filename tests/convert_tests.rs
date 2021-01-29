@@ -111,7 +111,7 @@ where
 
         assert_eq!(
             result.hi(),
-            <f64 as num_traits::NumCast>::from(source).unwrap(),
+            source.to_f64().unwrap(),
             "Float conversion failed: mismatch in high word"
         );
         assert_eq!(
@@ -124,7 +124,7 @@ where
 
 fn into_float<F>()
 where
-    F: num_traits::Float + From<TwoFloat> + Debug,
+    F: num_traits::Float + num_traits::FromPrimitive + From<TwoFloat> + Debug,
 {
     repeated_test(|| {
         let source = get_twofloat();
@@ -132,7 +132,7 @@ where
         let result: F = source.into();
         assert_eq!(
             result,
-            <F as num_traits::NumCast>::from(source.hi()).unwrap(),
+            F::from_f64(source.hi()).unwrap(),
             "Float conversion from TwoFloat failed"
         );
     });
@@ -198,11 +198,11 @@ trait ConvertBounds:
     + SampleUniform
 {
     fn lower_bound() -> f64 {
-        <f64 as num_traits::NumCast>::from(Self::min_value()).unwrap() - 1.0
+        Self::min_value().to_f64().unwrap() - 1.0
     }
 
     fn upper_bound() -> f64 {
-        <f64 as num_traits::NumCast>::from(Self::max_value()).unwrap() + 1.0
+        Self::max_value().to_f64().unwrap() + 1.0
     }
 }
 
@@ -371,7 +371,7 @@ where
         assert!(result.is_valid(), "Conversion of {:?} was invalid", source);
         assert_eq!(
             result.hi(),
-            <f64 as num_traits::NumCast>::from(source).unwrap(),
+            source.to_f64().unwrap(),
             "Conversion of {:?} failed: mismatch in high word",
             source
         );
@@ -483,8 +483,7 @@ where
                 break result;
             }
         };
-        let expected = if source.hi() < <f64 as num_traits::NumCast>::from(T::min_value()).unwrap()
-        {
+        let expected = if source.hi() < T::min_value().to_f64().unwrap() {
             if source.lo() > 0.0 {
                 Ok(T::min_value())
             } else {
@@ -677,8 +676,8 @@ where
 
         assert!(result.is_valid(), "Conversion of {:?} was invalid", source);
         assert!(
-            result.hi() >= <f64 as num_traits::NumCast>::from(T::min_value()).unwrap()
-                && result.hi() <= <f64 as num_traits::NumCast>::from(T::max_value()).unwrap(),
+            result.hi() >= T::min_value().to_f64().unwrap()
+                && result.hi() <= T::max_value().to_f64().unwrap(),
             "Conversion of {:?} high word out of range",
             source
         );
@@ -693,7 +692,7 @@ where
             source
         );
 
-        if result.hi() == <f64 as num_traits::NumCast>::from(T::max_value()).unwrap() {
+        if result.hi() == T::max_value().to_f64().unwrap() {
             assert!(
                 result.lo() < 0.0,
                 "Converted result of {:?} out of range",
@@ -705,7 +704,7 @@ where
                 "Conversion of {:?} did not produce matching value",
                 source
             );
-        } else if result.hi() == <f64 as num_traits::NumCast>::from(T::min_value()).unwrap() {
+        } else if result.hi() == T::min_value().to_f64().unwrap() {
             assert!(
                 result.lo() >= 0.0,
                 "Converted result of {:?} out of range",
@@ -813,8 +812,8 @@ where
 
         assert!(result.is_valid(), "Conversion of {:?} was invalid", source);
         assert!(
-            result.hi() >= <f64 as num_traits::NumCast>::from(T::min_value()).unwrap()
-                && result.hi() <= <f64 as num_traits::NumCast>::from(T::max_value()).unwrap(),
+            result.hi() >= T::min_value().to_f64().unwrap()
+                && result.hi() <= T::max_value().to_f64().unwrap(),
             "Conversion of {:?} high word out of range",
             source
         );
