@@ -59,6 +59,7 @@ is possible through the Serde library.
 #![allow(clippy::suspicious_arithmetic_impl)]
 #![allow(clippy::suspicious_op_assign_impl)]
 
+mod ops_util;
 mod test_util;
 
 mod arithmetic;
