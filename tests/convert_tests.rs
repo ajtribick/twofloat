@@ -97,7 +97,7 @@ fn try_from_array_overlap_test() {
 
 fn from_float<F>()
 where
-    F: num_traits::Float + Into<TwoFloat>,
+    F: num_traits::float::FloatCore + Into<TwoFloat>,
 {
     repeated_test(|| {
         let source = loop {
@@ -124,7 +124,7 @@ where
 
 fn into_float<F>()
 where
-    F: num_traits::Float + num_traits::FromPrimitive + From<TwoFloat> + Debug,
+    F: PartialEq<F> + num_traits::FromPrimitive + From<TwoFloat> + Debug,
 {
     repeated_test(|| {
         let source = get_twofloat();
