@@ -2,6 +2,16 @@ use core::{cmp::Ordering, fmt, num::FpCategory};
 
 use crate::TwoFloat;
 
+const DEG_PER_RAD: TwoFloat = TwoFloat {
+    hi: 57.29577951308232,
+    lo: -1.9878495670576283e-15,
+};
+
+const RAD_PER_DEG: TwoFloat = TwoFloat {
+    hi: 0.017453292519943295,
+    lo: 2.9486522708701687e-19,
+};
+
 #[inline]
 fn exponent(x: f64) -> u32 {
     ((x.to_bits() >> 52) & 0x7ff) as u32
@@ -43,6 +53,48 @@ pub fn no_overlap(a: f64, b: f64) -> bool {
 }
 
 impl TwoFloat {
+    /// Smallest finite `TwoFloat` value.
+    pub const MIN: Self = Self {
+        hi: f64::MIN,
+        lo: 1.9958403095347196e+292, // 0x1.fffffffffffffp+970
+    };
+
+    /// Smallest positive normal `TwoFloat` value.
+    pub const MIN_POSITIVE: Self = Self {
+        hi: f64::MIN_POSITIVE,
+        lo: 0.0,
+    };
+
+    /// Largest finite `TwoFloat` value.
+    pub const MAX: Self = Self {
+        hi: f64::MAX,
+        lo: -1.9958403095347196e+292, // 0x1.fffffffffffffp+970
+    };
+
+    /// Represents an error value equivalent to `f64::NAN`.
+    pub const NAN: Self = Self {
+        hi: f64::NAN,
+        lo: f64::NAN,
+    };
+
+    /// Represents the difference between 1.0 and the next representable value.
+    pub const EPSILON: Self = Self {
+        hi: 5e-324,
+        lo: 0.0,
+    };
+
+    /// A positive infinite value
+    pub const INFINITY: Self = Self {
+        hi: f64::INFINITY,
+        lo: f64::INFINITY,
+    };
+
+    /// A negative infinite value
+    pub const NEG_INFINITY: Self = Self {
+        hi: f64::NEG_INFINITY,
+        lo: f64::NEG_INFINITY,
+    };
+
     /// Returns the high word of `self`.
     ///
     /// # Examples
@@ -125,11 +177,89 @@ impl TwoFloat {
         }
     }
 
-    /// Represents an error value equivalent to `f64::NAN`.
-    pub const NAN: Self = Self {
-        hi: f64::NAN,
-        lo: f64::NAN,
-    };
+    /// Converts degrees to radians.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(90.0);
+    /// let b = a.to_radians();
+    ///
+    /// assert!((b - twofloat::consts::FRAC_PI_2).abs() < 1e-16);
+    pub fn to_radians(self) -> Self {
+        self * RAD_PER_DEG
+    }
+
+    /// Converts radians to degrees.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let a = twofloat::consts::PI;
+    /// let b = a.to_degrees();
+    ///
+    /// assert!((b - 180.0).abs() < 1e-16);
+    pub fn to_degrees(self) -> Self {
+        self * DEG_PER_RAD
+    }
+
+    /// Takes the reciprocal (inverse) of the number, `1/x`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::new_add(67.2, 5.7e-53);
+    /// let b = a.recip();
+    /// let difference = b.recip() - a;
+    ///
+    /// assert!(difference.abs() < 1e-16);
+    pub fn recip(self) -> Self {
+        1.0 / self
+    }
+
+    /// Raises the number to an integer power. Returns a NAN value for 0^0.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// let a = TwoFloat::from(2.0).powi(3);
+    /// let b = TwoFloat::from(0.0).powi(0);
+    ///
+    /// assert!(a - TwoFloat::from(8.0) <= 1e-16);
+    /// assert!(!b.is_valid());
+    pub fn powi(self, n: i32) -> Self {
+        match n {
+            0 => {
+                if self.hi == 0.0 && self.lo == 0.0 {
+                    Self::NAN
+                } else {
+                    Self::from(1.0)
+                }
+            }
+            1 => self,
+            -1 => self.recip(),
+            _ => {
+                let mut result = Self::from(1.0);
+                let mut n_pos = n.abs();
+                let mut value = self;
+                while n_pos > 0 {
+                    if (n_pos & 1) != 0 {
+                        result *= &value;
+                    }
+                    value *= value;
+                    n_pos >>= 1;
+                }
+                if n > 0 {
+                    result
+                } else {
+                    result.recip()
+                }
+            }
+        }
+    }
 }
 
 impl fmt::Display for TwoFloat {
@@ -247,6 +377,24 @@ impl PartialEq<TwoFloat> for f64 {
     }
 }
 
+impl PartialEq<TwoFloat> for TwoFloat {
+    fn eq(&self, other: &TwoFloat) -> bool {
+        if self.is_valid() != other.is_valid()
+            || self.hi.is_nan()
+            || self.lo.is_nan()
+            || other.hi.is_nan()
+            || self.lo.is_nan()
+        {
+            false
+        } else if self.is_valid() {
+            self.hi == other.hi && self.lo == other.lo
+        } else {
+            // all infinities compare equal
+            true
+        }
+    }
+}
+
 impl PartialOrd<f64> for TwoFloat {
     fn partial_cmp(&self, other: &f64) -> Option<Ordering> {
         let hi_cmp = self.hi.partial_cmp(other);
@@ -265,6 +413,28 @@ impl PartialOrd<TwoFloat> for f64 {
             0.0.partial_cmp(&other.lo)
         } else {
             hi_cmp
+        }
+    }
+}
+
+impl PartialOrd<TwoFloat> for TwoFloat {
+    fn partial_cmp(&self, other: &TwoFloat) -> Option<Ordering> {
+        if self.hi.is_nan() || self.lo.is_nan() || other.hi.is_nan() || other.lo.is_nan() {
+            return None;
+        }
+
+        match (self.is_valid(), other.is_valid()) {
+            (true, true) => {
+                let hi_cmp = self.hi.partial_cmp(&other.hi);
+                if matches!(hi_cmp, Some(Ordering::Equal)) {
+                    self.lo.partial_cmp(&other.lo)
+                } else {
+                    hi_cmp
+                }
+            }
+            (true, false) => Some(Ordering::Less),
+            (false, true) => Some(Ordering::Greater),
+            (false, false) => Some(Ordering::Equal),
         }
     }
 }
@@ -337,5 +507,15 @@ mod tests {
     fn default_test() {
         let value: TwoFloat = Default::default();
         assert_eq!(value, TwoFloat::from(0));
+    }
+
+    #[test]
+    fn min_test() {
+        assert!(TwoFloat::MIN.is_valid());
+    }
+
+    #[test]
+    fn max_test() {
+        assert!(TwoFloat::MAX.is_valid());
     }
 }

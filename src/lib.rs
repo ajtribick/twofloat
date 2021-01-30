@@ -59,6 +59,9 @@ possible through the Serde library.
 #![allow(clippy::suspicious_arithmetic_impl)]
 #![allow(clippy::suspicious_op_assign_impl)]
 
+use core::fmt;
+use std::error;
+
 mod ops_util;
 mod test_util;
 
@@ -72,11 +75,9 @@ pub mod consts;
 
 mod convert;
 mod functions;
+mod num_integration;
 
 pub use base::no_overlap;
-
-use core::fmt;
-use std::error;
 
 #[cfg(feature = "serde")]
 mod serde_helper {
@@ -100,7 +101,7 @@ mod serde_helper {
 
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
-#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Default, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(
     feature = "serde",
@@ -117,12 +118,14 @@ pub struct TwoFloat {
 pub enum TwoFloatError {
     /// Indicates invalid conversion to/from `TwoFloat`
     ConversionError,
+    ParseError,
 }
 
 impl fmt::Display for TwoFloatError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::ConversionError => write!(f, "invalid TwoFloat conversion"),
+            Self::ConversionError => f.pad("invalid TwoFloat conversion"),
+            Self::ParseError => f.pad("parsing not supported"),
         }
     }
 }

@@ -18,9 +18,9 @@ default = ["math_funcs"]
 math_funcs = []
 
 [dependencies]
+num-traits = "0.2.14"
 serde = { version = "1.0", features = ["derive"], optional = true }
 
 [dev-dependencies]
-num-traits = "0.2.14"
 rand = "0.8"
 serde_test = "1.0"

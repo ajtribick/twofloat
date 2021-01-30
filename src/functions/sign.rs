@@ -12,11 +12,11 @@ impl TwoFloat {
     ///
     /// assert_eq!(a, TwoFloat::new_add(1.0, 1.0e-300));
     /// assert_eq!(b, TwoFloat::new_add(1.0, -1.0e-300));
-    pub fn abs(self) -> Self {
+    pub fn abs(&self) -> Self {
         if self.hi > 0.0
             || (self.hi == 0.0 && self.hi.is_sign_positive() && self.lo.is_sign_positive())
         {
-            self
+            *self
         } else {
             -self
         }
@@ -68,12 +68,12 @@ impl TwoFloat {
     /// # use twofloat::TwoFloat;
     /// let a = TwoFloat::new_add(-1.0, 1.0e-200);
     /// let b = TwoFloat::new_add(1.0, 0.3);
-    /// let c = a.copysign(b);
+    /// let c = a.copysign(&b);
     ///
     /// assert_eq!(c, -a);
-    pub fn copysign(self, sign: Self) -> Self {
+    pub fn copysign(&self, sign: &Self) -> Self {
         if self.is_sign_positive() == sign.is_sign_positive() {
-            self
+            *self
         } else {
             -self
         }
@@ -92,7 +92,7 @@ impl TwoFloat {
     ///
     /// assert_eq!(a.signum(), 1.0);
     /// assert_eq!(b.signum(), -1.0);
-    pub fn signum(self) -> Self {
+    pub fn signum(&self) -> Self {
         if self.is_valid() {
             if self.is_sign_positive() {
                 Self::from(1.0)

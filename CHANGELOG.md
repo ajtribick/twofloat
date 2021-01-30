@@ -5,6 +5,7 @@
 * Add operator overloads for `&f64`.
 * Breaking change: use `serde` as the feature flag name.
 * Breaking change: use helper struct for Serde serialization.
+* Integrate with `num_traits` crate.
 
 ## Version 0.4.1
 

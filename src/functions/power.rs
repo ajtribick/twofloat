@@ -1,21 +1,6 @@
 use crate::TwoFloat;
 
 impl TwoFloat {
-    /// Takes the reciprocal (inverse) of the number, `1/x`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use twofloat::TwoFloat;
-    /// let a = TwoFloat::new_add(67.2, 5.7e-53);
-    /// let b = a.recip();
-    /// let difference = b.recip() - a;
-    ///
-    /// assert!(difference.abs() < 1e-16);
-    pub fn recip(self) -> Self {
-        1.0 / self
-    }
-
     /// Returns the square root of the number, using equation 4 from Karp &
     /// Markstein (1997).
     ///
@@ -71,48 +56,6 @@ impl TwoFloat {
     /// assert!((c - 5.0).abs() < 1e-10);
     pub fn hypot(self, other: Self) -> Self {
         (self * self + other * other).sqrt()
-    }
-
-    /// Raises the number to an integer power. Returns a NAN value for 0^0.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use twofloat::TwoFloat;
-    /// let a = TwoFloat::from(2.0).powi(3);
-    /// let b = TwoFloat::from(0.0).powi(0);
-    ///
-    /// assert!(a - TwoFloat::from(8.0) <= 1e-16);
-    /// assert!(!b.is_valid());
-    pub fn powi(self, n: i32) -> Self {
-        match n {
-            0 => {
-                if self.hi == 0.0 && self.lo == 0.0 {
-                    Self::NAN
-                } else {
-                    Self::from(1.0)
-                }
-            }
-            1 => self,
-            -1 => self.recip(),
-            _ => {
-                let mut result = Self::from(1.0);
-                let mut n_pos = n.abs();
-                let mut value = self;
-                while n_pos > 0 {
-                    if (n_pos & 1) != 0 {
-                        result *= &value;
-                    }
-                    value *= value;
-                    n_pos >>= 1;
-                }
-                if n > 0 {
-                    result
-                } else {
-                    result.recip()
-                }
-            }
-        }
     }
 
     /// Returns the value raised to the power `y`.
