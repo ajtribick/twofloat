@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.5
+
+* Add operator overloads for `&f64`.
+* Breaking change: use `serde` as the feature flag name.
+* Breaking change: use helper struct for Serde serialization.
+
 ## Version 0.4.1
 
 * Internals now checked with clippy.
@@ -12,13 +18,13 @@
 
 * Support Default trait.
 
-## Version 0.3.0
+## Version 0.3
 
 * Breaking change: add specific implementations for `exp2` and `log2`
   functions.
 * Breaking change: update formatting, support exponential formats and
   precision specifiers.
-* Add optional support for serde (feature "serde_support").
+* Add optional support for serde (feature `serde_support`).
 * Add conversions to/from `i128` and `u128`.
 * Mathematical functions are optional but enabled by default (feature
   "math_funcs").
@@ -31,7 +37,7 @@
 
 * Add `exp_m1`, `ln_1p` functions.
 
-## Version 0.2.0
+## Version 0.2
 
 * Breaking change: prefer value-like arguments to improve ergonomics.
 * Breaking change: use `ConversionError` type to represent failure of
@@ -67,6 +73,6 @@
   `sqrt`, `powi`.
 * Add `%` and `%=` operators.
 
-## Version 0.1.0
+## Version 0.1
 
 * Initial release.

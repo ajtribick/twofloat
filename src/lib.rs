@@ -32,8 +32,8 @@ as preliminary.
 Operations on non-finite values are not supported. At the moment this is not
 automatically checked. The `is_valid()` method is provided for this purpose.
 
-If the `serde_support` feature is enabled, serialization and deserialization
-is possible through the Serde library.
+If the `serde` feature is enabled, serialization and deserialization is
+possible through the Serde library.
 
 ## References
 
@@ -78,15 +78,34 @@ pub use base::no_overlap;
 use core::fmt;
 use std::error;
 
-#[cfg(feature = "serde_support")]
-use serde::{Deserialize, Serialize};
+#[cfg(feature = "serde")]
+mod serde_helper {
+    use super::{TwoFloat, TwoFloatError};
+
+    #[derive(serde::Deserialize)]
+    #[serde(rename = "TwoFloat")]
+    pub(super) struct TwoFloatDeserializeHelper {
+        hi: f64,
+        lo: f64,
+    }
+
+    impl core::convert::TryFrom<TwoFloatDeserializeHelper> for TwoFloat {
+        type Error = TwoFloatError;
+
+        fn try_from(value: TwoFloatDeserializeHelper) -> Result<Self, Self::Error> {
+            TwoFloat::try_from((value.hi, value.lo))
+        }
+    }
+}
 
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde_support", serde(try_from = "(f64, f64)"))]
-#[cfg_attr(feature = "serde_support", serde(into = "(f64, f64)"))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    serde(try_from = "serde_helper::TwoFloatDeserializeHelper")
+)]
 pub struct TwoFloat {
     pub(crate) hi: f64,
     pub(crate) lo: f64,

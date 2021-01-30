@@ -16,7 +16,6 @@ repository = "https://github.com/ajtribick/twofloat"
 [features]
 default = ["math_funcs"]
 math_funcs = []
-serde_support = ["serde"]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"], optional = true }

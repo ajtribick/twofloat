@@ -1,4 +1,4 @@
-#![cfg(feature = "serde_support")]
+#![cfg(feature = "serde")]
 
 pub mod common;
 
@@ -13,10 +13,15 @@ fn serialize_test() {
         assert_tokens(
             &source,
             &[
-                Token::Tuple { len: 2 },
+                Token::Struct {
+                    name: "TwoFloat",
+                    len: 2,
+                },
+                Token::Str("hi"),
                 Token::F64(source.hi()),
+                Token::Str("lo"),
                 Token::F64(source.lo()),
-                Token::TupleEnd,
+                Token::StructEnd,
             ],
         );
     });
@@ -28,10 +33,15 @@ fn deserialize_invalid_test() {
         let (hi, lo) = get_valid_pair(|x, y| !no_overlap(x, y));
         assert_de_tokens_error::<TwoFloat>(
             &[
-                Token::Tuple { len: 2 },
+                Token::Struct {
+                    name: "TwoFloat",
+                    len: 2,
+                },
+                Token::Str("hi"),
                 Token::F64(hi),
+                Token::Str("lo"),
                 Token::F64(lo),
-                Token::TupleEnd,
+                Token::StructEnd,
             ],
             "invalid TwoFloat conversion",
         );
