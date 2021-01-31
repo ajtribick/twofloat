@@ -5,7 +5,7 @@ use core::{cmp::Ordering, fmt, str::FromStr};
 use lazy_static::lazy_static;
 use num_bigint::BigInt;
 use num_rational::BigRational;
-use num_traits::{one, FromPrimitive, ToPrimitive, zero};
+use num_traits::{one, zero, FromPrimitive, ToPrimitive};
 
 use crate::{TwoFloat, TwoFloatError};
 
