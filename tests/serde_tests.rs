@@ -1,5 +1,6 @@
 #![cfg(feature = "serde")]
 
+#[macro_use]
 pub mod common;
 
 use common::*;

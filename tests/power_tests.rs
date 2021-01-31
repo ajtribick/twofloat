@@ -1,6 +1,7 @@
 #![cfg(feature = "math_funcs")]
 #![allow(clippy::float_cmp)]
 
+#[macro_use]
 pub mod common;
 
 use common::*;

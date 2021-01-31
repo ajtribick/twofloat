@@ -3,7 +3,9 @@
 use core::cmp::Ordering;
 use twofloat::TwoFloat;
 
+#[macro_use]
 pub mod common;
+
 use common::*;
 
 #[test]

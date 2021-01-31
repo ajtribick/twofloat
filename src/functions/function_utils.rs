@@ -1,5 +1,3 @@
-#![macro_use]
-
 macro_rules! polynomial {
     ($x:ident, $poly:expr) => {
         {

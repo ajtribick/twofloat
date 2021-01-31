@@ -1,5 +1,6 @@
 #![cfg(feature = "math_funcs")]
 
+#[macro_use]
 pub mod common;
 
 use common::*;

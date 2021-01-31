@@ -6,7 +6,9 @@ use rand::Rng;
 
 use twofloat::{no_overlap, TwoFloat};
 
+#[macro_use]
 pub mod common;
+
 use common::{get_twofloat, get_valid_pair, get_valid_twofloat, random_float, repeated_test};
 
 // Tests for construction from two f64 values

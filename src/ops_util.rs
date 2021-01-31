@@ -1,5 +1,3 @@
-#![macro_use]
-
 macro_rules! op_trait_impl {
     (
         $trait:ident, $name:ident, $($ab:lifetime,)*

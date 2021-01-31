@@ -3,7 +3,9 @@
 use core::convert::TryFrom;
 use twofloat::{no_overlap, TwoFloat};
 
+#[macro_use]
 pub mod common;
+
 use common::*;
 
 // fract() tests

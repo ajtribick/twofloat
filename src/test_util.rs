@@ -1,6 +1,3 @@
-#![cfg(test)]
-#![macro_use]
-
 use rand::Rng;
 
 const TEST_ITERS: usize = 100000;

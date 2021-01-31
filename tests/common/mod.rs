@@ -1,5 +1,3 @@
-#![macro_use]
-
 use core::convert::TryFrom;
 
 use rand::Rng;

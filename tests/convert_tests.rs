@@ -7,7 +7,9 @@ use rand::{distributions::uniform::SampleUniform, Rng};
 
 use twofloat::{no_overlap, TwoFloat, TwoFloatError};
 
+#[macro_use]
 pub mod common;
+
 use common::*;
 
 fn right_bit(f: f64) -> Option<i16> {

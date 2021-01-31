@@ -62,7 +62,11 @@ possible through the Serde library.
 use core::fmt;
 use std::error;
 
+#[macro_use]
 mod ops_util;
+
+#[cfg(test)]
+#[macro_use]
 mod test_util;
 
 mod arithmetic;
