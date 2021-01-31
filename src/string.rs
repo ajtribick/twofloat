@@ -5,7 +5,7 @@ use core::{cmp::Ordering, fmt, str::FromStr};
 use lazy_static::lazy_static;
 use num_bigint::BigInt;
 use num_rational::BigRational;
-use num_traits::{one, FromPrimitive, ToPrimitive};
+use num_traits::{one, FromPrimitive, ToPrimitive, zero};
 
 use crate::{TwoFloat, TwoFloatError};
 
@@ -141,13 +141,20 @@ fn parse_rational(s: &str) -> Result<BigRational, TwoFloatError> {
 
     let value = match point_pos {
         Some(p) => {
-            BigRational::new(
+            let int_part = BigRational::new(
                 v[..p].parse().map_err(|_| TwoFloatError::ParseError)?,
                 one(),
-            ) + BigRational::new(
+            );
+            let fract_part = BigRational::new(
                 v[p + 1..].parse().map_err(|_| TwoFloatError::ParseError)?,
                 TEN.pow((v.len() - p - 1) as u32),
-            )
+            );
+
+            if int_part >= zero() {
+                int_part + fract_part
+            } else {
+                int_part - fract_part
+            }
         }
         None => BigRational::new(v.parse().map_err(|_| TwoFloatError::ParseError)?, one()),
     };
