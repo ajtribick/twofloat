@@ -76,6 +76,7 @@ pub mod consts;
 mod convert;
 mod functions;
 mod num_integration;
+mod string;
 
 pub use base::no_overlap;
 

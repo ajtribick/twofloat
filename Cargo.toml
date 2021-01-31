@@ -14,10 +14,14 @@ description = "Double-double arithmetic functionality."
 repository = "https://github.com/ajtribick/twofloat"
 
 [features]
-default = ["math_funcs"]
+default = ["math_funcs", "string_convert"]
 math_funcs = ["num-traits/std"]
+string_convert = ["lazy_static", "num-bigint", "num-rational"]
 
 [dependencies]
+lazy_static = { version = "1.4", optional = true }
+num-bigint = { version = "0.3", optional = true }
+num-rational = { version = "0.3", optional = true }
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
 
