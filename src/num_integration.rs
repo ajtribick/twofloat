@@ -233,20 +233,16 @@ impl num_traits::NumCast for TwoFloat {
         const INT_THRESHOLD: f64 = 9007199254740992.0; // 0x1.0p53
         if let Some(f) = n.to_f64() {
             if f.abs() <= INT_THRESHOLD {
-                Some(<TwoFloat as From<f64>>::from(f))
+                Some(f.into())
             } else if let Some(i) = n.to_i128() {
-                Some(<TwoFloat as From<i128>>::from(i))
-            } else if let Some(u) = n.to_u128() {
-                Some(<TwoFloat as From<u128>>::from(u))
+                Some(i.into())
             } else {
-                Some(<TwoFloat as From<f64>>::from(f))
+                Some(n.to_u128().map_or_else(|| f.into(), |u| u.into()))
             }
         } else if let Some(i) = n.to_i128() {
-            Some(<TwoFloat as From<i128>>::from(i))
-        } else if let Some(u) = n.to_u128() {
-            Some(<TwoFloat as From<u128>>::from(u))
+            Some(i.into())
         } else {
-            None
+            n.to_u128().map(|u| u.into())
         }
     }
 }
