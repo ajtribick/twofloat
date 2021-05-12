@@ -1,5 +1,3 @@
-#![cfg(feature = "string_convert")]
-
 use core::{cmp::Ordering, fmt, str::FromStr};
 
 use lazy_static::lazy_static;

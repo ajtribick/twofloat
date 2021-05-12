@@ -1,15 +1,17 @@
 use core::{cmp::Ordering, num::FpCategory};
 
+use hexf::hexf64;
+
 use crate::TwoFloat;
 
 const DEG_PER_RAD: TwoFloat = TwoFloat {
-    hi: 57.29577951308232,
-    lo: -1.9878495670576283e-15,
+    hi: hexf64!("0x1.ca5dc1a63c1f8p5"),
+    lo: hexf64!("-0x1.1e7ab456405f9p-49"),
 };
 
 const RAD_PER_DEG: TwoFloat = TwoFloat {
-    hi: 0.017453292519943295,
-    lo: 2.9486522708701687e-19,
+    hi: hexf64!("0x1.1df46a2529d39p-6"),
+    lo: hexf64!("0x1.5c1d8becdd291p-62"),
 };
 
 #[inline]
@@ -56,7 +58,7 @@ impl TwoFloat {
     /// Smallest finite `TwoFloat` value.
     pub const MIN: Self = Self {
         hi: f64::MIN,
-        lo: 1.9958403095347196e+292, // 0x1.fffffffffffffp+970
+        lo: hexf64!("-0x1.fffffffffffffp+970"),
     };
 
     /// Smallest positive normal `TwoFloat` value.
@@ -68,7 +70,7 @@ impl TwoFloat {
     /// Largest finite `TwoFloat` value.
     pub const MAX: Self = Self {
         hi: f64::MAX,
-        lo: -1.9958403095347196e+292, // 0x1.fffffffffffffp+970
+        lo: hexf64!("0x1.fffffffffffffp+970"),
     };
 
     /// Represents an error value equivalent to `f64::NAN`.
@@ -77,9 +79,9 @@ impl TwoFloat {
         lo: f64::NAN,
     };
 
-    /// Represents the difference between 1.0 and the next representable value.
+    /// Represents the difference between 1.0 and the next representable normal value.
     pub const EPSILON: Self = Self {
-        hi: 5e-324,
+        hi: f64::MIN_POSITIVE,
         lo: 0.0,
     };
 

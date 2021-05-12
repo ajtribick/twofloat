@@ -1,117 +1,119 @@
+use hexf::hexf64;
+
 use crate::TwoFloat;
 
 /// Euler's number (e)
 pub const E: TwoFloat = TwoFloat {
-    hi: 2.718281828459045,
-    lo: 1.4456468917292502e-16,
+    hi: hexf64!("0x1.5bf0a8b145769p1"),
+    lo: hexf64!("0x1.4d57ee2b1013ap-53"),
 };
 
 /// 1/π
 pub const FRAC_1_PI: TwoFloat = TwoFloat {
-    hi: 0.3183098861837907,
-    lo: -1.9678676675182486e-17,
+    hi: hexf64!("0x1.45f306dc9c883p-2"),
+    lo: hexf64!("-0x1.6b01ec5417056p-56"),
 };
 
 /// 2/π
 pub const FRAC_2_PI: TwoFloat = TwoFloat {
-    hi: 0.6366197723675814,
-    lo: -3.935735335036497e-17,
+    hi: hexf64!("0x1.45f306dc9c883p-1"),
+    lo: hexf64!("-0x1.6b01ec5417056p-55"),
 };
 
 /// 2/sqrt(π)
 pub const FRAC_2_SQRT_PI: TwoFloat = TwoFloat {
-    hi: 1.1283791670955126,
-    lo: 1.533545961316588e-17,
+    hi: hexf64!("0x1.20dd750429b6dp0"),
+    lo: hexf64!("0x1.1ae3a914fed8p-56"),
 };
 
 /// 1/sqrt(2)
 pub const FRAC_1_SQRT_2: TwoFloat = TwoFloat {
-    hi: 0.7071067811865476,
-    lo: -4.833646656726457e-17,
+    hi: hexf64!("0x1.6a09e667f3bcdp-1"),
+    lo: hexf64!("-0x1.bdd3413b26456p-55"),
 };
 
 /// π/2
 pub const FRAC_PI_2: TwoFloat = TwoFloat {
-    hi: 1.5707963267948966,
-    lo: 6.123233995736766e-17,
+    hi: hexf64!("0x1.921fb54442d18p0"),
+    lo: hexf64!("0x1.1a62633145c07p-54"),
 };
 
 /// π/3
 pub const FRAC_PI_3: TwoFloat = TwoFloat {
-    hi: 1.0471975511965979,
-    lo: -1.072081766451091e-16,
+    hi: hexf64!("0x1.0c152382d7366p0"),
+    lo: hexf64!("-0x1.ee6913347c2a6p-54"),
 };
 
 /// π/4
 pub const FRAC_PI_4: TwoFloat = TwoFloat {
-    hi: 0.7853981633974483,
-    lo: 3.061616997868383e-17,
+    hi: hexf64!("0x1.921fb54442d18p-1"),
+    lo: hexf64!("0x1.1a62633145c07p-55"),
 };
 
 /// π/6
 pub const FRAC_PI_6: TwoFloat = TwoFloat {
-    hi: 0.5235987755982989,
-    lo: -5.360408832255455e-17,
+    hi: hexf64!("0x1.0c152382d7366p-1"),
+    lo: hexf64!("-0x1.ee6913347c2a6p-55"),
 };
 
 /// π/8
 pub const FRAC_PI_8: TwoFloat = TwoFloat {
-    hi: 0.39269908169872414,
-    lo: 1.5308084989341915e-17,
+    hi: hexf64!("0x1.921fb54442d18p-2"),
+    lo: hexf64!("0x1.1a62633145c07p-56"),
 };
 
 /// ln(2)
 pub const LN_2: TwoFloat = TwoFloat {
-    hi: 0.6931471805599453,
-    lo: 2.3190468138462996e-17,
+    hi: hexf64!("0x1.62e42fefa39efp-1"),
+    lo: hexf64!("0x1.abc9e3b39803fp-56"),
 };
 
 /// ln(10)
 pub const LN_10: TwoFloat = TwoFloat {
-    hi: 2.302585092994046,
-    lo: -2.1707562233822494e-16,
+    hi: hexf64!("0x1.26bb1bbb55516p1"),
+    lo: hexf64!("-0x1.f48ad494ea3e9p-53"),
 };
 
 /// log<sub>2</sub>(e)
 pub const LOG2_E: TwoFloat = TwoFloat {
-    hi: 1.4426950408889634,
-    lo: 2.0355273740931033e-17,
+    hi: hexf64!("0x1.71547652b82fep0"),
+    lo: hexf64!("0x1.777d0ffda0d24p-56"),
 };
 
 /// log<sub>10</sub>(e)
 pub const LOG10_E: TwoFloat = TwoFloat {
-    hi: 0.4342944819032518,
-    lo: 1.098319650216765e-17,
+    hi: hexf64!("0x1.bcb7b1526e50ep-2"),
+    lo: hexf64!("0x1.95355baaafad3p-57"),
 };
 
 /// log<sub>10</sub>(2)
 pub const LOG10_2: TwoFloat = TwoFloat {
-    hi: 0.3010299956639812,
-    lo: -2.8037281277851704e-18,
+    hi: hexf64!("0x1.34413509f79ffp-2"),
+    lo: hexf64!("-0x1.9dc1da994fd21p-59"),
 };
 
 /// log<sub>2</sub>(10)
 pub const LOG2_10: TwoFloat = TwoFloat {
-    hi: 3.321928094887362,
-    lo: 1.661617516973592e-16,
+    hi: hexf64!("0x1.a934f0979a371p1"),
+    lo: hexf64!("0x1.7f2495fb7fa6dp-53"),
 };
 
 /// Archimedes' constant (π)
 pub const PI: TwoFloat = TwoFloat {
-    hi: 3.141592653589793,
-    lo: 1.2246467991473532e-16,
+    hi: hexf64!("0x1.921fb54442d18p1"),
+    lo: hexf64!("0x1.1a62633145c07p-53"),
 };
 
 /// sqrt(2)
 pub const SQRT_2: TwoFloat = TwoFloat {
-    hi: 1.4142135623730951,
-    lo: -9.667293313452913e-17,
+    hi: hexf64!("0x1.6a09e667f3bcdp0"),
+    lo: hexf64!("-0x1.bdd3413b26456p-54"),
 };
 
 /// The full circle constant (τ)
 pub const TAU: TwoFloat = TwoFloat {
-    hi: 6.283185307179586,
-    lo: 2.4492935982947064e-16,
+    hi: hexf64!("0x1.921fb54442d18p2"),
+    lo: hexf64!("0x1.1a62633145c07p-52"),
 };
 
 #[cfg(test)]

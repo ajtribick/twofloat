@@ -80,6 +80,7 @@ pub mod consts;
 mod convert;
 mod functions;
 mod num_integration;
+#[cfg(feature = "string_convert")]
 mod string;
 
 pub use base::no_overlap;

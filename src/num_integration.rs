@@ -1,5 +1,6 @@
 use core::{convert::TryFrom, num::FpCategory};
 
+use hexf::hexf64;
 use num_traits::{Inv, Pow};
 
 use crate::{consts, TwoFloat, TwoFloatError};
@@ -230,7 +231,7 @@ impl num_traits::ToPrimitive for TwoFloat {
 
 impl num_traits::NumCast for TwoFloat {
     fn from<T: num_traits::ToPrimitive>(n: T) -> Option<Self> {
-        const INT_THRESHOLD: f64 = 9007199254740992.0; // 0x1.0p53
+        const INT_THRESHOLD: f64 = hexf64!("0x1.0p53");
         if let Some(f) = n.to_f64() {
             if f.abs() <= INT_THRESHOLD {
                 Some(f.into())

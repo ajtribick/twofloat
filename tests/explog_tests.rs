@@ -4,10 +4,11 @@
 pub mod common;
 
 use common::*;
+use hexf::hexf64;
 use rand::Rng;
 use twofloat::TwoFloat;
 
-const EXP_UPPER_LIMIT: f64 = 709.782712893384;
+const EXP_UPPER_LIMIT: f64 = hexf64!("0x1.62e42fefa39efp9"); // ln(0x1.0p1024)
 
 #[test]
 fn exp_test() {

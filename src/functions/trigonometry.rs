@@ -1,5 +1,7 @@
 use core::convert::TryFrom;
 
+use hexf::hexf64;
+
 use crate::{
     consts::{FRAC_PI_2, FRAC_PI_4, PI},
     TwoFloat,
@@ -8,242 +10,243 @@ use crate::{
 // Polynomial coefficients of sin(x)-x on [0,pi/4]
 const SIN_COEFFS: [TwoFloat; 7] = [
     TwoFloat {
-        hi: -0.16666666666666666,
-        lo: -8.51510705987379e-18,
+        hi: hexf64!("-0x1.5555555555555p-3"),
+        lo: hexf64!("-0x1.3a26e9901c14ap-57"),
     },
     TwoFloat {
-        hi: 0.008333333333333312,
-        lo: -1.3912016738387687e-19,
+        hi: hexf64!("0x1.1111111111105p-7"),
+        lo: hexf64!("-0x1.487cfb2f402fap-63"),
     },
     TwoFloat {
-        hi: -0.00019841269841246198,
-        lo: -7.681619205684898e-21,
+        hi: hexf64!("-0x1.a01a01a017e07p-13"),
+        lo: hexf64!("-0x1.22340ff667d3fp-67"),
     },
     TwoFloat {
-        hi: 2.75573192105007e-06,
-        lo: 2.955758642485038e-23,
+        hi: hexf64!("0x1.71de3a526314fp-19"),
+        lo: hexf64!("0x1.1ddd0a161cfa7p-75"),
     },
     TwoFloat {
-        hi: -2.505210410444575e-08,
-        lo: 9.269533560586216e-26,
+        hi: hexf64!("-0x1.ae6451ad6a8ebp-26"),
+        lo: hexf64!("0x1.cb014c3ddfd85p-84"),
     },
     TwoFloat {
-        hi: 1.605827759011912e-10,
-        lo: 3.404451553732099e-27,
+        hi: hexf64!("0x1.612010f363e7dp-33"),
+        lo: hexf64!("0x1.0dba7b1b83a01p-88"),
     },
     TwoFloat {
-        hi: -7.574792323977277e-13,
-        lo: 4.727692438769333e-29,
+        hi: hexf64!("-0x1.aa6c431516f76p-41"),
+        lo: hexf64!("0x1.df71e9b9b179bp-95"),
     },
 ];
 
 // Polynomial coefficients of cos(x)-1+x^2/2 on [0,pi/4]
 const COS_COEFFS: [TwoFloat; 7] = [
     TwoFloat {
-        hi: 0.041666666666666664,
-        lo: 2.2440014013613353e-18,
+        hi: hexf64!("0x1.5555555555555p-5"),
+        lo: hexf64!("0x1.4b27f9ddea57ap-59"),
     },
     TwoFloat {
-        hi: -0.0013888888888888872,
-        lo: 6.065718226973696e-20,
+        hi: hexf64!("-0x1.6c16c16c16c0fp-10"),
+        lo: hexf64!("0x1.1e7208a68629bp-64"),
     },
     TwoFloat {
-        hi: 2.4801587301569693e-05,
-        lo: 7.112363744916272e-22,
+        hi: hexf64!("0x1.a01a01a018bcdp-16"),
+        lo: hexf64!("0x1.adea7f883a49cp-71"),
     },
     TwoFloat {
-        hi: -2.7557319214749576e-07,
-        lo: -2.1630593346449427e-23,
+        hi: hexf64!("-0x1.27e4fb75e002ap-22"),
+        lo: hexf64!("-0x1.a26582a390382p-76"),
     },
     TwoFloat {
-        hi: 2.0876754247413408e-09,
-        lo: -3.4443669660877135e-26,
+        hi: hexf64!("0x1.1eed8c87a5a51p-29"),
+        lo: hexf64!("-0x1.551d13b8d9c61p-85"),
     },
     TwoFloat {
-        hi: -1.1470281608989357e-11,
-        lo: 4.623853450729046e-28,
+        hi: hexf64!("-0x1.93931ca96bc22p-37"),
+        lo: hexf64!("0x1.25124fcc17b3fp-91"),
     },
     TwoFloat {
-        hi: 4.737645013072795e-14,
-        lo: 2.0519566094121702e-30,
+        hi: hexf64!("0x1.aabaa8059719cp-45"),
+        lo: hexf64!("0x1.4cf2f15ef56d1p-99"),
     },
 ];
 
 // Polynomial coefficients of tan(x)-x on [0,pi/4]
 const TAN_COEFFS: [TwoFloat; 14] = [
     TwoFloat {
-        hi: 0.333333333333301,
-        lo: -1.6964192869147454e-17,
+        hi: hexf64!("0x1.555555555530fp-2"),
+        lo: hexf64!("-0x1.38ef22c4b8238p-56"),
     },
     TwoFloat {
-        hi: 0.133333333336424,
-        lo: 1.2882344203768942e-17,
+        hi: hexf64!("0x1.111111112c40ap-3"),
+        lo: hexf64!("0x1.db464d0cd9cb4p-57"),
     },
     TwoFloat {
-        hi: 0.053968253847554985,
-        lo: 7.3568315143778935e-19,
+        hi: hexf64!("0x1.ba1ba1a984e9fp-5"),
+        lo: hexf64!("0x1.b2454b6b23d17p-61"),
     },
     TwoFloat {
-        hi: 0.02186949110053143,
-        lo: 7.506482205636934e-19,
+        hi: hexf64!("0x1.664f4b43a4fefp-6"),
+        lo: hexf64!("0x1.bb1ac07d3ba2fp-61"),
     },
     TwoFloat {
-        hi: 0.008863201837095791,
-        lo: -1.6985713823531061e-19,
+        hi: hexf64!("0x1.226ded039b30dp-7"),
+        lo: hexf64!("-0x1.9110570c2853ap-63"),
     },
     TwoFloat {
-        hi: 0.0035924221451762235,
-        lo: -3.783119522648438e-20,
+        hi: hexf64!("0x1.d6ddaf4100a51p-9"),
+        lo: hexf64!("-0x1.654e37a706894p-65"),
     },
     TwoFloat {
-        hi: 0.0014540539618521297,
-        lo: -9.893196667739264e-20,
+        hi: hexf64!("0x1.7d2be8d9e1761p-10"),
+        lo: hexf64!("-0x1.d33168adc5b21p-64"),
     },
     TwoFloat {
-        hi: 0.000597689634752774,
-        lo: -1.844774602740589e-20,
+        hi: hexf64!("0x1.395c8b79b1e68p-11"),
+        lo: hexf64!("-0x1.5c77d3711fefdp-66"),
     },
     TwoFloat {
-        hi: 0.00021542536600071578,
-        lo: 2.5078450231357865e-21,
+        hi: hexf64!("0x1.c3c79cdabdf3ep-13"),
+        lo: hexf64!("0x1.7af98e21b704bp-69"),
     },
     TwoFloat {
-        hi: 0.00014954373126927091,
-        lo: -4.9925826785968525e-21,
+        hi: hexf64!("0x1.399dadec87c3ap-13"),
+        lo: hexf64!("-0x1.793a97fd365d5p-68"),
     },
     TwoFloat {
-        hi: -4.3214610451232346e-05,
-        lo: 1.3602116927481075e-22,
+        hi: hexf64!("-0x1.6a82ab57290c9p-15"),
+        lo: hexf64!("0x1.48e1069bffaafp-73"),
     },
     TwoFloat {
-        hi: 0.00010374385393487309,
-        lo: -1.7246199044466566e-21,
+        hi: hexf64!("0x1.b3221d6d8c4b6p-14"),
+        lo: hexf64!("-0x1.049e004213205p-69"),
     },
     TwoFloat {
-        hi: -5.2050985346847035e-05,
-        lo: 3.038262431960992e-21,
+        hi: hexf64!("-0x1.b4a2a3d0229eap-15"),
+        lo: hexf64!("0x1.cb2115b70d6e3p-69"),
     },
     TwoFloat {
-        hi: 2.2476452033043005e-05,
-        lo: -1.3763291484895173e-21,
+        hi: hexf64!("0x1.7917a05c89f91p-16"),
+        lo: hexf64!("-0x1.9ff84f5cc7024p-70"),
     },
 ];
 
 // Polynomial coefficients of asin(x)-x on [0,0.5]
 const ASIN_COEFFS: [TwoFloat; 10] = [
     TwoFloat {
-        hi: 0.16666666665760896,
-        lo: 6.318909167472426e-18,
+        hi: hexf64!("0x1.5555555505a93p-3"),
+        lo: hexf64!("0x1.d240d1c705854p-58"),
     },
     TwoFloat {
-        hi: 0.07500000116177634,
-        lo: -3.6535510436559885e-19,
+        hi: hexf64!("0x1.333333830962bp-4"),
+        lo: hexf64!("-0x1.af55ce0405fecp-62"),
     },
     TwoFloat {
-        hi: 0.04464279716731413,
-        lo: -7.858342616855284e-19,
+        hi: hexf64!("0x1.6db6bb3abd092p-5"),
+        lo: hexf64!("-0x1.cfdfea864322ap-61"),
     },
     TwoFloat {
-        hi: 0.030383587986160417,
-        lo: 2.910903680786144e-22,
+        hi: hexf64!("0x1.f1ce012f15aafp-6"),
+        lo: hexf64!("0x1.5fe81afd0c561p-72"),
     },
     TwoFloat {
-        hi: 0.022345297689414505,
-        lo: -1.4743699989653656e-18,
+        hi: hexf64!("0x1.6e1af8b2e827ep-6"),
+        lo: hexf64!("-0x1.b3283f59c2f09p-60"),
     },
     TwoFloat {
-        hi: 0.017629659409590933,
-        lo: -4.947235313007659e-19,
+        hi: hexf64!("0x1.20d826a6a4d9fp-6"),
+        lo: hexf64!("-0x1.2408819e30e3ep-61"),
     },
     TwoFloat {
-        hi: 0.012128557172711413,
-        lo: 5.8362891350143e-19,
+        hi: hexf64!("0x1.8d6db633c567p-7"),
+        lo: hexf64!("0x1.58838200dd463p-61"),
     },
     TwoFloat {
-        hi: 0.019288181641610027,
-        lo: -3.799209584634637e-19,
+        hi: hexf64!("0x1.3c047f5666c57p-6"),
+        lo: hexf64!("-0x1.c0881063edf9dp-62"),
     },
     TwoFloat {
-        hi: -0.009769012047538925,
-        lo: -8.206627214129968e-20,
+        hi: hexf64!("-0x1.401c69a113918p-7"),
+        lo: hexf64!("-0x1.838c090a26969p-64"),
     },
     TwoFloat {
-        hi: 0.033397748388563755,
-        lo: -3.4307997519760322e-18,
+        hi: hexf64!("0x1.119827a2d86aap-5"),
+        lo: hexf64!("-0x1.fa4bf3377ba39p-59"),
     },
 ];
 
 // Polynomial coefficients of atan(x) - x on [0, 7/16]
 const ATAN_COEFFS: [TwoFloat; 15] = [
     TwoFloat {
-        hi: -0.3333333333333333,
-        lo: -1.8404711392378294e-17,
+        hi: hexf64!("-0x1.5555555555555p-2"),
+        lo: hexf64!("-0x1.5381cace077adp-56"),
     },
     TwoFloat {
-        hi: 0.19999999999999996,
-        lo: 8.821841116322433e-18,
+        hi: hexf64!("0x1.9999999999998p-3"),
+        lo: hexf64!("0x1.4577ef010e069p-57"),
     },
     TwoFloat {
-        hi: -0.1428571428571376,
-        lo: -8.757692135391525e-18,
+        hi: hexf64!("-0x1.24924924923d5p-3"),
+        lo: hexf64!("-0x1.431a104911639p-57"),
     },
     TwoFloat {
-        hi: 0.11111111111068835,
-        lo: -5.832462234788162e-19,
+        hi: hexf64!("0x1.c71c71c71501dp-4"),
+        lo: hexf64!("-0x1.5849ad667389fp-61"),
     },
     TwoFloat {
-        hi: -0.090909090887859,
-        lo: 6.0077049965516354e-18,
+        hi: hexf64!("-0x1.745d17445bf06p-4"),
+        lo: hexf64!("0x1.bb4a56bf72341p-58"),
     },
     TwoFloat {
-        hi: 0.0769230762073313,
-        lo: -3.2884708888145337e-18,
+        hi: hexf64!("0x1.3b13b109e4298p-4"),
+        lo: hexf64!("-0x1.e54aeaea9366cp-59"),
     },
     TwoFloat {
-        hi: -0.06666664969948971,
-        lo: 4.320817735439753e-19,
+        hi: hexf64!("-0x1.11110c8317554p-4"),
+        lo: hexf64!("0x1.fe1cb3fb72cafp-62"),
     },
     TwoFloat {
-        hi: 0.05882323803853899,
-        lo: -2.805787242057251e-18,
+        hi: hexf64!("0x1.e1e14573d9e46p-5"),
+        lo: hexf64!("-0x1.9e0fa521514a9p-59"),
     },
     TwoFloat {
-        hi: -0.05262788771506685,
-        lo: 2.9037477653961078e-18,
+        hi: hexf64!("-0x1.af20ae13002ecp-5"),
+        lo: hexf64!("0x1.ac847d2d89e0cp-59"),
     },
     TwoFloat {
-        hi: 0.04758423341314784,
-        lo: 2.4230908396440816e-19,
+        hi: hexf64!("0x1.85cf5eca1206ap-5"),
+        lo: hexf64!("0x1.1e116d4ec0f01p-62"),
     },
     TwoFloat {
-        hi: -0.043233511131193926,
-        lo: -1.7170865975388194e-18,
+        hi: hexf64!("-0x1.622b3e8cca965p-5"),
+        lo: hexf64!("-0x1.facb65280deecp-60"),
     },
     TwoFloat {
-        hi: 0.038726167898553494,
-        lo: -2.3827075835715594e-18,
+        hi: hexf64!("0x1.3d3ea913f5499p-5"),
+        lo: hexf64!("-0x1.5fa025bf396bbp-59"),
     },
     TwoFloat {
-        hi: -0.03220490340648736,
-        lo: -2.5695532509697203e-18,
+        hi: hexf64!("-0x1.07d293dcdabe9p-5"),
+        lo: hexf64!("-0x1.7b32fa28e715p-59"),
     },
     TwoFloat {
-        hi: 0.021458037392206093,
-        lo: -2.213497023050699e-20,
+        hi: hexf64!("0x1.5f9188357ee62p-6"),
+        lo: hexf64!("-0x1.a21e25eaaf1d8p-66"),
     },
     TwoFloat {
-        hi: -0.00811325678548267,
-        lo: 8.602995904603601e-19,
+        hi: hexf64!("-0x1.09daee4762a73p-7"),
+        lo: hexf64!("0x1.fbd4cc667e59dp-61"),
     },
 ];
 
 const ATAN_FRAC_1_2: TwoFloat = TwoFloat {
-    hi: 0.4636476090008061,
-    lo: 2.2698777452961687e-17,
+    hi: hexf64!("0x1.dac670561bb4fp-2"),
+    lo: hexf64!("0x1.a2b7f222f65e2p-56"),
 };
+
 const ATAN_FRAC_3_2: TwoFloat = TwoFloat {
-    hi: 0.982793723247329,
-    lo: 1.3903311031230998e-17,
+    hi: hexf64!("0x1.f730bd281f69bp-1"),
+    lo: hexf64!("0x1.007887af0cbbdp-56"),
 };
 
 fn quadrant(value: TwoFloat) -> (TwoFloat, i8) {
