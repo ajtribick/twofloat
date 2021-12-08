@@ -9,7 +9,9 @@ pub fn twofloat(input: TokenStream) -> TokenStream {
     match TwoFloat::from_str(&literal.value()) {
         Ok(value) =>
             format!(
-                "<::twofloat::TwoFloat as ::core::convert::TryFrom<(f64, f64)>>::try_from(({:?}f64, {:?}f64)).unwrap()",
+                concat!(
+                    "<::twofloat::TwoFloat as ::core::convert::TryFrom<(f64, f64)>>::try_from(({0:?}f64, {1:?}f64))",
+                    ".unwrap_or_else(|_| ::twofloat::TwoFloat::new_add({0:?}f64, {1:?}f64))"),
                 value.hi(),
                 value.lo())
             .parse()
