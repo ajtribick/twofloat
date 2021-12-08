@@ -1,6 +1,6 @@
 [package]
 name = "twofloat"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Andrew Tribick"]
 
 keywords = ["float", "precision", "numerics", "floating-point", "arithmetic"]
@@ -12,6 +12,10 @@ readme = "README.md"
 license = "BSD-3-Clause"
 description = "Double-double arithmetic functionality."
 repository = "https://github.com/ajtribick/twofloat"
+
+[lib]
+name = "twofloat"
+test = true
 
 [features]
 default = ["math_funcs", "string_convert"]
@@ -29,3 +33,7 @@ serde = { version = "1.0", default-features = false, features = ["derive"], opti
 [dev-dependencies]
 rand = "0.8"
 serde_test = "1.0"
+
+[workspace]
+members = ["twofloat_macro"]
+default-members = [".", "twofloat_macro"]
