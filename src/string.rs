@@ -1,4 +1,6 @@
-use core::{cmp::Ordering, fmt, str::FromStr};
+use core::cmp::Ordering;
+use core::fmt;
+use core::str::FromStr;
 
 use lazy_static::lazy_static;
 use num_bigint::BigInt;

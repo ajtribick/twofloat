@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use core::str::FromStr;
 
 use proc_macro::TokenStream;
 use twofloat::TwoFloat;

@@ -1,6 +1,7 @@
 #![allow(clippy::float_cmp)]
 
-use core::{convert::TryFrom, fmt::Debug};
+use core::convert::TryFrom;
+use core::fmt::Debug;
 
 use rand::Rng;
 

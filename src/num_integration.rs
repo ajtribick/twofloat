@@ -1,4 +1,5 @@
-use core::{convert::TryFrom, num::FpCategory};
+use core::convert::TryFrom;
+use core::num::FpCategory;
 
 use hexf::hexf64;
 use num_traits::{Inv, Pow};

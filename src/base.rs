@@ -1,4 +1,5 @@
-use core::{cmp::Ordering, num::FpCategory};
+use core::cmp::Ordering;
+use core::num::FpCategory;
 
 use hexf::hexf64;
 
