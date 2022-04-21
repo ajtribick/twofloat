@@ -6,7 +6,7 @@
 * Breaking change: use `serde` as the feature flag name.
 * Breaking change: use helper struct for Serde serialization.
 * Integrate with `num_traits` crate.
-* Internal: use hexf to specify constants.
+* Add `FromStr` implementation.
 
 ## Version 0.4.1
 

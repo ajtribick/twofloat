@@ -1,9 +1,14 @@
 #![allow(clippy::float_cmp)]
 
-use core::{convert::TryFrom, fmt::Debug, mem::discriminant, ops::Range};
+use core::convert::TryFrom;
+use core::fmt::Debug;
+use core::mem::discriminant;
+use core::ops::Range;
 
 use num_traits::{one, zero};
-use rand::{distributions::uniform::SampleUniform, Rng};
+
+use rand::distributions::uniform::SampleUniform;
+use rand::Rng;
 
 use twofloat::{no_overlap, TwoFloat, TwoFloatError};
 

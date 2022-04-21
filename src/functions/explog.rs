@@ -1,6 +1,7 @@
 use hexf::hexf64;
 
-use crate::{consts::LN_2, TwoFloat};
+use crate::consts::LN_2;
+use crate::TwoFloat;
 
 // 1/ln(2)
 const FRAC_1_LN_2: TwoFloat = TwoFloat {

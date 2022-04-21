@@ -1,6 +1,7 @@
 use core::convert::{From, TryFrom};
 
-use crate::{base::no_overlap, TwoFloat, TwoFloatError};
+use crate::base::no_overlap;
+use crate::{TwoFloat, TwoFloatError};
 
 macro_rules! from_conversion {
     (|$source_i:ident : TwoFloat| -> $dest:tt $code:block) => {
