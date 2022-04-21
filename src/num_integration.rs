@@ -1,5 +1,4 @@
-use core::convert::TryFrom;
-use core::num::FpCategory;
+use core::{convert::TryFrom, num::FpCategory};
 
 use hexf::hexf64;
 use num_traits::{Inv, Pow};
@@ -9,16 +8,6 @@ use crate::{consts, TwoFloat, TwoFloatError};
 impl num_traits::Num for TwoFloat {
     type FromStrRadixErr = TwoFloatError;
 
-    #[cfg(feature = "string_convert")]
-    fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
-        if radix == 10 {
-            str.parse()
-        } else {
-            Err(TwoFloatError::ParseError)
-        }
-    }
-
-    #[cfg(not(feature = "string_convert"))]
     fn from_str_radix(_str: &str, _radix: u32) -> Result<Self, Self::FromStrRadixErr> {
         Err(TwoFloatError::ParseError)
     }

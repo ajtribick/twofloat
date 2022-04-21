@@ -1,7 +1,6 @@
 #![allow(clippy::float_cmp)]
 
 use core::cmp::Ordering;
-
 use twofloat::TwoFloat;
 
 #[macro_use]
