@@ -98,6 +98,18 @@ impl TwoFloat {
         lo: f64::NEG_INFINITY,
     };
 
+    /// Creates a new TwoFloat from a constant `f64` value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use twofloat::TwoFloat;
+    /// const value: TwoFloat = TwoFloat::from_f64(1.0);
+    /// assert_eq!(value.hi(), 1.0);
+    pub const fn from_f64(value: f64) -> Self {
+        TwoFloat { hi: value, lo: 0.0 }
+    }
+
     /// Returns the high word of `self`.
     ///
     /// # Examples
