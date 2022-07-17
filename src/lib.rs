@@ -12,7 +12,7 @@ The basic type is `TwoFloat` which represents the sum of two non-overlapping
 `f64` values, which may be initialized from a single `f64` or by calling a
 constructor that performs an arithmetic operation on a pair of `f64` values.
 
-```.rust
+```
 extern crate twofloat;
 use twofloat::TwoFloat;
 

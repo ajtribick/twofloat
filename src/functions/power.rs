@@ -12,6 +12,7 @@ impl TwoFloat {
     /// let b = a.sqrt();
     ///
     /// assert!(b * b - a < 1e-16);
+    /// ```
     pub fn sqrt(self) -> Self {
         if self.hi < 0.0 || (self.hi == 0.0 && self.lo < 0.0) {
             Self::NAN
@@ -34,6 +35,7 @@ impl TwoFloat {
     /// let b = a.cbrt();
     ///
     /// assert!(b.powi(3) - a < 1e-16);
+    /// ```
     pub fn cbrt(self) -> Self {
         let mut x = Self::from(self.hi.cbrt());
         let mut x2 = x * x;
@@ -54,6 +56,7 @@ impl TwoFloat {
     /// let c = TwoFloat::hypot(a, b);
     ///
     /// assert!((c - 5.0).abs() < 1e-10);
+    /// ```
     pub fn hypot(self, other: Self) -> Self {
         (self * self + other * other).sqrt()
     }
@@ -72,6 +75,7 @@ impl TwoFloat {
     /// let c = a.powf(b);
     ///
     /// assert!((c + 125.0).abs() < 1e-9, "{}", c);
+    /// ```
     pub fn powf(self, y: Self) -> Self {
         match (self == 0.0, y == 0.0) {
             (true, true) => Self::NAN,

@@ -300,6 +300,7 @@ impl TwoFloat {
     /// let c = 2.5f64.sin();
     ///
     /// assert!((b - c).abs() < 1e-10);
+    /// ```
     pub fn sin(self) -> Self {
         if !self.is_valid() {
             return Self::NAN;
@@ -324,6 +325,7 @@ impl TwoFloat {
     /// let c = 2.5f64.cos();
     ///
     /// assert!((b - c).abs() < 1e-10);
+    /// ```
     pub fn cos(self) -> Self {
         if !self.is_valid() {
             return Self::NAN;
@@ -350,6 +352,7 @@ impl TwoFloat {
     ///
     /// assert!((s - 2.5f64.sin()).abs() < 1e-10);
     /// assert!((c - 2.5f64.cos()).abs() < 1e-10);
+    /// ```
     pub fn sin_cos(self) -> (Self, Self) {
         if !self.is_valid() {
             return (Self::NAN, Self::NAN);
@@ -376,6 +379,7 @@ impl TwoFloat {
     /// let c = 2.5f64.tan();
     ///
     /// assert!((b - c).abs() < 1e-10);
+    /// ```
     pub fn tan(self) -> Self {
         if !self.is_valid() {
             return self;
@@ -400,6 +404,7 @@ impl TwoFloat {
     /// let c = 0.7f64.asin();
     ///
     /// assert!((b - c).abs() < 1e-10);
+    /// ```
     pub fn asin(self) -> Self {
         let abs_val = self.abs();
         if !self.is_valid() || abs_val > 1.0 {
@@ -429,6 +434,7 @@ impl TwoFloat {
     /// let c = (-0.8f64).acos();
     ///
     /// assert!((b - c).abs() < 1e-10);
+    /// ```
     pub fn acos(self) -> Self {
         let x = self.asin();
         if x.is_valid() {
@@ -450,6 +456,7 @@ impl TwoFloat {
     /// let c = 3.5f64.atan();
     ///
     /// assert!((b - c).abs() < 1e-10);
+    /// ```
     pub fn atan(self) -> Self {
         if !self.is_valid() {
             Self::NAN
@@ -496,6 +503,7 @@ impl TwoFloat {
     /// let theta = TwoFloat::atan2(y, x);
     ///
     /// assert!((theta + 3.0 * twofloat::consts::FRAC_PI_4).abs() < 1e-10);
+    /// ```
     pub fn atan2(self, other: Self) -> Self {
         if self.hi == 0.0 {
             if other.hi.is_sign_positive() {

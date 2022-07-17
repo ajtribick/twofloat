@@ -34,6 +34,7 @@ fn exponent(x: f64) -> u32 {
 /// assert!(a);
 /// assert!(!b);
 /// assert!(!c);
+/// ```
 pub fn no_overlap(a: f64, b: f64) -> bool {
     match (a.classify(), b.classify()) {
         (FpCategory::Normal, FpCategory::Normal) => {
@@ -106,6 +107,7 @@ impl TwoFloat {
     /// # use twofloat::TwoFloat;
     /// const value: TwoFloat = TwoFloat::from_f64(1.0);
     /// assert_eq!(value.hi(), 1.0);
+    /// ```
     pub const fn from_f64(value: f64) -> Self {
         TwoFloat { hi: value, lo: 0.0 }
     }
@@ -118,6 +120,7 @@ impl TwoFloat {
     /// # use twofloat::TwoFloat;
     /// let value = TwoFloat::new_add(1.0, -1.0e-200);
     /// assert_eq!(value.hi(), 1.0);
+    /// ```
     pub fn hi(&self) -> f64 {
         self.hi
     }
@@ -130,6 +133,7 @@ impl TwoFloat {
     /// # use twofloat::TwoFloat;
     /// let value = TwoFloat::new_add(1.0, -1.0e-200);
     /// assert_eq!(value.lo(), -1.0e-200);
+    /// ```
     pub fn lo(&self) -> f64 {
         self.lo
     }
@@ -146,6 +150,7 @@ impl TwoFloat {
     ///
     /// assert!(a);
     /// assert!(!b);
+    /// ```
     pub fn is_valid(&self) -> bool {
         self.hi.is_finite() && self.lo.is_finite() && no_overlap(self.hi, self.lo)
     }
@@ -161,6 +166,7 @@ impl TwoFloat {
     /// let b = TwoFloat::new_add(35.2, -1e-93);
     ///
     /// assert_eq!(a.min(b), b);
+    /// ```
     pub fn min(self, other: Self) -> Self {
         if !self.is_valid() {
             other
@@ -182,6 +188,7 @@ impl TwoFloat {
     /// let b = TwoFloat::new_add(35.2, -1e-93);
     ///
     /// assert_eq!(a.max(b), a);
+    /// ```
     pub fn max(self, other: Self) -> Self {
         if !self.is_valid() {
             other
@@ -202,6 +209,7 @@ impl TwoFloat {
     /// let b = a.to_radians();
     ///
     /// assert!((b - twofloat::consts::FRAC_PI_2).abs() < 1e-16);
+    /// ```
     pub fn to_radians(self) -> Self {
         self * RAD_PER_DEG
     }
@@ -215,6 +223,7 @@ impl TwoFloat {
     /// let b = a.to_degrees();
     ///
     /// assert!((b - 180.0).abs() < 1e-16);
+    /// ```
     pub fn to_degrees(self) -> Self {
         self * DEG_PER_RAD
     }
@@ -230,6 +239,7 @@ impl TwoFloat {
     /// let difference = b.recip() - a;
     ///
     /// assert!(difference.abs() < 1e-16);
+    /// ```
     pub fn recip(self) -> Self {
         1.0 / self
     }
@@ -245,6 +255,7 @@ impl TwoFloat {
     ///
     /// assert!(a - TwoFloat::from(8.0) <= 1e-16);
     /// assert!(!b.is_valid());
+    /// ```
     pub fn powi(self, n: i32) -> Self {
         match n {
             0 => {
