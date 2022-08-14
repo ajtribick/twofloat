@@ -13,6 +13,9 @@ license = "BSD-3-Clause"
 description = "Double-double arithmetic functionality."
 repository = "https://github.com/ajtribick/twofloat"
 
+[package.metadata.docs.rs]
+all-features = true
+
 [lib]
 name = "twofloat"
 test = true
