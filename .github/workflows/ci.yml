@@ -1,0 +1,76 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Tests
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [stable, nightly]
+        platform:
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - target: i686-pc-windows-msvc
+            os: windows-latest
+          - target: x86_64-pc-windows-gnu
+            os: windows-latest
+            host: -x86_64-pc-windows-gnu
+          - target: i686-pc-windows-gnu
+            os: windows-latest
+            host: -i686-pc-windows-gnu
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: i686-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-apple-darwin
+            os: macos-latest
+
+    env:
+      RUST_BACKTRACE: 1
+      CARGO_INCREMENTAL: 0
+      CARGO_TERM_COLOR: always
+      OPTIONS: --all-features
+      RUSTFLAGS: "-C debuginfo=0 --deny warnings"
+
+    runs-on: ${{ matrix.platform.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}${{ matrix.platform.host }}
+          target: ${{ matrix.platform.target }}
+          components: clippy, rustfmt
+
+      - name: Install GCC multilib
+        if: (matrix.platform.os == 'ubuntu-latest') && contains(matrix.platform.target, 'i686')
+        run: sudo apt-get update && sudo apt-get install gcc-multilib
+
+      - name: Check formatting
+        shell: bash
+        run: |
+          cargo fmt -- --check
+
+      - name: Build tests
+        shell: bash
+        run: |
+          cargo test --no-run --verbose --target ${{ matrix.platform.target }} $OPTIONS
+
+      - name: Run tests
+        shell: bash
+        run: |
+          cargo test --verbose --target ${{ matrix.platform.target }} $OPTIONS
+
+      - name: Run clippy
+        shell: bash
+        run: |
+          cargo clippy --target ${{ matrix.platform.target }} $OPTIONS -- -Dwarnings
