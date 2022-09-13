@@ -23,11 +23,10 @@ test = true
 [features]
 default = ["math_funcs", "string_convert"]
 math_funcs = ["num-traits/std"]
-string_convert = ["lazy_static", "num-bigint", "num-rational"]
+string_convert = ["num-bigint", "num-rational"]
 
 [dependencies]
 hexf = "0.2"
-lazy_static = { version = "1.4", optional = true }
 num-bigint = { version = "0.3", optional = true }
 num-rational = { version = "0.3", optional = true }
 num-traits = { version = "0.2.14", default-features = false }

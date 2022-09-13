@@ -2,16 +2,11 @@ use core::cmp::Ordering;
 use core::fmt;
 use core::str::FromStr;
 
-use lazy_static::lazy_static;
 use num_bigint::BigInt;
 use num_rational::BigRational;
 use num_traits::{one, zero, FromPrimitive, ToPrimitive};
 
 use crate::{TwoFloat, TwoFloatError};
-
-lazy_static! {
-    static ref TEN: BigInt = BigInt::from(10);
-}
 
 impl fmt::Display for TwoFloat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -147,7 +142,7 @@ fn parse_rational(s: &str) -> Result<BigRational, TwoFloatError> {
             );
             let fract_part = BigRational::new(
                 v[p + 1..].parse().map_err(|_| TwoFloatError::ParseError)?,
-                TEN.pow((v.len() - p - 1) as u32),
+                BigInt::from(10).pow((v.len() - p - 1) as u32),
             );
 
             if int_part >= zero() {
@@ -160,9 +155,9 @@ fn parse_rational(s: &str) -> Result<BigRational, TwoFloatError> {
     };
 
     Ok(match exponent.cmp(&0) {
-        Ordering::Less => value * BigRational::new(one(), TEN.pow((-exponent) as u32)),
+        Ordering::Less => value * BigRational::new(one(), BigInt::from(10).pow((-exponent) as u32)),
         Ordering::Equal => value,
-        Ordering::Greater => value * TEN.pow(exponent as u32),
+        Ordering::Greater => value * BigInt::from(10).pow(exponent as u32),
     })
 }
 
