@@ -35,6 +35,15 @@ automatically checked. The `is_valid()` method is provided for this purpose.
 If the `serde` feature is enabled, serialization and deserialization is
 possible through the Serde library.
 
+## Known issues
+
+This library depends on the `std` implementations of the floating point
+mathematical functions, which in turn depend on the C standard library
+implementation, which may have variations between platforms. In particular,
+the MinGW platforms `i686-pc-windows-gnu` and `x86_64-pc-windows-gnu` do not
+pass the test suite, so these platforms are currently unsupported. In future
+it may be possible to use `libm` to address this issue.
+
 ## References
 
 * Mioara Joldes, Jean-Michel Muller, Valentina Popescu. Tight and rigourous
@@ -58,6 +67,10 @@ possible through the Serde library.
 #![allow(clippy::float_cmp)]
 #![allow(clippy::suspicious_arithmetic_impl)]
 #![allow(clippy::suspicious_op_assign_impl)]
+
+// MinGW standard library mathematical functions appear to be inaccurate
+#[cfg(all(windows, target_env = "gnu"))]
+compile_error!("MinGW is not supported");
 
 use core::fmt;
 use std::error;
