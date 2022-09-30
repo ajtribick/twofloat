@@ -91,6 +91,7 @@ mod base;
 pub mod consts;
 
 mod convert;
+mod format;
 mod functions;
 mod num_integration;
 
