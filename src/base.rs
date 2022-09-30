@@ -14,13 +14,11 @@ const RAD_PER_DEG: TwoFloat = TwoFloat {
     lo: hexf64!("0x1.5c1d8becdd291p-62"),
 };
 
-#[inline]
-fn exponent(x: f64) -> u32 {
-    ((x.to_bits() >> 52) & 0x7ff) as u32
-}
+const EXPONENT_MASK: u64 = 0x7ff;
+const MANTISSA_MASK: u64 = (1 << 52) - 1;
 
 /// Checks if two `f64` values do not overlap, with the first value being the
-/// more significant.
+/// more significant. This matches definition 1.4 in Joldes et al. (2017).
 ///
 /// # Examples
 ///
@@ -35,22 +33,26 @@ fn exponent(x: f64) -> u32 {
 /// assert!(!c);
 /// ```
 pub fn no_overlap(a: f64, b: f64) -> bool {
-    match (a.classify(), b.classify()) {
-        (FpCategory::Normal, FpCategory::Normal) => {
-            exponent(a) >= exponent(b) + f64::MANTISSA_DIGITS
-        }
-        (FpCategory::Normal, FpCategory::Subnormal) => {
-            let a_exponent = exponent(a);
-            if a_exponent >= f64::MANTISSA_DIGITS {
-                true
+    match a.classify() {
+        FpCategory::Normal => {
+            if b == 0.0 {
+                return true;
+            }
+            let bits = a.to_bits();
+            let biased_exponent = ((bits >> 52) & EXPONENT_MASK) as i16;
+            let offset = if (bits & MANTISSA_MASK) == 0 && a.signum() != b.signum() {
+                1077
             } else {
-                let b_mantissa = b.to_bits() & ((1 << 52) - 1);
-                a_exponent >= 65 - b_mantissa.leading_zeros()
+                1076
+            };
+            let limit = ((biased_exponent - offset) as f64).exp2();
+            match b.abs().partial_cmp(&limit) {
+                Some(Ordering::Less) => true,
+                Some(Ordering::Equal) => (bits & 1) == 0,
+                _ => false,
             }
         }
-        (FpCategory::Normal, FpCategory::Zero) => true,
-        (FpCategory::Subnormal, FpCategory::Zero) => true,
-        (FpCategory::Zero, FpCategory::Zero) => true,
+        FpCategory::Subnormal | FpCategory::Zero => b == 0.0,
         _ => false,
     }
 }
@@ -59,7 +61,7 @@ impl TwoFloat {
     /// Smallest finite `TwoFloat` value.
     pub const MIN: Self = Self {
         hi: f64::MIN,
-        lo: hexf64!("-0x1.fffffffffffffp+970"),
+        lo: hexf64!("-0x1.fffffffffffffp+969"),
     };
 
     /// Smallest positive normal `TwoFloat` value.
@@ -71,7 +73,7 @@ impl TwoFloat {
     /// Largest finite `TwoFloat` value.
     pub const MAX: Self = Self {
         hi: f64::MAX,
-        lo: hexf64!("0x1.fffffffffffffp+970"),
+        lo: hexf64!("0x1.fffffffffffffp+969"),
     };
 
     /// Represents an error value equivalent to `f64::NAN`.
@@ -363,26 +365,55 @@ impl PartialOrd<TwoFloat> for TwoFloat {
 
 #[cfg(test)]
 mod tests {
+    use hexf::hexf64;
+
     use super::{no_overlap, TwoFloat};
+
+    const ONE: f64 = 1.0;
+    const ONE_NEXT: f64 = hexf64!("0x1.0000000000001p+0");
+    const ONE_NEXT_2: f64 = hexf64!("0x1.0000000000002p+0");
+    const ONE_PREV: f64 = hexf64!("0x1.fffffffffffffp-1");
+    const LOWER_MID_DIFF: f64 = hexf64!("0x1p-54");
+    const LOWER_MID_DIFF_NEXT: f64 = hexf64!("0x1.0000000000001p-54");
+    const UPPER_MID_DIFF: f64 = hexf64!("0x1p-53");
+    const UPPER_MID_DIFF_NEXT: f64 = hexf64!("0x1.0000000000001p-53");
+    const OFFSET_1_4: f64 = hexf64!("0x1p-54");
+    const OFFSET_3_4: f64 = hexf64!("0x1.8p-53");
 
     #[test]
     fn no_overlap_test() {
-        assert!(!no_overlap(1.0, (-52f64).exp2()));
-        assert!(!no_overlap(-1.0, -(-52f64).exp2()));
-        assert!(no_overlap(1.0, (-53f64).exp2()));
-        assert!(no_overlap(-1.0, -(-53f64).exp2()));
-        assert!(no_overlap(1.0, (-1023f64).exp2()));
-        assert!(no_overlap(1.0, -(-1023f64).exp2()));
+        assert!(!no_overlap(1.0, hexf64!("0x1p-52")));
+        assert!(!no_overlap(-1.0, hexf64!("-0x1p-52")));
+        assert!(no_overlap(1.0, UPPER_MID_DIFF));
+        assert!(!no_overlap(1.0, UPPER_MID_DIFF_NEXT));
+        assert!(no_overlap(1.0, -LOWER_MID_DIFF));
+        assert!(!no_overlap(1.0, -LOWER_MID_DIFF_NEXT));
+        assert!(!no_overlap(1.0, -UPPER_MID_DIFF));
+        assert!(!no_overlap(ONE_NEXT, UPPER_MID_DIFF));
+        assert!(!no_overlap(ONE_NEXT, -UPPER_MID_DIFF));
+        assert!(no_overlap(ONE_NEXT_2, UPPER_MID_DIFF));
+        assert!(no_overlap(ONE_NEXT_2, -UPPER_MID_DIFF));
+        assert!(no_overlap(-1.0, LOWER_MID_DIFF));
+        assert!(!no_overlap(-1.0, LOWER_MID_DIFF_NEXT));
+        assert!(!no_overlap(-1.0, UPPER_MID_DIFF));
+        assert!(no_overlap(-1.0, -UPPER_MID_DIFF));
+        assert!(!no_overlap(-1.0, -UPPER_MID_DIFF_NEXT));
+        assert!(!no_overlap(-ONE_NEXT, hexf64!("0x1p-53")));
+        assert!(!no_overlap(-ONE_NEXT, hexf64!("-0x1p-53")));
+        assert!(no_overlap(-ONE_NEXT_2, hexf64!("-0x1p-53")));
+        assert!(no_overlap(-ONE_NEXT_2, hexf64!("0x1p-53")));
+        assert!(no_overlap(1.0, hexf64!("0x1p-1023")));
+        assert!(no_overlap(1.0, hexf64!("-0x1p-1023")));
         assert!(no_overlap(1.0, 0.0));
         assert!(no_overlap(-1.0, -0.0));
 
-        assert!(!no_overlap((-970f64).exp2(), (-1022f64).exp2()));
-        assert!(no_overlap((-970f64).exp2(), (-1023f64).exp2()));
-        assert!(!no_overlap((-971f64).exp2(), (-1023f64).exp2()));
-        assert!(no_overlap((-971f64).exp2(), (-1024f64).exp2()));
+        assert!(!no_overlap(hexf64!("0x1p-970"), hexf64!("0x1p-1022")));
+        assert!(no_overlap(hexf64!("0x1p-970"), hexf64!("0x1p-1023")));
+        assert!(!no_overlap(hexf64!("0x1p-971"), hexf64!("0x1p-1023")));
+        assert!(no_overlap(hexf64!("0x1p-971"), hexf64!("0x1p-1024")));
 
-        assert!(no_overlap((-1023f64).exp2(), 0.0));
-        assert!(!no_overlap((-1023f64).exp2(), f64::MIN));
+        assert!(no_overlap(hexf64!("0x1p-1023"), 0.0));
+        assert!(!no_overlap(hexf64!("0x1p-1023"), f64::MIN));
 
         assert!(!no_overlap(f64::INFINITY, 1.0));
         assert!(!no_overlap(f64::NAN, 1.0));
@@ -406,5 +437,131 @@ mod tests {
     #[test]
     fn max_test() {
         assert!(TwoFloat::MAX.is_valid());
+    }
+
+    #[test]
+    fn midpoint_eq_test() {
+        let values = [
+            TwoFloat::new_add(ONE, UPPER_MID_DIFF),
+            TwoFloat::new_add(ONE_NEXT, -UPPER_MID_DIFF),
+            TwoFloat::new_sub(ONE, -UPPER_MID_DIFF),
+            TwoFloat::new_sub(ONE_NEXT, UPPER_MID_DIFF),
+            TwoFloat {
+                hi: ONE,
+                lo: UPPER_MID_DIFF,
+            },
+        ];
+
+        assert!(values.iter().all(|v| v.is_valid()));
+        values
+            .iter()
+            .for_each(|&a| values.iter().for_each(|&b| assert_eq!(a, b)));
+    }
+
+    #[test]
+    fn midpoint_eq_test_next() {
+        let values = [
+            TwoFloat::new_add(ONE_NEXT, UPPER_MID_DIFF),
+            TwoFloat::new_add(ONE_NEXT_2, -UPPER_MID_DIFF),
+            TwoFloat::new_sub(ONE_NEXT, -UPPER_MID_DIFF),
+            TwoFloat::new_sub(ONE_NEXT_2, UPPER_MID_DIFF),
+            TwoFloat {
+                hi: ONE_NEXT_2,
+                lo: -UPPER_MID_DIFF,
+            },
+        ];
+
+        assert!(values.iter().all(|v| v.is_valid()));
+        values
+            .iter()
+            .for_each(|&a| values.iter().for_each(|&b| assert_eq!(a, b)));
+    }
+
+    #[test]
+    fn midpoint_eq_test_prev() {
+        let values = [
+            TwoFloat::new_add(ONE, -LOWER_MID_DIFF),
+            TwoFloat::new_add(ONE_PREV, LOWER_MID_DIFF),
+            TwoFloat::new_sub(ONE, LOWER_MID_DIFF),
+            TwoFloat::new_sub(ONE_PREV, -LOWER_MID_DIFF),
+        ];
+
+        assert!(values.iter().all(|v| v.is_valid()));
+        values
+            .iter()
+            .for_each(|&a| values.iter().for_each(|&b| assert_eq!(a, b)));
+    }
+
+    #[test]
+    fn quarter_eq_test() {
+        let values = [
+            TwoFloat::new_add(ONE, OFFSET_3_4),
+            TwoFloat::new_add(ONE_NEXT, -OFFSET_1_4),
+            TwoFloat::new_sub(ONE, -OFFSET_3_4),
+            TwoFloat::new_sub(ONE_NEXT, OFFSET_1_4),
+            TwoFloat {
+                hi: ONE_NEXT,
+                lo: -OFFSET_1_4,
+            },
+        ];
+
+        assert!(values.iter().all(|v| v.is_valid()));
+        values
+            .iter()
+            .for_each(|&a| values.iter().for_each(|&b| assert_eq!(a, b)));
+    }
+
+    #[test]
+    fn ord_test() {
+        let lower_values = [
+            TwoFloat::new_add(ONE, OFFSET_1_4),
+            TwoFloat::new_add(ONE_NEXT, -OFFSET_3_4),
+            TwoFloat::new_sub(ONE, -OFFSET_1_4),
+            TwoFloat::new_sub(ONE_NEXT, OFFSET_3_4),
+            TwoFloat {
+                hi: ONE,
+                lo: OFFSET_1_4,
+            },
+        ];
+        assert!(lower_values.iter().all(|v| v.is_valid()));
+
+        let mid_values = [
+            TwoFloat::new_add(ONE, UPPER_MID_DIFF),
+            TwoFloat::new_add(ONE_NEXT, -UPPER_MID_DIFF),
+            TwoFloat::new_sub(ONE, -UPPER_MID_DIFF),
+            TwoFloat::new_sub(ONE_NEXT, UPPER_MID_DIFF),
+            TwoFloat {
+                hi: ONE,
+                lo: UPPER_MID_DIFF,
+            },
+        ];
+        assert!(mid_values.iter().all(|v| v.is_valid()));
+
+        let upper_values = [
+            TwoFloat::new_add(ONE, OFFSET_3_4),
+            TwoFloat::new_add(ONE_NEXT, -OFFSET_1_4),
+            TwoFloat::new_sub(ONE, -OFFSET_3_4),
+            TwoFloat::new_sub(ONE_NEXT, OFFSET_1_4),
+            TwoFloat {
+                hi: ONE_NEXT,
+                lo: -OFFSET_1_4,
+            },
+        ];
+        assert!(upper_values.iter().all(|v| v.is_valid()));
+
+        lower_values.iter().for_each(|&a| {
+            mid_values.iter().for_each(|&b| assert!(a < b));
+            upper_values.iter().for_each(|&b| assert!(a < b));
+        });
+
+        mid_values.iter().for_each(|&a| {
+            lower_values.iter().for_each(|&b| assert!(a > b));
+            upper_values.iter().for_each(|&b| assert!(a < b));
+        });
+
+        upper_values.iter().for_each(|&a| {
+            lower_values.iter().for_each(|&b| assert!(a > b));
+            mid_values.iter().for_each(|&b| assert!(a > b));
+        });
     }
 }

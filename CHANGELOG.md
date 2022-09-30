@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.6
+
+* Breaking change: fix definition of no_overlap to match definition 1.4 in
+  Joldes et al. (2017).
+* Breaking change: Correct values of `MIN` and `MAX` constants.
+
 ## Version 0.5
 
 * Add operator overloads for `&f64`.
