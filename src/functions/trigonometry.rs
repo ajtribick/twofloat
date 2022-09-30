@@ -535,9 +535,10 @@ impl TwoFloat {
 #[cfg(test)]
 mod tests {
     use super::quadrant;
-
-    use crate::consts::{FRAC_PI_2, FRAC_PI_4, PI};
-    use crate::TwoFloat;
+    use crate::{
+        consts::{FRAC_PI_2, FRAC_PI_4, PI},
+        TwoFloat,
+    };
 
     const THRESHOLD: f64 = 1e-10;
 
