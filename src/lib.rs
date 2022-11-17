@@ -68,12 +68,25 @@ it may be possible to use `libm` to address this issue.
 #![allow(clippy::suspicious_arithmetic_impl)]
 #![allow(clippy::suspicious_op_assign_impl)]
 
-// MinGW standard library mathematical functions appear to be inaccurate
-#[cfg(all(windows, target_env = "gnu"))]
-compile_error!("MinGW is not supported");
-
 use core::fmt;
 use std::error;
+
+// MinGW needs to use libm FMA
+#[cfg(not(all(windows, target_env = "gnu")))]
+mod math {
+    #[inline(always)]
+    pub fn fma(a: f64, b: f64, c: f64) -> f64 {
+        a.mul_add(b, c)
+    }
+}
+
+#[cfg(all(windows, target_env = "gnu"))]
+mod math {
+    #[inline(always)]
+    pub fn fma(a: f64, b: f64, c: f64) -> f64 {
+        libm::fma(a, b, c)
+    }
+}
 
 #[macro_use]
 mod ops_util;
