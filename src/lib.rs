@@ -39,10 +39,7 @@ possible through the Serde library.
 
 This library depends on the `std` implementations of the floating point
 mathematical functions, which in turn depend on the C standard library
-implementation, which may have variations between platforms. In particular,
-the MinGW platforms `i686-pc-windows-gnu` and `x86_64-pc-windows-gnu` do not
-pass the test suite, so these platforms are currently unsupported. In future
-it may be possible to use `libm` to address this issue.
+implementation, which may have variations between platforms.
 
 ## References
 

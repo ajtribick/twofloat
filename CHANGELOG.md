@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.6.1
+
+* Re-enable MinGW support via libm.
+
 ## Version 0.6
 
 * Add const constructor `from_f64`.
