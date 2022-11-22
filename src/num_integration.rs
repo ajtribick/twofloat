@@ -3,7 +3,7 @@ use core::{convert::TryFrom, num::FpCategory};
 use hexf::hexf64;
 use num_traits::{Inv, Pow};
 
-use crate::{consts, TwoFloat, TwoFloatError};
+use crate::{consts, Math, TwoFloat, TwoFloatError};
 
 impl num_traits::Num for TwoFloat {
     type FromStrRadixErr = TwoFloatError;
@@ -98,7 +98,7 @@ impl num_traits::FromPrimitive for TwoFloat {
     }
 
     fn from_isize(n: isize) -> Option<Self> {
-        match std::mem::size_of::<isize>() {
+        match core::mem::size_of::<isize>() {
             1 => Self::from_i8(n as i8),
             2 => Self::from_i16(n as i16),
             4 => Self::from_i32(n as i32),
@@ -134,7 +134,7 @@ impl num_traits::FromPrimitive for TwoFloat {
     }
 
     fn from_usize(n: usize) -> Option<Self> {
-        match std::mem::size_of::<usize>() {
+        match core::mem::size_of::<usize>() {
             1 => Self::from_u8(n as u8),
             2 => Self::from_u16(n as u16),
             4 => Self::from_u32(n as u32),
@@ -172,7 +172,7 @@ impl num_traits::ToPrimitive for TwoFloat {
     }
 
     fn to_isize(&self) -> Option<isize> {
-        match std::mem::size_of::<isize>() {
+        match core::mem::size_of::<isize>() {
             1 => self.to_i8().map(|i| i as isize),
             2 => self.to_i16().map(|i| i as isize),
             4 => self.to_i32().map(|i| i as isize),
@@ -208,7 +208,7 @@ impl num_traits::ToPrimitive for TwoFloat {
     }
 
     fn to_usize(&self) -> Option<usize> {
-        match std::mem::size_of::<usize>() {
+        match core::mem::size_of::<usize>() {
             1 => self.to_u8().map(|u| u as usize),
             2 => self.to_u16().map(|u| u as usize),
             4 => self.to_u32().map(|u| u as usize),
@@ -223,7 +223,7 @@ impl num_traits::NumCast for TwoFloat {
     fn from<T: num_traits::ToPrimitive>(n: T) -> Option<Self> {
         const INT_THRESHOLD: f64 = hexf64!("0x1.0p53");
         if let Some(f) = n.to_f64() {
-            if f.abs() <= INT_THRESHOLD {
+            if Math::abs(f) <= INT_THRESHOLD {
                 Some(f.into())
             } else if let Some(i) = n.to_i128() {
                 Some(i.into())
