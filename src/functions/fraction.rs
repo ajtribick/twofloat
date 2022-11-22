@@ -1,4 +1,4 @@
-use crate::{arithmetic::fast_two_sum, TwoFloat};
+use crate::{arithmetic::fast_two_sum, Math, TwoFloat};
 
 impl TwoFloat {
     /// Returns the fractional part of the number.
@@ -14,18 +14,18 @@ impl TwoFloat {
     /// assert_eq!(b, TwoFloat::new_add(-1.0, 1e-200));
     /// ```
     pub fn fract(self) -> Self {
-        let hi_fract = self.hi.fract();
-        let lo_fract = self.lo.fract();
+        let hi_fract = Math::fract(self.hi);
+        let lo_fract = Math::fract(self.lo);
         if lo_fract == 0.0 {
             hi_fract.into()
         } else if hi_fract == 0.0 {
             match (self.hi >= 0.0, self.lo >= 0.0) {
                 (true, false) => fast_two_sum(1.0, lo_fract),
                 (false, true) => fast_two_sum(-1.0, lo_fract),
-                _ => self.lo.fract().into(),
+                _ => Math::fract(self.lo).into(),
             }
         } else {
-            fast_two_sum(self.hi.fract(), self.lo)
+            fast_two_sum(Math::fract(self.hi), self.lo)
         }
     }
 
@@ -64,15 +64,15 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(0.0));
     /// ```
     pub fn ceil(self) -> Self {
-        if self.lo.fract() == 0.0 {
+        if Math::fract(self.lo) == 0.0 {
             Self {
-                hi: self.hi.ceil(),
+                hi: Math::ceil(self.hi),
                 lo: self.lo,
             }
-        } else if self.hi.fract() == 0.0 {
-            fast_two_sum(self.hi, self.lo.ceil())
+        } else if Math::fract(self.hi) == 0.0 {
+            fast_two_sum(self.hi, Math::ceil(self.lo))
         } else {
-            self.hi.ceil().into()
+            Math::ceil(self.hi).into()
         }
     }
 
@@ -91,15 +91,15 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(-1.0));
     /// ```
     pub fn floor(self) -> Self {
-        if self.lo.fract() == 0.0 {
+        if Math::fract(self.lo) == 0.0 {
             Self {
-                hi: self.hi.floor(),
+                hi: Math::floor(self.hi),
                 lo: self.lo,
             }
-        } else if self.hi.fract() == 0.0 {
-            fast_two_sum(self.hi, self.lo.floor())
+        } else if Math::fract(self.hi) == 0.0 {
+            fast_two_sum(self.hi, Math::floor(self.lo))
         } else {
-            self.hi.floor().into()
+            Math::floor(self.hi).into()
         }
     }
 
@@ -119,29 +119,29 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(-1.0));
     /// ```
     pub fn round(self) -> Self {
-        if self.lo.fract() == 0.0 {
+        if Math::fract(self.lo) == 0.0 {
             Self {
-                hi: self.hi.round(),
+                hi: Math::round(self.hi),
                 lo: self.lo(),
             }
-        } else if self.hi.fract() == 0.0 {
-            if self.lo.fract().abs() == 0.5 {
+        } else if Math::fract(self.hi) == 0.0 {
+            if Math::abs(Math::fract(self.lo)) == 0.5 {
                 if self.is_sign_positive() {
-                    fast_two_sum(self.hi, self.lo.ceil())
+                    fast_two_sum(self.hi, Math::ceil(self.lo))
                 } else {
-                    fast_two_sum(self.hi, self.lo.floor())
+                    fast_two_sum(self.hi, Math::floor(self.lo))
                 }
             } else {
-                fast_two_sum(self.hi, self.lo.round())
+                fast_two_sum(self.hi, Math::round(self.lo))
             }
-        } else if self.hi.fract().abs() == 0.5 {
+        } else if Math::abs(Math::fract(self.hi)) == 0.5 {
             if self.hi.is_sign_positive() == self.lo.is_sign_positive() {
-                self.hi.round().into()
+                Math::round(self.hi).into()
             } else {
-                self.hi.trunc().into()
+                Math::trunc(self.hi).into()
             }
         } else {
-            self.hi.round().into()
+            Math::round(self.hi).into()
         }
     }
 }

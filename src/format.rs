@@ -1,6 +1,6 @@
 use core::fmt;
 
-use crate::TwoFloat;
+use crate::{Math, TwoFloat};
 
 impl fmt::Display for TwoFloat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -18,14 +18,22 @@ impl fmt::Display for TwoFloat {
                     self.hi,
                     sign_char,
                     p,
-                    self.lo.abs()
+                    Math::abs(self.lo)
                 ),
-                None => write!(f, "{:+} {} {}", self.hi, sign_char, self.lo.abs()),
+                None => write!(f, "{:+} {} {}", self.hi, sign_char, Math::abs(self.lo)),
             }
         } else {
             match f.precision() {
-                Some(p) => write!(f, "{:.*} {} {:.*}", p, self.hi, sign_char, p, self.lo.abs()),
-                None => write!(f, "{} {} {}", self.hi, sign_char, self.lo.abs()),
+                Some(p) => write!(
+                    f,
+                    "{:.*} {} {:.*}",
+                    p,
+                    self.hi,
+                    sign_char,
+                    p,
+                    Math::abs(self.lo)
+                ),
+                None => write!(f, "{} {} {}", self.hi, sign_char, Math::abs(self.lo)),
             }
         }
     }
@@ -47,9 +55,9 @@ impl fmt::LowerExp for TwoFloat {
                     self.hi,
                     sign_char,
                     p,
-                    self.lo.abs()
+                    Math::abs(self.lo)
                 ),
-                None => write!(f, "{:+e} {} {:e}", self.hi, sign_char, self.lo.abs()),
+                None => write!(f, "{:+e} {} {:e}", self.hi, sign_char, Math::abs(self.lo)),
             }
         } else {
             match f.precision() {
@@ -60,9 +68,9 @@ impl fmt::LowerExp for TwoFloat {
                     self.hi,
                     sign_char,
                     p,
-                    self.lo.abs()
+                    Math::abs(self.lo)
                 ),
-                None => write!(f, "{:e} {} {:e}", self.hi, sign_char, self.lo.abs()),
+                None => write!(f, "{:e} {} {:e}", self.hi, sign_char, Math::abs(self.lo)),
             }
         }
     }
@@ -84,9 +92,9 @@ impl fmt::UpperExp for TwoFloat {
                     self.hi,
                     sign_char,
                     p,
-                    self.lo.abs()
+                    Math::abs(self.lo)
                 ),
-                None => write!(f, "{:+E} {} {:E}", self.hi, sign_char, self.lo.abs()),
+                None => write!(f, "{:+E} {} {:E}", self.hi, sign_char, Math::abs(self.lo)),
             }
         } else {
             match f.precision() {
@@ -97,15 +105,15 @@ impl fmt::UpperExp for TwoFloat {
                     self.hi,
                     sign_char,
                     p,
-                    self.lo.abs()
+                    Math::abs(self.lo)
                 ),
-                None => write!(f, "{:E} {} {:E}", self.hi, sign_char, self.lo.abs()),
+                None => write!(f, "{:E} {} {:E}", self.hi, sign_char, Math::abs(self.lo)),
             }
         }
     }
 }
 
-#[cfg(test)]
+#[cfg(all(feature = "std", test))]
 mod test {
     use crate::TwoFloat;
 

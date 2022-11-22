@@ -64,26 +64,12 @@ implementation, which may have variations between platforms.
 #![allow(clippy::float_cmp)]
 #![allow(clippy::suspicious_arithmetic_impl)]
 #![allow(clippy::suspicious_op_assign_impl)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 use core::fmt;
-use std::error;
 
-// MinGW needs to use libm FMA
-#[cfg(not(all(windows, target_env = "gnu")))]
-mod math {
-    #[inline(always)]
-    pub fn fma(a: f64, b: f64, c: f64) -> f64 {
-        a.mul_add(b, c)
-    }
-}
-
-#[cfg(all(windows, target_env = "gnu"))]
-mod math {
-    #[inline(always)]
-    pub fn fma(a: f64, b: f64, c: f64) -> f64 {
-        libm::fma(a, b, c)
-    }
-}
+mod math_util;
+pub(crate) use math_util::Math;
 
 #[macro_use]
 mod ops_util;
@@ -158,4 +144,5 @@ impl fmt::Display for TwoFloatError {
     }
 }
 
-impl error::Error for TwoFloatError {}
+#[cfg(feature = "std")]
+impl std::error::Error for TwoFloatError {}

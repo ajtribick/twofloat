@@ -21,11 +21,13 @@ name = "twofloat"
 test = true
 
 [features]
-default = ["math_funcs"]
-math_funcs = ["num-traits/std"]
+default = ["std", "math_funcs"]
+math_funcs = ["std"]
+std = ["num-traits/std"]
 
 [dependencies]
 hexf = "0.2"
+libm = { version = "0.2.6", optional = true }
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
 
