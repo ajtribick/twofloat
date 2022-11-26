@@ -21,19 +21,21 @@ name = "twofloat"
 test = true
 
 [features]
-default = ["std", "math_funcs"]
+default = ["std", "math_funcs", "simba"]
 math_funcs = ["std"]
 std = ["num-traits/std"]
 
 [dependencies]
+approx = "0.5.1"
 hexf = "0.2"
 libm = { version = "0.2.6", optional = true }
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
+simba = { version = "0.7", optional = true }
 
 [target.'cfg(all(windows, target_env = "gnu"))'.dependencies]
 libm = "0.2.6"
 
 [dev-dependencies]
 rand = "0.8"
-serde_test = "1.0"
+serde_test = "1.0" 

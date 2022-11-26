@@ -57,7 +57,6 @@ implementation, which may have variations between platforms.
   28–31.
 */
 
-#![forbid(unsafe_code)]
 // Disable irrelevant lints
 #![allow(clippy::approx_constant)]
 #![allow(clippy::excessive_precision)]
@@ -69,6 +68,7 @@ implementation, which may have variations between platforms.
 use core::fmt;
 
 mod math_util;
+mod simba;
 pub(crate) use math_util::Math;
 
 #[macro_use]
