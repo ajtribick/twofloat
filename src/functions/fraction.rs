@@ -1,4 +1,4 @@
-use crate::{arithmetic::fast_two_sum, Math, TwoFloat};
+use crate::{arithmetic::fast_two_sum, math_util::mathfn, TwoFloat};
 
 impl TwoFloat {
     /// Returns the fractional part of the number.
@@ -14,18 +14,18 @@ impl TwoFloat {
     /// assert_eq!(b, TwoFloat::new_add(-1.0, 1e-200));
     /// ```
     pub fn fract(self) -> Self {
-        let hi_fract = Math::fract(self.hi);
-        let lo_fract = Math::fract(self.lo);
+        let hi_fract = mathfn::fract(self.hi);
+        let lo_fract = mathfn::fract(self.lo);
         if lo_fract == 0.0 {
             hi_fract.into()
         } else if hi_fract == 0.0 {
             match (self.hi >= 0.0, self.lo >= 0.0) {
                 (true, false) => fast_two_sum(1.0, lo_fract),
                 (false, true) => fast_two_sum(-1.0, lo_fract),
-                _ => Math::fract(self.lo).into(),
+                _ => mathfn::fract(self.lo).into(),
             }
         } else {
-            fast_two_sum(Math::fract(self.hi), self.lo)
+            fast_two_sum(mathfn::fract(self.hi), self.lo)
         }
     }
 
@@ -64,15 +64,15 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(0.0));
     /// ```
     pub fn ceil(self) -> Self {
-        if Math::fract(self.lo) == 0.0 {
+        if mathfn::fract(self.lo) == 0.0 {
             Self {
-                hi: Math::ceil(self.hi),
+                hi: mathfn::ceil(self.hi),
                 lo: self.lo,
             }
-        } else if Math::fract(self.hi) == 0.0 {
-            fast_two_sum(self.hi, Math::ceil(self.lo))
+        } else if mathfn::fract(self.hi) == 0.0 {
+            fast_two_sum(self.hi, mathfn::ceil(self.lo))
         } else {
-            Math::ceil(self.hi).into()
+            mathfn::ceil(self.hi).into()
         }
     }
 
@@ -91,15 +91,15 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(-1.0));
     /// ```
     pub fn floor(self) -> Self {
-        if Math::fract(self.lo) == 0.0 {
+        if mathfn::fract(self.lo) == 0.0 {
             Self {
-                hi: Math::floor(self.hi),
+                hi: mathfn::floor(self.hi),
                 lo: self.lo,
             }
-        } else if Math::fract(self.hi) == 0.0 {
-            fast_two_sum(self.hi, Math::floor(self.lo))
+        } else if mathfn::fract(self.hi) == 0.0 {
+            fast_two_sum(self.hi, mathfn::floor(self.lo))
         } else {
-            Math::floor(self.hi).into()
+            mathfn::floor(self.hi).into()
         }
     }
 
@@ -119,29 +119,29 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(-1.0));
     /// ```
     pub fn round(self) -> Self {
-        if Math::fract(self.lo) == 0.0 {
+        if mathfn::fract(self.lo) == 0.0 {
             Self {
-                hi: Math::round(self.hi),
+                hi: mathfn::round(self.hi),
                 lo: self.lo(),
             }
-        } else if Math::fract(self.hi) == 0.0 {
-            if Math::abs(Math::fract(self.lo)) == 0.5 {
+        } else if mathfn::fract(self.hi) == 0.0 {
+            if mathfn::abs(mathfn::fract(self.lo)) == 0.5 {
                 if self.is_sign_positive() {
-                    fast_two_sum(self.hi, Math::ceil(self.lo))
+                    fast_two_sum(self.hi, mathfn::ceil(self.lo))
                 } else {
-                    fast_two_sum(self.hi, Math::floor(self.lo))
+                    fast_two_sum(self.hi, mathfn::floor(self.lo))
                 }
             } else {
-                fast_two_sum(self.hi, Math::round(self.lo))
+                fast_two_sum(self.hi, mathfn::round(self.lo))
             }
-        } else if Math::abs(Math::fract(self.hi)) == 0.5 {
+        } else if mathfn::abs(mathfn::fract(self.hi)) == 0.5 {
             if self.hi.is_sign_positive() == self.lo.is_sign_positive() {
-                Math::round(self.hi).into()
+                mathfn::round(self.hi).into()
             } else {
-                Math::trunc(self.hi).into()
+                mathfn::trunc(self.hi).into()
             }
         } else {
-            Math::round(self.hi).into()
+            mathfn::round(self.hi).into()
         }
     }
 }

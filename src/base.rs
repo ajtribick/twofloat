@@ -2,7 +2,7 @@ use core::{cmp::Ordering, num::FpCategory};
 
 use hexf::hexf64;
 
-use crate::{Math, TwoFloat};
+use crate::{math_util::mathfn, TwoFloat};
 
 const DEG_PER_RAD: TwoFloat = TwoFloat {
     hi: hexf64!("0x1.ca5dc1a63c1f8p5"),
@@ -40,13 +40,13 @@ pub fn no_overlap(a: f64, b: f64) -> bool {
             }
             let bits = a.to_bits();
             let biased_exponent = ((bits >> 52) & EXPONENT_MASK) as i16;
-            let offset = if (bits & MANTISSA_MASK) == 0 && Math::signum(a) != Math::signum(b) {
+            let offset = if (bits & MANTISSA_MASK) == 0 && mathfn::signum(a) != mathfn::signum(b) {
                 1077
             } else {
                 1076
             };
-            let limit = Math::exp2((biased_exponent - offset) as f64);
-            match Math::abs(b).partial_cmp(&limit) {
+            let limit = mathfn::exp2((biased_exponent - offset) as f64);
+            match mathfn::abs(b).partial_cmp(&limit) {
                 Some(Ordering::Less) => true,
                 Some(Ordering::Equal) => (bits & 1) == 0,
                 _ => false,
