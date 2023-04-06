@@ -37,9 +37,8 @@ possible through the Serde library.
 
 ## Known issues
 
-This library depends on the `std` implementations of the floating point
-mathematical functions, which in turn depend on the C standard library
-implementation, which may have variations between platforms.
+* The MinGW `fma` implementation appears to give incorrect results in some
+  cases, so the libm implementation is always used on this platform.
 
 ## References
 

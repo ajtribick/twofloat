@@ -1,12 +1,16 @@
 # Changelog
 
+## Version 0.7
+
+* Support `no_std` builds. (Thanks: joseluis)
+
 ## Version 0.6.1
 
 * Re-enable MinGW support via libm.
 
 ## Version 0.6
 
-* Add const constructor `from_f64`.
+* Add const constructor `from_f64`. (Thanks: joseluis)
 * Breaking change: remove MinGW support due to incorrect `fma` implementation
 * Breaking change: fix definition of no_overlap to match definition 1.4 in
   Joldes et al. (2017).
