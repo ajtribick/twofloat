@@ -2,10 +2,8 @@
 ///
 /// It uses "libm" if it's enabled, which is required for "no_std".
 /// Fallbacks to "std" otherwise.
-pub(crate) struct Math;
-
 #[cfg(feature = "libm")]
-impl Math {
+pub(crate) mod mathfn {
     #[inline(always)]
     pub fn abs(x: f64) -> f64 {
         libm::fabs(x)
@@ -45,7 +43,7 @@ impl Math {
 }
 
 #[cfg(not(feature = "libm"))]
-impl Math {
+pub(crate) mod mathfn {
     #[inline(always)]
     pub fn abs(x: f64) -> f64 {
         x.abs()

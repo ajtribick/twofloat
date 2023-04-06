@@ -69,7 +69,6 @@ implementation, which may have variations between platforms.
 use core::fmt;
 
 mod math_util;
-pub(crate) use math_util::Math;
 
 #[macro_use]
 mod ops_util;
