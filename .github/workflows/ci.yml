@@ -13,6 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         rust: [stable, nightly]
+        features:
+          - std,math_funcs,serde
+          - math_funcs
         platform:
           - target: x86_64-pc-windows-msvc
             os: windows-latest
@@ -35,7 +38,6 @@ jobs:
       RUST_BACKTRACE: 1
       CARGO_INCREMENTAL: 0
       CARGO_TERM_COLOR: always
-      OPTIONS: --all-features
       RUSTFLAGS: "-C debuginfo=0 --deny warnings"
 
     runs-on: ${{ matrix.platform.os }}
@@ -63,14 +65,18 @@ jobs:
       - name: Build tests
         shell: bash
         run: |
-          cargo test --no-run --verbose --target ${{ matrix.platform.target }} $OPTIONS
+          cargo test --no-run --verbose --target ${{ matrix.platform.target }} \
+                --no-default-features --features=${{ matrix.features }}
 
       - name: Run tests
         shell: bash
         run: |
-          cargo test --verbose --target ${{ matrix.platform.target }} $OPTIONS
+          cargo test --verbose --target ${{ matrix.platform.target }} \
+                --no-default-features --features=${{ matrix.features }}
 
       - name: Run clippy
         shell: bash
         run: |
-          cargo clippy --target ${{ matrix.platform.target }} $OPTIONS -- -Dwarnings
+          cargo clippy --target ${{ matrix.platform.target }} \
+                --no-default-features --features=${{ matrix.features }} \
+                -- -Dwarnings

@@ -2,7 +2,7 @@
 ///
 /// It uses "libm" if it's enabled, which is required for "no_std".
 /// Fallbacks to "std" otherwise.
-#[cfg(feature = "libm")]
+#[cfg(not(feature = "std"))]
 pub(crate) mod mathfn {
     #[inline(always)]
     pub fn abs(x: f64) -> f64 {
@@ -42,7 +42,7 @@ pub(crate) mod mathfn {
     }
 }
 
-#[cfg(not(feature = "libm"))]
+#[cfg(feature = "std")]
 pub(crate) mod mathfn {
     #[inline(always)]
     pub fn abs(x: f64) -> f64 {
@@ -60,9 +60,16 @@ pub(crate) mod mathfn {
     pub fn floor(x: f64) -> f64 {
         x.floor()
     }
+    #[cfg(not(all(windows, target_env = "gnu")))]
     #[inline(always)]
     pub fn fma(a: f64, b: f64, c: f64) -> f64 {
         a.mul_add(b, c)
+    }
+    // The built-in FMA on MinGW is inaccurate, so always use the libm version
+    #[cfg(all(windows, target_env = "gnu"))]
+    #[inline(always)]
+    pub fn fma(a: f64, b: f64, c: f64) -> f64 {
+        libm::fma(a, b, c)
     }
     #[inline(always)]
     pub fn fract(x: f64) -> f64 {
