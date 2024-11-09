@@ -4,6 +4,7 @@
 
 * Always use libm functions.
 * `math_funcs` feature no longer requires `std`.
+* `TwoFloat` is now `#[repr(C)]`.
 
 ## Version 0.7
 
