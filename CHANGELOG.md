@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.8 (unreleased)
+
+* Always use libm functions.
+* `math_funcs` feature no longer requires `std`.
+
 ## Version 0.7
 
 * Support `no_std` builds. (Thanks: joseluis)
@@ -21,7 +26,7 @@
 * Add operator overloads for `&f64`.
 * Breaking change: use `serde` as the feature flag name.
 * Breaking change: use helper struct for Serde serialization.
-* Integrate with `num_traits` crate.
+* Integrate with num_traits crate.
 * Internal: use hexf to specify constants.
 
 ## Version 0.4.1

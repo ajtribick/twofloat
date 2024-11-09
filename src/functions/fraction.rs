@@ -1,4 +1,4 @@
-use crate::{arithmetic::fast_two_sum, math_util::mathfn, TwoFloat};
+use crate::{arithmetic::fast_two_sum, TwoFloat};
 
 impl TwoFloat {
     /// Returns the fractional part of the number.
@@ -14,18 +14,18 @@ impl TwoFloat {
     /// assert_eq!(b, TwoFloat::new_add(-1.0, 1e-200));
     /// ```
     pub fn fract(self) -> Self {
-        let hi_fract = mathfn::fract(self.hi);
-        let lo_fract = mathfn::fract(self.lo);
+        let hi_fract = libm::modf(self.hi).0;
+        let lo_fract = libm::modf(self.lo).0;
         if lo_fract == 0.0 {
             hi_fract.into()
         } else if hi_fract == 0.0 {
             match (self.hi >= 0.0, self.lo >= 0.0) {
                 (true, false) => fast_two_sum(1.0, lo_fract),
                 (false, true) => fast_two_sum(-1.0, lo_fract),
-                _ => mathfn::fract(self.lo).into(),
+                _ => libm::modf(self.lo).0.into(),
             }
         } else {
-            fast_two_sum(mathfn::fract(self.hi), self.lo)
+            fast_two_sum(libm::modf(self.hi).0, self.lo)
         }
     }
 
@@ -64,15 +64,15 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(0.0));
     /// ```
     pub fn ceil(self) -> Self {
-        if mathfn::fract(self.lo) == 0.0 {
+        if libm::modf(self.lo).0 == 0.0 {
             Self {
-                hi: mathfn::ceil(self.hi),
+                hi: libm::ceil(self.hi),
                 lo: self.lo,
             }
-        } else if mathfn::fract(self.hi) == 0.0 {
-            fast_two_sum(self.hi, mathfn::ceil(self.lo))
+        } else if libm::modf(self.hi).0 == 0.0 {
+            fast_two_sum(self.hi, libm::ceil(self.lo))
         } else {
-            mathfn::ceil(self.hi).into()
+            libm::ceil(self.hi).into()
         }
     }
 
@@ -91,15 +91,15 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(-1.0));
     /// ```
     pub fn floor(self) -> Self {
-        if mathfn::fract(self.lo) == 0.0 {
+        if libm::modf(self.lo).0 == 0.0 {
             Self {
-                hi: mathfn::floor(self.hi),
+                hi: libm::floor(self.hi),
                 lo: self.lo,
             }
-        } else if mathfn::fract(self.hi) == 0.0 {
-            fast_two_sum(self.hi, mathfn::floor(self.lo))
+        } else if libm::modf(self.hi).0 == 0.0 {
+            fast_two_sum(self.hi, libm::floor(self.lo))
         } else {
-            mathfn::floor(self.hi).into()
+            libm::floor(self.hi).into()
         }
     }
 
@@ -119,29 +119,29 @@ impl TwoFloat {
     /// assert_eq!(c, TwoFloat::from(-1.0));
     /// ```
     pub fn round(self) -> Self {
-        if mathfn::fract(self.lo) == 0.0 {
+        if libm::modf(self.lo).0 == 0.0 {
             Self {
-                hi: mathfn::round(self.hi),
+                hi: libm::round(self.hi),
                 lo: self.lo(),
             }
-        } else if mathfn::fract(self.hi) == 0.0 {
-            if mathfn::abs(mathfn::fract(self.lo)) == 0.5 {
+        } else if libm::modf(self.hi).0 == 0.0 {
+            if libm::fabs(libm::modf(self.lo).0) == 0.5 {
                 if self.is_sign_positive() {
-                    fast_two_sum(self.hi, mathfn::ceil(self.lo))
+                    fast_two_sum(self.hi, libm::ceil(self.lo))
                 } else {
-                    fast_two_sum(self.hi, mathfn::floor(self.lo))
+                    fast_two_sum(self.hi, libm::floor(self.lo))
                 }
             } else {
-                fast_two_sum(self.hi, mathfn::round(self.lo))
+                fast_two_sum(self.hi, libm::round(self.lo))
             }
-        } else if mathfn::abs(mathfn::fract(self.hi)) == 0.5 {
+        } else if libm::fabs(libm::modf(self.hi).0) == 0.5 {
             if self.hi.is_sign_positive() == self.lo.is_sign_positive() {
-                mathfn::round(self.hi).into()
+                libm::round(self.hi).into()
             } else {
-                mathfn::trunc(self.hi).into()
+                libm::trunc(self.hi).into()
             }
         } else {
-            mathfn::round(self.hi).into()
+            libm::round(self.hi).into()
         }
     }
 }
