@@ -385,7 +385,7 @@ where
         );
     };
 
-    if std::mem::size_of::<T>() < std::mem::size_of::<u32>() {
+    if core::mem::size_of::<T>() < core::mem::size_of::<u32>() {
         let mut source = T::min_value();
         loop {
             test(source);

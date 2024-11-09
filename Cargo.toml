@@ -1,6 +1,6 @@
 [package]
 name = "twofloat"
-version = "0.7.0"
+version = "0.8.0"
 authors = ["Andrew Tribick"]
 
 keywords = ["float", "precision", "numerics", "floating-point", "arithmetic"]
@@ -22,13 +22,13 @@ test = true
 
 [features]
 default = ["std", "math_funcs"]
-math_funcs = ["std"]
-std = ["num-traits/std"]
+math_funcs = []
+std = []
 
 [dependencies]
 hexf = "0.2"
 libm = { version = "0.2.6" }
-num-traits = { version = "0.2.14", default-features = false }
+num-traits = { version = "0.2.14", default-features = false, features = ["libm"] }
 serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
 
 [target.'cfg(all(windows, target_env = "gnu"))'.dependencies]

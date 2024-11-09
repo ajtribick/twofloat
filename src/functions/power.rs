@@ -19,7 +19,7 @@ impl TwoFloat {
         } else if self.hi == 0.0 && self.lo == 0.0 {
             Self { hi: 0.0, lo: 0.0 }
         } else {
-            let x = self.hi.sqrt().recip();
+            let x = libm::sqrt(self.hi).recip();
             let y = self.hi * x;
             Self::new_add(y, (self - Self::new_mul(y, y)).hi * (x * 0.5))
         }
@@ -37,7 +37,7 @@ impl TwoFloat {
     /// assert!(b.powi(3) - a < 1e-16);
     /// ```
     pub fn cbrt(self) -> Self {
-        let mut x = Self::from(self.hi.cbrt());
+        let mut x = Self::from(libm::cbrt(self.hi));
         let mut x2 = x * x;
         x -= (x2 * x - self) / (3.0 * x2);
         x2 = x * x;
@@ -84,14 +84,14 @@ impl TwoFloat {
             (false, false) => {
                 if self.is_sign_positive() {
                     (y * self.ln()).exp()
-                } else if self.hi.fract() != 0.0 || self.lo.fract() != 0.0 {
+                } else if libm::modf(self.hi).0 != 0.0 || libm::modf(self.lo).0 != 0.0 {
                     Self::NAN
                 } else {
                     let abs_result = (y * self.abs().ln()).exp();
-                    let low_trunc = if self.lo.trunc() == 0.0 {
-                        self.hi.trunc()
+                    let low_trunc = if libm::trunc(self.lo) == 0.0 {
+                        libm::trunc(self.hi)
                     } else {
-                        self.lo.trunc()
+                        libm::trunc(self.lo)
                     };
 
                     if low_trunc % 2.0 == 0.0 {

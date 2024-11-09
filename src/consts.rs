@@ -177,12 +177,7 @@ mod tests {
 
     const_check! {
         E, FRAC_1_PI, FRAC_2_PI, FRAC_2_SQRT_PI, FRAC_1_SQRT_2, FRAC_PI_2,
-        FRAC_PI_3, FRAC_PI_4, FRAC_PI_6, FRAC_PI_8, LN_2, LN_10, LOG2_E,
-        LOG10_E, PI, SQRT_2,
-    }
-
-    const_check! {
-        #[cfg(extra_log_consts)]
-        LOG10_2, LOG2_10, TAU
+        FRAC_PI_3, FRAC_PI_4, FRAC_PI_6, FRAC_PI_8, LN_2, LN_10, LOG2_10, LOG2_E,
+        LOG10_2, LOG10_E, PI, SQRT_2, TAU
     }
 }
