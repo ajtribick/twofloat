@@ -117,6 +117,7 @@ mod serde_helper {
     feature = "serde",
     serde(try_from = "serde_helper::TwoFloatDeserializeHelper")
 )]
+#[repr(C)]
 pub struct TwoFloat {
     pub(crate) hi: f64,
     pub(crate) lo: f64,
