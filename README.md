@@ -1,6 +1,5 @@
 # twofloat
 
-[![Build Status](https://github.com/ajtribick/twofloat/workflows/build/badge.svg)](https://github.com/ajtribick/twofloat/actions)
 [![Crate](https://img.shields.io/crates/v/twofloat)](https://crates.io/crates/twofloat)
 
 **A double-double arithmetic library for Rust.**

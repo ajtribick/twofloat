@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 0.8 (unreleased)
+## Version 0.8
 
 * Always use libm functions.
 * `math_funcs` feature no longer requires `std`.
