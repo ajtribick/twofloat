@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.8.1
+
+* Re-enable use of `std::mul_add` if the `std` feature is enabled (except on
+  MinGW).
+
 ## Version 0.8
 
 * Always use libm functions.

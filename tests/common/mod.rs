@@ -7,7 +7,7 @@ use twofloat::{TwoFloat, TwoFloatError};
 // This runs substantially slower than the other CI targets, so reduce the
 // number of iterations
 #[cfg(all(target_arch = "aarch64", target_os = "linux"))]
-const TEST_ITERS: usize = 1000;
+const TEST_ITERS: usize = 10000;
 
 #[cfg(not(all(target_arch = "aarch64", target_os = "linux")))]
 const TEST_ITERS: usize = 100000;

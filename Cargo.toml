@@ -1,6 +1,6 @@
 [package]
 name = "twofloat"
-version = "0.8.0"
+version = "0.8.1"
 authors = ["Andrew Tribick", "Individual contributors"]
 keywords = ["float", "precision", "numerics", "floating-point", "arithmetic"]
 categories = ["algorithms", "mathematics", "science"]
