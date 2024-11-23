@@ -6,6 +6,19 @@ use core::ops::{
 
 use crate::TwoFloat;
 
+// MinGW FMA seems to be inaccurate, use libm even if std is enabled.
+#[cfg(all(feature = "std", not(all(windows, target_env = "gnu"))))]
+#[inline(always)]
+fn fma(x: f64, y: f64, z: f64) -> f64 {
+    f64::mul_add(x, y, z)
+}
+
+#[cfg(not(all(feature = "std", not(all(windows, target_env = "gnu")))))]
+#[inline(always)]
+fn fma(x: f64, y: f64, z: f64) -> f64 {
+    libm::fma(x, y, z)
+}
+
 pub(crate) fn fast_two_sum(a: f64, b: f64) -> TwoFloat {
     // Joldes et al. (2017) Algorithm 1
     let s = a + b;
@@ -43,7 +56,7 @@ impl TwoFloat {
         let p = a * b;
         Self {
             hi: p,
-            lo: libm::fma(a, b, -p),
+            lo: fma(a, b, -p),
         }
     }
 
@@ -128,7 +141,7 @@ binary_ops! {
     /// (2017) Algorithm 9.
     fn Mul::mul<'a, 'b>(self: &'a TwoFloat, rhs: &'b f64) -> TwoFloat {
         let (ch, cl1) = TwoFloat::new_mul(self.hi, *rhs).into();
-        let cl3 = libm::fma(self.lo, *rhs, cl1);
+        let cl3 = fma(self.lo, *rhs, cl1);
         fast_two_sum(ch, cl3)
     }
 
@@ -136,7 +149,7 @@ binary_ops! {
     /// (2017) Algorithm 9.
     fn Mul::mul<'a, 'b>(self: &'a f64, rhs: &'b TwoFloat) -> TwoFloat {
         let (ch, cl1) = TwoFloat::new_mul(rhs.hi, *self).into();
-        let cl3 = libm::fma(rhs.lo, *self, cl1);
+        let cl3 = fma(rhs.lo, *self, cl1);
         fast_two_sum(ch, cl3)
     }
 
@@ -145,8 +158,8 @@ binary_ops! {
     fn Mul::mul<'a, 'b>(self: &'a TwoFloat, rhs: &'b TwoFloat) -> TwoFloat {
         let (ch, cl1) = TwoFloat::new_mul(self.hi, rhs.hi).into();
         let tl0 = self.lo * rhs.lo;
-        let tl1 = libm::fma(self.hi, rhs.lo, tl0);
-        let cl2 = libm::fma(self.lo, rhs.hi, tl1);
+        let tl1 = fma(self.hi, rhs.lo, tl0);
+        let cl2 = fma(self.lo, rhs.hi, tl1);
         let cl3 = cl1 + cl2;
         fast_two_sum(ch, cl3)
     }
@@ -175,7 +188,7 @@ binary_ops! {
         let d = e * th;
         let m = d + th;
         let (ch, cl1) = TwoFloat::new_mul(m.hi, *self).into();
-        let cl3 = libm::fma(m.lo, *self, cl1);
+        let cl3 = fma(m.lo, *self, cl1);
         fast_two_sum(ch, cl3)
     }
 
@@ -253,7 +266,7 @@ assign_ops! {
     /// (2017) Algorithm 9.
     fn MulAssign::mul_assign<'a>(self: &mut TwoFloat, rhs: &'a f64) {
         let (ch, cl1) = TwoFloat::new_mul(self.hi, *rhs).into();
-        let cl3 = libm::fma(self.lo, *rhs, cl1);
+        let cl3 = fma(self.lo, *rhs, cl1);
         *self = fast_two_sum(ch, cl3);
     }
 
@@ -262,8 +275,8 @@ assign_ops! {
     fn MulAssign::mul_assign<'a>(self: &mut TwoFloat, rhs: &'a TwoFloat) {
         let (ch, cl1) = TwoFloat::new_mul(self.hi, rhs.hi).into();
         let tl0 = self.lo * rhs.lo;
-        let tl1 = libm::fma(self.hi, rhs.lo, tl0);
-        let cl2 = libm::fma(self.lo, rhs.hi, tl1);
+        let tl1 = fma(self.hi, rhs.lo, tl0);
+        let cl2 = fma(self.lo, rhs.hi, tl1);
         let cl3 = cl1 + cl2;
         *self = fast_two_sum(ch, cl3)
     }

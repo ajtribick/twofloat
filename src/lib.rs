@@ -32,13 +32,19 @@ as preliminary.
 Operations on non-finite values are not supported. At the moment this is not
 automatically checked. The `is_valid()` method is provided for this purpose.
 
+If the `std` feature is enabled (as it is by default), the fused multiply-add
+operation from the standard library is used. This *may* be more performant if
+the target architecture has a dedicated instruction for this. See the
+documentation of [`f64::mul_add`] for details. Otherwise the libm
+implementation is used.
+
 If the `serde` feature is enabled, serialization and deserialization is
 possible through the Serde library.
 
 ## Known issues
 
 * The MinGW `fma` implementation appears to give incorrect results in some
-  cases, so the libm implementation is always used on this platform.
+  cases, so the libm function is always used on this platform.
 
 ## References
 
