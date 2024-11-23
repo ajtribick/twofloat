@@ -1,13 +1,11 @@
 [package]
 name = "twofloat"
 version = "0.8.0"
-authors = ["Andrew Tribick"]
-
+authors = ["Andrew Tribick", "Individual contributors"]
 keywords = ["float", "precision", "numerics", "floating-point", "arithmetic"]
 categories = ["algorithms", "mathematics", "science"]
-exclude = [".gitignore", "sollya", ".github"]
+exclude = [".github", ".gitignore", "ci-workdir", "sollya", "scripts"]
 edition = "2018"
-
 readme = "README.md"
 license = "BSD-3-Clause"
 description = "Double-double arithmetic functionality."

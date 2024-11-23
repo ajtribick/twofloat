@@ -1,4 +1,5 @@
 #![allow(clippy::float_cmp)]
+#![allow(clippy::needless_borrows_for_generic_args)]
 
 use core::{convert::TryFrom, fmt::Debug};
 
@@ -338,7 +339,7 @@ fn f64_twofloat_assign(op: Operator) {
     repeated_test(|| {
         let c = random_float();
         let value = get_valid_twofloat(|x, y| op.apply(x + y, c).is_finite());
-        let result1 = op.apply(value, c);
+        let result1: TwoFloat = op.apply(value, c);
         if result1.is_valid() {
             let result2 = op.apply(&value, c);
             assert!(
