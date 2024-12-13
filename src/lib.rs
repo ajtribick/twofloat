@@ -93,36 +93,14 @@ mod format;
 mod functions;
 mod num_integration;
 
-pub use base::no_overlap;
-
 #[cfg(feature = "serde")]
-mod serde_helper {
-    use super::{TwoFloat, TwoFloatError};
+mod serialization;
 
-    #[derive(serde::Deserialize)]
-    #[serde(rename = "TwoFloat")]
-    pub(super) struct TwoFloatDeserializeHelper {
-        hi: f64,
-        lo: f64,
-    }
-
-    impl core::convert::TryFrom<TwoFloatDeserializeHelper> for TwoFloat {
-        type Error = TwoFloatError;
-
-        fn try_from(value: TwoFloatDeserializeHelper) -> Result<Self, Self::Error> {
-            TwoFloat::try_from((value.hi, value.lo))
-        }
-    }
-}
+pub use base::no_overlap;
 
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
 #[derive(Debug, Default, Clone, Copy)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "serde",
-    serde(try_from = "serde_helper::TwoFloatDeserializeHelper")
-)]
 #[repr(C)]
 pub struct TwoFloat {
     pub(crate) hi: f64,
