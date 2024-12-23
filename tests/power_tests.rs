@@ -227,3 +227,60 @@ fn powf_test() {
         );
     });
 }
+
+#[test]
+fn powf_integers_test() {
+    let mut rng = rand::thread_rng();
+    let value_dist = rand::distributions::Uniform::new(-20.0f64, 20.0f64);
+    repeated_test(|| {
+        let a = rng.sample(value_dist);
+        let b = rng.sample(value_dist).floor();
+
+        let expected = a.powf(b);
+        let result = TwoFloat::from(a).powf(TwoFloat::from(b));
+        if expected.is_nan() {
+            assert!(result.hi().is_nan());
+            assert!(result.lo().is_nan());
+        } else {
+            let difference = (result - expected).abs().hi() / expected;
+
+            assert!(
+                difference < 1e-8,
+                "{}^{} resulted in different value {} vs {}",
+                a,
+                b,
+                result,
+                expected
+            );
+        }
+    });
+}
+
+#[test]
+fn powf_negative_test() {
+    let mut rng = rand::thread_rng();
+    let value_dist = rand::distributions::Uniform::new(-20.0f64, 20.0f64);
+    repeated_test(|| {
+        let a = rng.sample(value_dist);
+        let b = rng.sample(value_dist);
+
+        let expected = a.powf(b);
+        let result = TwoFloat::from(a).powf(TwoFloat::from(b));
+        //println!("{}^{} :{} | {}", a,b,expected, Into::<f64>::into(result));
+        if expected.is_nan() {
+            assert!(result.hi().is_nan());
+            assert!(result.lo().is_nan());
+        } else {
+            let difference = (result - expected).abs().hi() / expected;
+
+            assert!(
+                difference < 1e-8,
+                "{}^{} resulted in different value {} vs {}",
+                a,
+                b,
+                result,
+                expected
+            );
+        }
+    });
+}

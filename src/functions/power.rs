@@ -84,14 +84,14 @@ impl TwoFloat {
             (false, false) => {
                 if self.is_sign_positive() {
                     (y * self.ln()).exp()
-                } else if libm::modf(self.hi).0 != 0.0 || libm::modf(self.lo).0 != 0.0 {
+                } else if libm::modf(y.hi).0 != 0.0 || libm::modf(y.lo).0 != 0.0 {
                     Self::NAN
                 } else {
                     let abs_result = (y * self.abs().ln()).exp();
-                    let low_trunc = if libm::trunc(self.lo) == 0.0 {
-                        libm::trunc(self.hi)
+                    let low_trunc = if libm::trunc(y.lo) == 0.0 {
+                        libm::trunc(y.hi)
                     } else {
-                        libm::trunc(self.lo)
+                        libm::trunc(y.lo)
                     };
 
                     if low_trunc % 2.0 == 0.0 {
