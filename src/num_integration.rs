@@ -217,6 +217,10 @@ impl num_traits::ToPrimitive for TwoFloat {
             _ => None,
         }
     }
+    #[inline]
+    fn to_f64(&self) -> Option<f64> {
+        Some(self.into())
+    }
 }
 
 impl num_traits::NumCast for TwoFloat {

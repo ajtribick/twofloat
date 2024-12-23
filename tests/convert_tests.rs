@@ -2,7 +2,7 @@
 
 use core::{convert::TryFrom, fmt::Debug, mem::discriminant, ops::Range};
 
-use num_traits::{one, zero};
+use num_traits::{one, zero, ToPrimitive};
 use rand::{distributions::uniform::SampleUniform, Rng};
 
 use twofloat::{no_overlap, TwoFloat, TwoFloatError};
@@ -158,6 +158,15 @@ fn from_f64_test() {
 #[test]
 fn into_f64_test() {
     into_float::<f64>();
+}
+
+#[test]
+fn to_f64_test() {
+    repeated_test(|| {
+        let source = get_twofloat();
+        let result = source.to_f64().unwrap();
+        assert_eq!(result, source.hi(), "Float conversion from TwoFloat failed");
+    });
 }
 
 fn check_try_from_result<T>(
