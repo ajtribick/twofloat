@@ -165,11 +165,7 @@ fn to_f64_test() {
     repeated_test(|| {
         let source = get_twofloat();
         let result = source.to_f64().unwrap();
-        assert_eq!(
-            result,
-            source.hi(),
-            "Float conversion from TwoFloat failed"
-        );
+        assert_eq!(result, source.hi(), "Float conversion from TwoFloat failed");
     });
 }
 
