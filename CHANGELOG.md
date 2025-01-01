@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.8.2
+
+* Use custom serde trait implementations
+* Add `to_f64` to the `ToPrimitive` implementation. (Thanks: apelloni)
+* Fix `powf` for negative values. (Thanks: apelloni)
+
 ## Version 0.8.1
 
 * Re-enable use of `std::mul_add` if the `std` feature is enabled (except on
