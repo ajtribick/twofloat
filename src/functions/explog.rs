@@ -24,34 +24,6 @@ const LN_FRAC_3_2: TwoFloat = TwoFloat {
 const EXP_UPPER_LIMIT: f64 = hexf64!("0x1.62e42fefa39efp9"); // ln(0x1.0p1024)
 const EXP_LOWER_LIMIT: f64 = hexf64!("-0x1.74385446d71c3p9"); // ln(0x1.0p-1074)
 
-// Coefficients for polynomial approximation of x*(exp(x)+1)/(exp(x)-1)
-const EXP_COEFFS: [TwoFloat; 6] = [
-    TwoFloat {
-        hi: hexf64!("0x1.5555555555555p-3"),
-        lo: hexf64!("0x1.32460411c87c6p-57"),
-    },
-    TwoFloat {
-        hi: hexf64!("-0x1.6c16c16c16af3p-9"),
-        lo: hexf64!("0x1.136a2c950fda6p-63"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.1566abbf9f4f6p-14"),
-        lo: hexf64!("0x1.1110477bd284cp-68"),
-    },
-    TwoFloat {
-        hi: hexf64!("-0x1.bbd7768cb5288p-20"),
-        lo: hexf64!("0x1.fece87c086974p-76"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.66a4e5c4c23f6p-25"),
-        lo: hexf64!("-0x1.c8771e6260e4bp-79"),
-    },
-    TwoFloat {
-        hi: hexf64!("-0x1.1f6dc1f8a9983p-30"),
-        lo: hexf64!("-0x1.d03ec3b33eaf5p-84"),
-    },
-];
-
 const EXP_M1_COEFFS: [TwoFloat; 12] = [
     TwoFloat {
         hi: hexf64!("0x1.0p-1"),
