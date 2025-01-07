@@ -26,6 +26,7 @@ fn iter_sum_1() {
     assert_eq!(v_sum, res);
 }
 
+#[cfg(test)]
 #[test]
 fn iter_sum_2() {
     //let v: Vec<TwoFloat> = (1..=10).map(|x| Into::<TwoFloat>::into(x as f64)).collect();
