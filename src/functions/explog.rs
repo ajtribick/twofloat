@@ -313,6 +313,7 @@ impl TwoFloat {
         } else {
             let mut x = Self::from(libm::log(self.hi));
             x += self * (-x).exp() - 1.0;
+            x += self * (-x).exp() - 1.0;
             x + self * (-x).exp() - 1.0
         }
     }
