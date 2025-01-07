@@ -43,10 +43,15 @@ impl TwoFloat {
         }
         // Format String to output by reducing the significant digits to 32
         let mut num_str = format!("{}", num);
+        // Define range to remove from string
+        let range_rm = if num.is_negative() {
+            precision + 2..42
+        } else {
+            precision + 1..41
+        };
         if !num.is_zero() {
             match num_str.find("e") {
-                Some(41) | None => num_str.replace_range(33..41, ""), // Positive
-                Some(42) => num_str.replace_range(34..42, ""),        // Negative
+                Some(41) | Some(42) | None => num_str.replace_range(range_rm, ""),
                 _ => panic!("BigFloat should have 40 significant digits"),
             };
         }
@@ -134,12 +139,13 @@ mod test {
 
     #[test]
     fn display_test() {
-        let value = TwoFloat { hi: 1.0, lo: 3e-17 };
-        assert_eq!(format!("{}", value), "1.0000000000000000300000000000000");
-        assert_eq!(
-            format!("{}", 100.0 * value),
-            "1.0000000000000000300000000000000e+2"
-        );
+        let value = TwoFloat { hi: 1.0, lo: 0.4 };
+        assert_eq!(format!("{:.10}", value), "1.400000000");
+        assert_eq!(format!("{:.10}", -value), "-1.400000000");
+        assert_eq!(format!("{:.2}", value), "1.4");
+        assert_eq!(format!("{:.2}", -value), "-1.4");
+        assert_eq!(format!("{:.2}", 10.0 * value), "1.4e+1");
+        assert_eq!(format!("{:.2}", -10.0 * value), "-1.4e+1");
     }
 
     #[test]
