@@ -41,7 +41,7 @@ impl<'de> Deserialize<'de> for TwoFloat {
                 impl Visitor<'_> for FieldVisitor {
                     type Value = Field;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
                         formatter.write_str("`hi` or `lo`")
                     }
 
@@ -66,7 +66,7 @@ impl<'de> Deserialize<'de> for TwoFloat {
         impl<'de> Visitor<'de> for TwoFloatVisitor {
             type Value = TwoFloat;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
                 formatter.write_str("struct TwoFloat")
             }
 
