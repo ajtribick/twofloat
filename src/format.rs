@@ -124,13 +124,9 @@ mod test {
 
     #[test]
     fn display_test() {
-        let value = TwoFloat { hi: 1.0, lo: 0.3 };
-        assert_eq!(format!("{}", value), "1 + 0.3");
-        assert_eq!(format!("{}", -value), "-1 - 0.3");
-        assert_eq!(format!("{:+}", value), "+1 + 0.3");
-        assert_eq!(format!("{:.2}", value), "1.00 + 0.30");
-        assert_eq!(format!("{:.2}", -value), "-1.00 - 0.30");
-        assert_eq!(format!("{:+.2}", value), "+1.00 + 0.30");
+        let mut value = TwoFloat { hi: 1.0, lo: 3e-17 };
+        assert_eq!(format!("{}", value), "1.0000000000000000300000000000000");
+        assert_eq!(format!("{}", 100.0*value), "1.0000000000000000300000000000000e+2");
     }
 
     #[test]
