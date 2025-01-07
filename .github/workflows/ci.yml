@@ -37,7 +37,7 @@ jobs:
       - run: cargo clippy --all-targets --all-features -- -Dwarnings
 
   build:
-    name: ${{ matrix.job.target }}
+    name: ${{ matrix.job.target }} (${{ matrix.features.name }})
     runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
@@ -47,9 +47,13 @@ jobs:
           - { target: aarch64-unknown-linux-gnu, os: ubuntu-latest,  use-cross: true }
           - { target: i686-pc-windows-msvc,      os: windows-latest                  }
           - { target: i686-unknown-linux-gnu,    os: ubuntu-latest,  use-cross: true }
+          - { target: x86_64-apple-darwin,       os: macos-13                        }
           - { target: x86_64-pc-windows-gnu,     os: windows-latest                  }
           - { target: x86_64-pc-windows-msvc,    os: windows-latest                  }
           - { target: x86_64-unknown-linux-gnu,  os: ubuntu-latest                   }
+        features:
+          - { name: "std",    extra_args: "--features serde"                                  }
+          - { name: "no_std", extra_args: "--no-default-features --features math_funcs,serde" }
     env:
       CARGO_CMD: cargo
 
@@ -75,11 +79,12 @@ jobs:
 
       - name: Build
         shell: bash
-        run: $CARGO_CMD build --release --target=${{ matrix.job.target }}
+        run: |
+          $CARGO_CMD build --release --target=${{ matrix.job.target }} ${{matrix.features.extra_args}}
 
       - name: Test
         shell: bash
-        run: $CARGO_CMD test --target=${{ matrix.job.target }}
+        run: $CARGO_CMD test --target=${{ matrix.job.target }} ${{matrix.features.extra_args}}
 
   release:
     name: Publish release
