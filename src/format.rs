@@ -5,13 +5,23 @@ use crate::TwoFloat;
 
 impl fmt::Display for TwoFloat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.pretty_str())
+        match f.precision() {
+            Some(p) => {
+                if p <= 32 {
+                    write!(f, "{}", self.pretty_str(p))
+                } else {
+                    write!(f, "{}", self.pretty_str(32))
+                }
+            }
+            None => write!(f, "{}", self.pretty_str(32)),
+        }
     }
 }
 
 impl TwoFloat {
     // Compute number using BigFloat assuming a mantisse of size 53*2-1
-    pub fn pretty_str(&self) -> String {
+    fn pretty_str(&self, precision: usize) -> String {
+        assert!(precision <= 32);
         let mut num: BigFloat = 0.0.into();
         for float in [self.hi, self.lo] {
             let (mut m, e) = libm::frexp(float);
