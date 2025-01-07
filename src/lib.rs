@@ -98,6 +98,8 @@ mod serialization;
 
 pub use base::no_overlap;
 
+pub mod iter;
+
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
 #[derive(Debug, Default, Clone, Copy)]
