@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.8.3
+
+* Fix `no_std` builds
+
 ## Version 0.8.2
 
 * Use custom serde trait implementations
