@@ -26,6 +26,7 @@ std = []
 [dependencies]
 hexf = "0.2"
 libm = { version = "0.2.6" }
+num-bigfloat = "1.7.1"
 num-traits = { version = "0.2.14", default-features = false, features = ["libm"] }
 serde = { version = "1.0", default-features = false, optional = true }
 
