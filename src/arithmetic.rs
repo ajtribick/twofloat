@@ -19,6 +19,16 @@ fn fma(x: f64, y: f64, z: f64) -> f64 {
     libm::fma(x, y, z)
 }
 
+/// Renormalization ensures that the components of the returned tuple are arranged in such a
+/// way that the absolute value of the last component is no more than half the ULP of the
+/// first.
+#[inline]
+pub fn renorm3(a: f64, b: f64, c: f64) -> TwoFloat {
+    let u = fast_two_sum(a, b);
+    let v = fast_two_sum(c, u.hi);
+    fast_two_sum(v.hi, u.lo + v.lo)
+}
+
 pub(crate) fn fast_two_sum(a: f64, b: f64) -> TwoFloat {
     // Joldes et al. (2017) Algorithm 1
     let s = a + b;
@@ -176,33 +186,26 @@ binary_ops! {
         fast_two_sum(th, tl)
     }
 
-    /// Implements division of `f64` and `TwoFloat` using Joldes et al. (2017)
-    /// Algorithm 18 modified for the left-hand side having a zero value in
-    /// the low word.
+    /// Former implements division from Joldes et al. (2017) Algorithm 18
+    /// Now taken from qd crate using long division
     fn Div::div<'a, 'b>(self: &'a f64, rhs: &'b TwoFloat) -> TwoFloat {
-        let th = rhs.hi.recip();
-        let rh = 1.0 - rhs.hi * th;
-        let rl = -(rhs.lo * th);
-        let (eh, el) = fast_two_sum(rh, rl).into();
-        let e = TwoFloat { hi: eh, lo: el };
-        let d = e * th;
-        let m = d + th;
-        let (ch, cl1) = TwoFloat::new_mul(m.hi, *self).into();
-        let cl3 = fma(m.lo, *self, cl1);
-        fast_two_sum(ch, cl3)
+                let q1 = self / rhs.hi;
+                let mut r = self - (rhs* q1);
+                let q2 = r.hi / rhs.hi;
+                r -=rhs* q2;
+                let q3 = r.hi / rhs.hi;
+                renorm3(q1, q2, q3)
     }
 
-    /// Implements division of two `TwoFloat` values using Joldes et al.
-    /// (2017) Algorithm 18.
+    /// Former implements division from Joldes et al. (2017) Algorithm 18
+    /// Now taken from qd crate using long division
     fn Div::div<'a, 'b>(self: &'a TwoFloat, rhs: &'b TwoFloat) -> TwoFloat {
-        let th = rhs.hi.recip();
-        let rh = 1.0 - rhs.hi * th;
-        let rl = -(rhs.lo * th);
-        let (eh, el) = fast_two_sum(rh, rl).into();
-        let e = TwoFloat { hi: eh, lo: el };
-        let d = e * th;
-        let m = d + th;
-        self * m
+                let q1 = self.hi / rhs.hi;
+                let mut r = self - (rhs* q1);
+                let q2 = r.hi / rhs.hi;
+                r -=rhs* q2;
+                let q3 = r.hi / rhs.hi;
+                renorm3(q1, q2, q3)
     }
 
     fn Rem::rem<'a, 'b>(self: &'a TwoFloat, rhs: &'b f64) -> TwoFloat {
