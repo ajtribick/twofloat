@@ -24,7 +24,6 @@ const LN_FRAC_3_2: TwoFloat = TwoFloat {
 const EXP_UPPER_LIMIT: f64 = hexf64!("0x1.62e42fefa39efp9"); // ln(0x1.0p1024)
 const EXP_LOWER_LIMIT: f64 = hexf64!("-0x1.74385446d71c3p9"); // ln(0x1.0p-1074)
 
-
 // Coefficients for polynomial approximation of 2^x on [-0.5, 0.5]
 const EXP2_COEFFS: [TwoFloat; 14] = [
     TwoFloat {
