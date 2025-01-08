@@ -24,66 +24,6 @@ const LN_FRAC_3_2: TwoFloat = TwoFloat {
 const EXP_UPPER_LIMIT: f64 = hexf64!("0x1.62e42fefa39efp9"); // ln(0x1.0p1024)
 const EXP_LOWER_LIMIT: f64 = hexf64!("-0x1.74385446d71c3p9"); // ln(0x1.0p-1074)
 
-// Coefficients for polynomial approximation of 2^x on [-0.5, 0.5]
-const EXP2_COEFFS: [TwoFloat; 14] = [
-    TwoFloat {
-        hi: hexf64!("0x1.62e42fefa39efp-1"),
-        lo: hexf64!("0x1.abcab7ae0b156p-56"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.ebfbdff82c58fp-3"),
-        lo: hexf64!("-0x1.5e431ae1ed823p-57"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.c6b08d704a0cp-5"),
-        lo: hexf64!("-0x1.d70e953766cd4p-59"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.3b2ab6fba4e77p-7"),
-        lo: hexf64!("0x1.494f1fd2611efp-62"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.5d87fe78a6736p-10"),
-        lo: hexf64!("0x1.1f321edc1a3bbp-64"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.430912f86c78cp-13"),
-        lo: hexf64!("0x1.bfc77bb3c115bp-70"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.ffcbfc5887f1ap-17"),
-        lo: hexf64!("-0x1.3d15db905a7ddp-71"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.62c0223a5a6dbp-20"),
-        lo: hexf64!("0x1.f538d80a3aae8p-75"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.b5253d488bccap-24"),
-        lo: hexf64!("-0x1.2ec9fd0f44ecfp-80"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.e4cf5169221d1p-28"),
-        lo: hexf64!("-0x1.cc6cb479cd318p-83"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.e8ca77bf9238ep-32"),
-        lo: hexf64!("0x1.c257a7e383648p-86"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.c3bd1cd9ae17dp-36"),
-        lo: hexf64!("-0x1.45f6fa8d3cb45p-91"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.8235651fc7049p-40"),
-        lo: hexf64!("0x1.98bc0cb4f5bc4p-94"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.31efcab273719p-44"),
-        lo: hexf64!("0x1.c814aa232482ap-98"),
-    },
-];
-
 const FRAC_FACT: [TwoFloat; 21] = [
     TwoFloat {
         // 1/0!
@@ -239,7 +179,7 @@ impl TwoFloat {
             // We can increase the value of `n` making the convergence of the
             // remaining exponential function faster
 
-            let k = libm::trunc((FRAC_1_LN_2 * self).hi + 0.5);
+            let k = libm::trunc((FRAC_1_LN_2 * self).hi - 0.5);
             // n = 512 is chosen;
             let r = (self - LN_2 * k) / 512.0;
             // TODO: Redefine EPSILON ?
@@ -317,14 +257,21 @@ impl TwoFloat {
 
     /// Returns `2^(self)`.
     ///
+    /// where self = k + r * n,  k > 0 and n = 2^9 = 512
+    /// The taylor series for the small value of r converges very fast
+    ///
     /// # Examples
     ///
     /// ```
     /// # use twofloat::TwoFloat;
     /// let a = TwoFloat::from(0.5).exp2();
     /// let b = TwoFloat::from(2).sqrt();
+    /// let c = (TwoFloat::from(0.5)*twofloat::consts::LN_2).exp();
+    /// let res = twofloat::consts::SQRT_2;
     ///
-    /// assert!((a - b).abs() < 1e-15);
+    /// assert!((a - res).abs() < 1e-29);
+    /// assert!((b - res).abs() < 1e-31);
+    /// assert!((c - res).abs() < 1e-30);
     /// ```
     pub fn exp2(self) -> Self {
         if self < -1074.0 {
@@ -336,8 +283,22 @@ impl TwoFloat {
             }
         } else {
             let k = libm::round(self.hi);
-            let r = self - k;
-            let r1 = polynomial!(r, 1.0, EXP2_COEFFS);
+            let r = (self - k) * LN_2 / 512.0;
+            //let x = self * LN_2;
+            let mut r1 = polynomial!(r, FRAC_FACT[..12]);
+
+            // Recover rescaling of r
+            r1 = r1 * r1; // 2^(r * 2)
+            r1 = r1 * r1; // 2^(r * 4)
+            r1 = r1 * r1; // 2^(r * 8)
+            r1 = r1 * r1; // 2^(r * 16)
+            r1 = r1 * r1; // 2^(r * 32)
+            r1 = r1 * r1; // 2^(r * 64)
+            r1 = r1 * r1; // 2^(r * 128)
+            r1 = r1 * r1; // 2^(r * 256)
+            r1 = r1 * r1; // 2^(r * 512)
+
+            //let r1 = polynomial!(r, 1.0, EXP2_COEFFS);
             if k == 0.0 {
                 r1
             } else {
