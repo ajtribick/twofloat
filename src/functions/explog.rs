@@ -159,7 +159,7 @@ impl TwoFloat {
     /// let b = a.exp();
     /// let e2 = twofloat::consts::E * twofloat::consts::E;
     ///
-    /// assert!((b - e2).abs() / e2 < 1e-16);
+    /// assert!((b - e2).abs() / e2 < 1e-30);
     /// ```
     pub fn exp(self) -> Self {
         if self.hi <= EXP_LOWER_LIMIT {
@@ -393,7 +393,7 @@ impl TwoFloat {
     /// # use twofloat::TwoFloat;
     /// let a = TwoFloat::from(64.0).log2();
     ///
-    /// assert!((a - 6.0).abs() < 1e-12, "{}", a);
+    /// assert!(a - 6.0 == 0.0, "{}", a);
     /// ```
     pub fn log2(self) -> Self {
         if self == 1.0 {
@@ -417,8 +417,7 @@ impl TwoFloat {
     /// ```
     /// # use twofloat::TwoFloat;
     /// let a = TwoFloat::from(100.0).log10();
-    ///
-    /// assert!((a - 2.0).abs() < 1e-12);
+    /// assert!((a - 2.0).abs() < 1e-30, "{}", a);
     /// ```
     pub fn log10(self) -> Self {
         self.ln() / LN_10
