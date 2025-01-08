@@ -1,7 +1,7 @@
 use crate::TwoFloat;
 use num_traits::Zero;
-use std::iter::Sum;
-use std::ops::Add;
+use core::iter::Sum;
+use core::ops::Add;
 
 impl<T> Sum<T> for TwoFloat
 where
