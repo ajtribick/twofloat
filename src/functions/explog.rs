@@ -24,56 +24,6 @@ const LN_FRAC_3_2: TwoFloat = TwoFloat {
 const EXP_UPPER_LIMIT: f64 = hexf64!("0x1.62e42fefa39efp9"); // ln(0x1.0p1024)
 const EXP_LOWER_LIMIT: f64 = hexf64!("-0x1.74385446d71c3p9"); // ln(0x1.0p-1074)
 
-const EXP_M1_COEFFS: [TwoFloat; 12] = [
-    TwoFloat {
-        hi: hexf64!("0x1.0p-1"),
-        lo: hexf64!("0x1.bd730351a9755p-56"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.5555555555553p-3"),
-        lo: hexf64!("-0x1.7597a71b9af89p-57"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.55555555553f5p-5"),
-        lo: hexf64!("-0x1.ccd976a7f775cp-59"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.11111111115c4p-7"),
-        lo: hexf64!("0x1.342b20ac16f97p-61"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.6c16c16c6709ep-10"),
-        lo: hexf64!("-0x1.3ce71843eff0cp-64"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.a01a01a0b696cp-13"),
-        lo: hexf64!("0x1.d41bdeddcef57p-71"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.a01a00aeb2858p-16"),
-        lo: hexf64!("0x1.7b3bc0a8a9fafp-70"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.71de32b050a9dp-19"),
-        lo: hexf64!("-0x1.9be0c6cec6271p-77"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.27e62dc06cd67p-22"),
-        lo: hexf64!("-0x1.41f2a2a0cba43p-77"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.ae852d1420eefp-26"),
-        lo: hexf64!("-0x1.669f123719ab2p-81"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.1e22aadda1973p-29"),
-        lo: hexf64!("-0x1.83b25ef3d0968p-85"),
-    },
-    TwoFloat {
-        hi: hexf64!("0x1.36ab6f77c95d8p-33"),
-        lo: hexf64!("0x1.c16dc2dc455f1p-89"),
-    },
-];
 
 // Coefficients for polynomial approximation of 2^x on [-0.5, 0.5]
 const EXP2_COEFFS: [TwoFloat; 14] = [
@@ -344,17 +294,24 @@ impl TwoFloat {
     ///
     /// ```
     /// # use twofloat::TwoFloat;
-    /// let a = TwoFloat::from(0.05);
-    /// let b = a.exp_m1();
-    /// let c = 0.05f64.exp_m1();
+    /// # use core::{convert::TryFrom};
+    /// let a = TwoFloat::from(2f64.powi(-20));
     ///
-    /// assert!((b - c).abs() < 1e-16);
+    /// let b = a.exp_m1();
+    /// let c = a.exp() - 1.0;
+    ///
+    /// // Exact Result
+    /// // res = 9.5367477115374544678824955687428e-7;
+    /// let res = TwoFloat::try_from((9.5367477115374552e-07, -7.0551613072428143e-23)).unwrap();
+    ///
+    /// assert!(((b-res)/res) == 0.0);
+    /// assert!(((c-res)/res).abs() < 1e-22);
     /// ```
     pub fn exp_m1(self) -> Self {
         if self < -LN_2 || self > LN_FRAC_3_2 {
             self.exp() - 1.0
         } else {
-            let r = polynomial!(self, 1.0, EXP_M1_COEFFS);
+            let r = polynomial!(self, 1.0, FRAC_FACT[2..12]);
             self * r
         }
     }
@@ -402,7 +359,7 @@ impl TwoFloat {
     ///
     /// ```
     /// let a = twofloat::consts::E.ln();
-    /// assert!((a - 1.0).abs() < 1e-11);
+    /// assert!((a - 1.0).abs() < 1e-29);
     /// ```
     pub fn ln(self) -> Self {
         if self == 1.0 {
