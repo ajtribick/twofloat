@@ -40,7 +40,7 @@ mod tests {
 
     #[test]
     fn iter_sum_1() {
-        let sum : TwoFloat = (1..=100).map(|x| x as f64).sum();
+        let sum: TwoFloat = (1..=100).map(|x| x as f64).sum();
         let res: TwoFloat = 5050.0.into();
 
         assert_eq!(sum, res);
