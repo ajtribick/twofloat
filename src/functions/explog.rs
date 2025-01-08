@@ -250,8 +250,13 @@ impl TwoFloat {
         if self < -LN_2 || self > LN_FRAC_3_2 {
             self.exp() - 1.0
         } else {
-            let r = polynomial!(self, 1.0, FRAC_FACT[2..12]);
-            self * r
+            let x = self.abs();
+            let r = polynomial!(x, 1.0, FRAC_FACT[2..15]);
+            if self < 0.0 {
+                self * r * self.exp()
+            } else {
+                self * r
+            }
         }
     }
 
@@ -336,17 +341,16 @@ impl TwoFloat {
 
     /// Returns the natural logarithm of `1 + self`.
     ///
-    /// Uses Newton–Raphson iteration which depends on the `expm1` function,
-    /// so may not be fully accurate to the full precision of a `TwoFloat`.
+    /// Uses Newton–Raphson iteration which depends on the `expm1` function
     ///
     /// # Example
     ///
     /// ```
     /// # use twofloat::TwoFloat;
-    /// let a = TwoFloat::from(0.1);
+    /// let a = TwoFloat::from(-0.5);
     /// let b = a.ln_1p();
-    /// let c = 0.1f64.ln_1p();
-    /// assert!((b - c).abs() < 1e-10);
+    /// let c = -twofloat::consts::LN_2;//0.1f64.ln_1p();
+    /// assert!((b - c).abs() < 1e-29);
     /// ```
     pub fn ln_1p(self) -> Self {
         if self == 0.0 {
