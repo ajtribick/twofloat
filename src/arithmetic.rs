@@ -296,17 +296,15 @@ assign_ops! {
         *self = fast_two_sum(th, tl)
     }
 
-    /// Implements division of two `TwoFloat` values using Joldes et al.
-    /// (2017) Algorithm 18.
+    /// Former implements division from Joldes et al. (2017) Algorithm 18
+    /// Now taken from qd crate using long division
     fn DivAssign::div_assign<'a>(self: &mut TwoFloat, rhs: &'a TwoFloat) {
-        let th = rhs.hi.recip();
-        let rh = 1.0 - rhs.hi * th;
-        let rl = -(rhs.lo * th);
-        let (eh, el) = fast_two_sum(rh, rl).into();
-        let e = TwoFloat { hi: eh, lo: el };
-        let d = e * th;
-        let m = d + th;
-        *self *= m;
+        let q1 = self.hi / rhs.hi;
+        let mut r = *self - (rhs* q1);
+        let q2 = r.hi / rhs.hi;
+        r -=rhs* q2;
+        let q3 = r.hi / rhs.hi;
+        *self = renorm3(q1, q2, q3)
     }
 
     fn RemAssign::rem_assign<'b>(self: &mut TwoFloat, rhs: &'b f64) {
