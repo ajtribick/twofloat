@@ -60,6 +60,10 @@ pub fn no_overlap(a: f64, b: f64) -> bool {
 }
 
 impl TwoFloat {
+    /// Mantissa size of the double-double structure of TwoFloat
+    /// aka the number of digits in base 2
+    pub const MANTISSA: u32 = 106;
+
     /// Smallest finite `TwoFloat` value.
     pub const MIN: Self = Self {
         hi: f64::MIN,
