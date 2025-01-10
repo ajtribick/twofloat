@@ -10,7 +10,7 @@ use twofloat::{TwoFloat, TwoFloatError};
 const TEST_ITERS: usize = 10000;
 
 #[cfg(not(all(target_arch = "aarch64", target_os = "linux")))]
-const TEST_ITERS: usize = 100000;
+const TEST_ITERS: usize = 100_000;
 
 pub fn random_float() -> f64 {
     let mut engine = rand::thread_rng();
