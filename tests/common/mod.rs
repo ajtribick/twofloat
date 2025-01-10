@@ -10,7 +10,7 @@ use twofloat::{TwoFloat, TwoFloatError};
 const TEST_ITERS: usize = 10000;
 
 #[cfg(not(all(target_arch = "aarch64", target_os = "linux")))]
-const TEST_ITERS: usize = 100000;
+const TEST_ITERS: usize = 100_000;
 
 pub fn random_float() -> f64 {
     let mut engine = rand::thread_rng();
@@ -22,6 +22,21 @@ pub fn random_float() -> f64 {
     } else {
         -x
     }
+}
+
+pub fn random_ddouble() -> TwoFloat {
+    let mut rng = rand::thread_rng();
+    let mantissa_bits_hi: u64 =
+        (0..f64::MANTISSA_DIGITS).fold(0u64, |bits, n| bits + (rng.gen_range(0..=1) << n));
+    let mantissa_bits_lo: u64 =
+        (0..f64::MANTISSA_DIGITS).fold(0u64, |bits, n| bits + (rng.gen_range(0..=1) << n));
+    let exponent_bits: u64 = (0..11)
+        .fold(0u64, |bits, n| bits + (rng.gen_range(0..=1) << n))
+        .max(53);
+    let sgn: u64 = rng.gen_range(0..=1);
+    let x_hi = f64::from_bits(sgn << 63 | exponent_bits << 52 | mantissa_bits_hi);
+    let x_lo = f64::from_bits(sgn << 63 | (exponent_bits - 53) << 52 | mantissa_bits_lo);
+    TwoFloat::new_add(x_hi, x_lo)
 }
 
 pub fn repeated_test(mut test: impl FnMut()) {
@@ -121,6 +136,18 @@ where
         let b = random_float();
         if pred(a, b) {
             return (a, b);
+        }
+    }
+}
+
+pub fn get_valid_ddouble<F>(pred: F) -> TwoFloat
+where
+    F: Fn(TwoFloat) -> bool,
+{
+    loop {
+        let a = random_ddouble();
+        if pred(a) {
+            return a;
         }
     }
 }
