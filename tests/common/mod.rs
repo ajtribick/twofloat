@@ -146,7 +146,7 @@ where
 {
     loop {
         let a = random_ddouble();
-        if pred(a){
+        if pred(a) {
             return a;
         }
     }
