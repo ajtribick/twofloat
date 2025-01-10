@@ -10,7 +10,10 @@ use twofloat::{no_overlap, TwoFloat};
 #[macro_use]
 pub mod common;
 
-use common::{get_twofloat, get_valid_pair, get_valid_twofloat, random_float, repeated_test};
+use common::{
+    get_twofloat, get_valid_ddouble, get_valid_pair, get_valid_twofloat, random_float,
+    repeated_test,
+};
 
 // Tests for construction from two f64 values
 
@@ -23,14 +26,14 @@ fn new_add_test() {
 
         assert!(
             result.is_valid(),
-            "Result of new_add({}, {}) was invalid",
+            "Result of new_add({:.e}, {:.e}) was invalid",
             a,
             b
         );
         assert_eq!(
             expected,
             result.hi(),
-            "Result of new_add({}, {}) had unexpected high word",
+            "Result of new_add({:.e}, {:.e}) had unexpected high word",
             a,
             b
         );
@@ -46,14 +49,14 @@ fn new_sub_test() {
 
         assert!(
             result.is_valid(),
-            "Result of new_sub({}, {}) was invalid",
+            "Result of new_sub({:.e}, {:.e}) was invalid",
             a,
             b
         );
         assert_eq!(
             expected,
             result.hi(),
-            "Result of new_sub({}, {}) had unexpected high word",
+            "Result of new_sub({:.e}, {:.e}) had unexpected high word",
             a,
             b
         );
@@ -68,14 +71,14 @@ fn new_mul_test() {
 
     assert!(
         result.is_valid(),
-        "Result of new_mul({}, {}) was invalid",
+        "Result of new_mul({:.e}, {:.e}) was invalid",
         a,
         b
     );
     assert_eq!(
         expected,
         result.hi(),
-        "Result of new_mul({}, {}) had unexpected high word",
+        "Result of new_mul({:.e}, {:.e}) had unexpected high word",
         a,
         b
     );
@@ -89,7 +92,7 @@ fn new_div_test() {
 
         assert!(
             result.is_valid(),
-            "Result of new_div({}, {}) was invalid",
+            "Result of new_div({:.e}, {:.e}) was invalid",
             a,
             b
         );
@@ -98,11 +101,42 @@ fn new_div_test() {
             result.hi(),
             a / b,
             10,
-            "Incorrect result of new_div({}, {})",
+            "Incorrect result of new_div({:.e}, {:.e})",
             a,
             b
         );
     });
+}
+
+#[test]
+fn div_precision_test() {
+    repeated_test(|| {
+        // Limit the exponent to be less then 1e16 away from the maximal exponent
+        // to allow a complete division
+        let expected = get_valid_ddouble(|x| x.hi().log10().abs() < 290.0);
+        let one: TwoFloat = 1.into();
+        // Use f64/TwoFloat
+        let result = 1.0 / (1.0 / expected);
+        let difference = ((result - expected) / expected).abs();
+        assert!(
+            difference < 1e-31,
+            "1/(1/a) != a (diff {}) ({:.e}, {:.e}) for f64/TwoFloat",
+            difference,
+            expected,
+            result,
+        );
+
+        // Use TwoFloat/TwoFloat
+        let result = one / (one / expected);
+        let difference = ((result - expected) / expected).abs();
+        assert!(
+            difference < 1e-31,
+            "1/(1/a) != a (diff {}) ({:.e}, {:.e}) for TwoFloat/TwoFloat",
+            difference,
+            expected,
+            result,
+        );
+    })
 }
 
 // Test for negation operator
