@@ -23,15 +23,6 @@ impl fmt::Display for TwoFloat {
 }
 
 impl TwoFloat {
-    pub fn normalize(&mut self) {
-        let u = self.hi + self.lo;
-        let mut v = self.hi - u;
-        v += self.lo;
-
-        self.hi = u;
-        self.lo = v;
-    }
-
     /// Compute number using BigFloat assuming a mantisse of size 53*2-1
     fn to_rug_float(&self) -> Float {
         let p = 106; // precision
