@@ -27,7 +27,7 @@ std = []
 hexf = "0.2"
 libm = { version = "0.2.6" }
 num-traits = { version = "0.2.14", default-features = false, features = ["libm"] }
-serde = { version = "1.0", default-features = false, optional = true }
+rug = "1.26.1"
 
 [target.'cfg(all(windows, target_env = "gnu"))'.dependencies]
 libm = "0.2.6"
