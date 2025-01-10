@@ -121,15 +121,19 @@ fn ln_1p_test() {
 }
 
 #[test]
-fn exp_ln_test() {
+fn ln_exp_test() {
     let mut rng = rand::thread_rng();
     let src_dist = rand::distributions::Uniform::new(-600.0, 600.0);
 
     repeated_test(|| {
         let expected = TwoFloat::from(rng.sample(src_dist));
-        println!("{:e}", expected);
 
-        let result = expected.exp().ln();
+        // Compensate for when the original number is small
+        let result = if expected.abs() < 0.25 {
+            expected.exp_m1().ln_1p()
+        } else {
+            expected.exp().ln()
+        };
 
         assert!(
             result.is_valid(),
