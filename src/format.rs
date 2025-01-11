@@ -59,9 +59,13 @@ impl TwoFloat {
     pub fn as_i128_pair(&self) -> Result<(i128, i128), TwoFloatError> {
         let precision = 32;
 
+        // Normalize representation to have two non-overlapping f64
+        let mut ddouble = *self;
+        ddouble.normalize();
+
         // HIGH parto of TwoFloat
         // Obtain precise string of 32 digits from f64 mantissa and convert into i128
-        let str_hi = format!("{:.*e}", precision, self.hi());
+        let str_hi = format!("{:.*e}", precision, ddouble.hi());
         let num_exp_hi = str_hi
             .replace(".", "")
             .split("e")
@@ -70,10 +74,10 @@ impl TwoFloat {
 
         // LOW parto of TwoFloat
         // Obtain precise string of 32 digits from f64 mantissa and convert into i128
-        let num_exp_lo = if self.lo() == 0.0 {
+        let num_exp_lo = if ddouble.lo() == 0.0 {
             vec![0, num_exp_hi[1]]
         } else {
-            let str_lo = format!("{:.*e}", precision, self.lo());
+            let str_lo = format!("{:.*e}", precision, ddouble.lo());
             str_lo
                 .replace(".", "")
                 .splitn(2, "e")
@@ -165,12 +169,15 @@ mod test {
     #[test]
     fn display_test() {
         let value = TwoFloat { hi: 1.0, lo: 0.4 };
-        assert_eq!(format!("{:.29}", value), "1.4000000000000000222044604925");
-        assert_eq!(format!("{:.29}", -value), "-1.4000000000000000222044604925");
-        assert_eq!(format!("{:+.10}", value), "+1.400000000");
-        assert_eq!(format!("{:.2}", value), "1.4");
-        assert_eq!(format!("{:.2}", -value), "-1.4");
-        assert_eq!(format!("{:+.2}", value), "+1.4");
+        assert_eq!(format!("{:.29}", value), "1.40000000000000002220446049250");
+        assert_eq!(
+            format!("{:.29}", -value),
+            "-1.40000000000000002220446049250"
+        );
+        assert_eq!(format!("{:+.10}", value), "+1.4000000000");
+        assert_eq!(format!("{:.2}", value), "1.40");
+        assert_eq!(format!("{:.2}", -value), "-1.40");
+        assert_eq!(format!("{:+.2}", value), "+1.40");
     }
 
     #[test]
@@ -178,19 +185,22 @@ mod test {
         let value = TwoFloat { hi: 1.0, lo: -0.3 };
         assert_eq!(
             format!("{:e}", value),
-            "7.0000000000000001110223024625157e-1"
+            "7.00000000000000011102230246251565e-1"
         );
         assert_eq!(
             format!("{:e}", -value),
-            "-7.0000000000000001110223024625157e-1"
+            "-7.00000000000000011102230246251565e-1"
         );
         assert_eq!(
             format!("{:+e}", value),
-            "+7.0000000000000001110223024625157e-1"
+            "+7.00000000000000011102230246251565e-1"
         );
-        assert_eq!(format!("{:.2e}", value), "7.0e-1");
-        assert_eq!(format!("{:.2e}", -value), "-7.0e-1");
-        assert_eq!(format!("{:+.2e}", value), "+7.0e-1");
+        assert_eq!(format!("{:.2e}", value), "7.00e-1");
+        assert_eq!(format!("{:.2e}", -value), "-7.00e-1");
+        assert_eq!(format!("{:+.2e}", value), "+7.00e-1");
+        assert_eq!(format!("{:.0e}", value), "7e-1");
+        assert_eq!(format!("{:.0e}", -value), "-7e-1");
+        assert_eq!(format!("{:+.0e}", value), "+7e-1");
     }
 
     #[test]
@@ -198,23 +208,23 @@ mod test {
         let value = TwoFloat { hi: 1.0, lo: 0.3 };
         assert_eq!(
             format!("{:E}", value),
-            "1.2999999999999999888977697537484E0"
+            "1.29999999999999998889776975374844E0"
         );
         assert_eq!(
             format!("{:E}", -value),
-            "-1.2999999999999999888977697537484E0"
+            "-1.29999999999999998889776975374844E0"
         );
         assert_eq!(
             format!("{:+E}", value),
-            "+1.2999999999999999888977697537484E0"
+            "+1.29999999999999998889776975374844E0"
         );
-        assert_eq!(format!("{:.2E}", value), "1.3E0");
-        assert_eq!(format!("{:.2E}", -value), "-1.3E0");
-        assert_eq!(format!("{:+.2E}", value), "+1.3E0");
+        assert_eq!(format!("{:.2E}", value), "1.29E0");
+        assert_eq!(format!("{:.2E}", -value), "-1.29E0");
+        assert_eq!(format!("{:+.2E}", value), "+1.29E0");
     }
 
     #[test]
-    fn precision_test() {
+    fn representation_test() {
         // Check representation of TwoFloat with a mantissa representing 2^-200
         let a = TwoFloat::new_add(2f64.powi(-200), 0.0);
         assert_eq!(a.hi(), 6.223015277861142e-61);
