@@ -89,9 +89,15 @@ mod base;
 pub mod consts;
 
 mod convert;
-mod format;
 mod functions;
 mod num_integration;
+
+/// Plain format of hi and lo with no_std
+#[cfg(not(feature = "std"))]
+mod format;
+/// Use pretty format when std is enabled
+#[cfg(feature = "std")]
+mod format_std;
 
 #[cfg(feature = "serde")]
 mod serialization;
@@ -115,6 +121,7 @@ pub struct TwoFloat {
 pub enum TwoFloatError {
     /// Indicates invalid conversion to/from `TwoFloat`
     ConversionError,
+    FmtError,
     ParseError,
 }
 
@@ -122,6 +129,7 @@ impl fmt::Display for TwoFloatError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::ConversionError => f.pad("invalid TwoFloat conversion"),
+            Self::FmtError => f.pad("TwoFloat fmt not supported"),
             Self::ParseError => f.pad("parsing not supported"),
         }
     }

@@ -77,6 +77,13 @@ impl TwoFloat {
     /// assert!((c + 125.0).abs() < 1e-9, "{}", c);
     /// ```
     pub fn powf(self, y: Self) -> Self {
+        //let mut x = Self::from(libm::log(self.hi));
+        //let (n_integer, n_fractional) = libm::modf(y.hi);
+        //let x_integer = self.powi(n_integer as i32);
+
+        //let mut y = y;
+        //y.hi = n_fractional;
+
         match (self == 0.0, y == 0.0) {
             (true, true) => Self::NAN,
             (true, false) => Self::from(0.0),
@@ -88,6 +95,7 @@ impl TwoFloat {
                     Self::NAN
                 } else {
                     let abs_result = (y * self.abs().ln()).exp();
+                    //let abs_result = self.powi(y.hi as i32) * self.powi(y.lo as i32);
                     let low_trunc = if libm::trunc(y.lo) == 0.0 {
                         libm::trunc(y.hi)
                     } else {
@@ -102,5 +110,6 @@ impl TwoFloat {
                 }
             }
         }
+        //x * x_integer
     }
 }
