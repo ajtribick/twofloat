@@ -89,9 +89,15 @@ mod base;
 pub mod consts;
 
 mod convert;
-mod format;
 mod functions;
 mod num_integration;
+
+/// Plain format of hi and lo with no_std
+#[cfg(not(feature = "std"))]
+mod format;
+/// Use pretty format when std is enabled
+#[cfg(feature = "std")]
+mod format_std;
 
 #[cfg(feature = "serde")]
 mod serialization;
