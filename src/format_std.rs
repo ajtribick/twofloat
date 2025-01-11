@@ -1,9 +1,26 @@
+use num_traits::Float;
+
 use crate::{TwoFloat, TwoFloatError};
 use core::convert::TryFrom;
 use core::fmt;
 
 impl fmt::Display for TwoFloat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Check if the number is valid
+        if !self.is_valid() {
+            if self.is_nan() {
+                return write!(f, "NaN");
+            }
+            if self.is_infinite() {
+                let sgn = match (f.sign_plus(), self.hi() < 0.0) {
+                    (_, true) => "-",
+                    (true, false) => "+",
+                    (false, false) => "",
+                };
+                return write!(f, "{}inf", sgn);
+            }
+        }
+
         // Convert TwoFloat to a i128 pair
         let (num, exp) = self.as_i128_pair().unwrap();
         let p = f.precision().unwrap_or(32).min(32);
@@ -102,6 +119,21 @@ impl TwoFloat {
 
 impl fmt::LowerExp for TwoFloat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Check if the number is valid
+        if !self.is_valid() {
+            if self.is_nan() {
+                return write!(f, "NaN");
+            }
+            if self.is_infinite() {
+                let sgn = match (f.sign_plus(), self.hi() < 0.0) {
+                    (_, true) => "-",
+                    (true, false) => "+",
+                    (false, false) => "",
+                };
+                return write!(f, "{}inf", sgn);
+            }
+        }
+
         // Convert TwoFloat to a i128 pair
         let (num, exp) = self.as_i128_pair().unwrap();
         let p = f.precision().unwrap_or(32).min(32);
@@ -133,6 +165,21 @@ impl fmt::LowerExp for TwoFloat {
 
 impl fmt::UpperExp for TwoFloat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Check if the number is valid
+        if !self.is_valid() {
+            if self.is_nan() {
+                return write!(f, "NaN");
+            }
+            if self.is_infinite() {
+                let sgn = match (f.sign_plus(), self.hi() < 0.0) {
+                    (_, true) => "-",
+                    (true, false) => "+",
+                    (false, false) => "",
+                };
+                return write!(f, "{}inf", sgn);
+            }
+        }
+
         // Convert TwoFloat to a i128 pair
         let (num, exp) = self.as_i128_pair().unwrap();
         let p = f.precision().unwrap_or(32).min(32);
@@ -165,6 +212,43 @@ impl fmt::UpperExp for TwoFloat {
 #[cfg(all(feature = "std", test))]
 mod test {
     use crate::TwoFloat;
+
+    #[test]
+    fn display_nan_test() {
+        let value = TwoFloat::new_add(f64::INFINITY, 0.0);
+        assert_eq!(format!("{}", value), "NaN");
+        assert_eq!(format!("{:+}", value), "NaN");
+        assert_eq!(format!("{:e}", value), "NaN");
+        assert_eq!(format!("{:+e}", value), "NaN");
+        assert_eq!(format!("{:E}", value), "NaN");
+        assert_eq!(format!("{:+E}", value), "NaN");
+
+        let value = TwoFloat::new_add(f64::NAN, 0.0);
+        assert_eq!(format!("{}", value), "NaN");
+        assert_eq!(format!("{:+}", value), "NaN");
+        assert_eq!(format!("{:e}", value), "NaN");
+        assert_eq!(format!("{:+e}", value), "NaN");
+        assert_eq!(format!("{:E}", value), "NaN");
+        assert_eq!(format!("{:+E}", value), "NaN");
+    }
+
+    #[test]
+    fn display_inf_test() {
+        let value = TwoFloat::new_add(1e100, 0.0).exp();
+        assert_eq!(format!("{}", value), "inf");
+        assert_eq!(format!("{:+}", value), "+inf");
+        assert_eq!(format!("{:e}", value), "inf");
+        assert_eq!(format!("{:+e}", value), "+inf");
+        assert_eq!(format!("{:E}", value), "inf");
+        assert_eq!(format!("{:+E}", value), "+inf");
+
+        assert_eq!(format!("{}", -value), "-inf");
+        assert_eq!(format!("{:+}", -value), "-inf");
+        assert_eq!(format!("{:e}", -value), "-inf");
+        assert_eq!(format!("{:+e}", -value), "-inf");
+        assert_eq!(format!("{:E}", -value), "-inf");
+        assert_eq!(format!("{:+E}", -value), "-inf");
+    }
 
     #[test]
     fn display_test() {
