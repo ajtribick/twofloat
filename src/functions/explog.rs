@@ -947,6 +947,8 @@ impl TwoFloat {
             }
         } else if self.hi == 0.0 {
             Self::from(1.0)
+        } else if self.hi.is_nan() {
+            Self::NAN
         } else {
             // Compute the exponential of x = y/2 + z
             // Where y = round(2*x) giving z <= 0.25
