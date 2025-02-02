@@ -4,12 +4,6 @@ use rand::Rng;
 
 use twofloat::{TwoFloat, TwoFloatError};
 
-// This runs substantially slower than the other CI targets, so reduce the
-// number of iterations
-#[cfg(all(target_arch = "aarch64", target_os = "linux"))]
-const TEST_ITERS: usize = 10000;
-
-#[cfg(not(all(target_arch = "aarch64", target_os = "linux")))]
 const TEST_ITERS: usize = 100_000;
 
 pub fn random_float() -> f64 {
