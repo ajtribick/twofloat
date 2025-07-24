@@ -1,12 +1,37 @@
 # Changelog
 
+## Version 0.8.3
+
+* Fix `no_std` builds
+
+## Version 0.8.2
+
+* Use custom serde trait implementations
+* Add `to_f64` to the `ToPrimitive` implementation. (Thanks: apelloni)
+* Fix `powf` for negative values. (Thanks: apelloni)
+
+## Version 0.8.1
+
+* Re-enable use of `std::mul_add` if the `std` feature is enabled (except on
+  MinGW).
+
+## Version 0.8
+
+* Always use libm functions.
+* `math_funcs` feature no longer requires `std`.
+* `TwoFloat` is now `#[repr(C)]`.
+
+## Version 0.7
+
+* Support `no_std` builds. (Thanks: joseluis)
+
 ## Version 0.6.1
 
 * Re-enable MinGW support via libm.
 
 ## Version 0.6
 
-* Add const constructor `from_f64`.
+* Add const constructor `from_f64`. (Thanks: joseluis)
 * Breaking change: remove MinGW support due to incorrect `fma` implementation
 * Breaking change: fix definition of no_overlap to match definition 1.4 in
   Joldes et al. (2017).
@@ -17,7 +42,7 @@
 * Add operator overloads for `&f64`.
 * Breaking change: use `serde` as the feature flag name.
 * Breaking change: use helper struct for Serde serialization.
-* Integrate with `num_traits` crate.
+* Integrate with num_traits crate.
 * Internal: use hexf to specify constants.
 
 ## Version 0.4.1

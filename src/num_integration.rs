@@ -3,7 +3,7 @@ use core::{convert::TryFrom, num::FpCategory};
 use hexf::hexf64;
 use num_traits::{Inv, Pow};
 
-use crate::{consts, Math, TwoFloat, TwoFloatError};
+use crate::{consts, TwoFloat, TwoFloatError};
 
 impl num_traits::Num for TwoFloat {
     type FromStrRadixErr = TwoFloatError;
@@ -217,13 +217,17 @@ impl num_traits::ToPrimitive for TwoFloat {
             _ => None,
         }
     }
+    #[inline]
+    fn to_f64(&self) -> Option<f64> {
+        Some(self.into())
+    }
 }
 
 impl num_traits::NumCast for TwoFloat {
     fn from<T: num_traits::ToPrimitive>(n: T) -> Option<Self> {
         const INT_THRESHOLD: f64 = hexf64!("0x1.0p53");
         if let Some(f) = n.to_f64() {
-            if Math::abs(f) <= INT_THRESHOLD {
+            if libm::fabs(f) <= INT_THRESHOLD {
                 Some(f.into())
             } else if let Some(i) = n.to_i128() {
                 Some(i.into())
@@ -479,7 +483,6 @@ impl num_traits::float::FloatCore for TwoFloat {
     }
 }
 
-#[cfg(feature = "math_funcs")]
 impl num_traits::Float for TwoFloat {
     fn infinity() -> Self {
         TwoFloat::INFINITY

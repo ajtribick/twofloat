@@ -1,13 +1,11 @@
 [package]
 name = "twofloat"
-version = "0.6.1"
-authors = ["Andrew Tribick"]
-
+version = "0.8.3"
+authors = ["Andrew Tribick", "Individual contributors"]
 keywords = ["float", "precision", "numerics", "floating-point", "arithmetic"]
 categories = ["algorithms", "mathematics", "science"]
-exclude = [".gitignore", "sollya", ".github"]
+exclude = [".github", ".gitignore", "ci-workdir", "sollya", "scripts"]
 edition = "2018"
-
 readme = "README.md"
 license = "BSD-3-Clause"
 description = "Double-double arithmetic functionality."
@@ -21,16 +19,16 @@ name = "twofloat"
 test = true
 
 [features]
-default = ["std", "math_funcs", "simba"]
-math_funcs = ["std"]
-std = ["num-traits/std"]
+default = ["std", "math_funcs"]
+math_funcs = []
+std = []
 
 [dependencies]
 approx = "0.5.1"
 hexf = "0.2"
-libm = { version = "0.2.6", optional = true }
-num-traits = { version = "0.2.14", default-features = false }
-serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
+libm = { version = "0.2.6" }
+num-traits = { version = "0.2.14", default-features = false, features = ["libm"] }
+serde = { version = "1.0", default-features = false, optional = true }
 simba = { version = "0.7", optional = true }
 
 [target.'cfg(all(windows, target_env = "gnu"))'.dependencies]

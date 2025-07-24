@@ -4,7 +4,30 @@ use core::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
 
-use crate::{Math, TwoFloat};
+use crate::TwoFloat;
+
+// MinGW FMA seems to be inaccurate, use libm even if std is enabled.
+#[cfg(all(feature = "std", not(all(windows, target_env = "gnu"))))]
+#[inline(always)]
+fn fma(x: f64, y: f64, z: f64) -> f64 {
+    f64::mul_add(x, y, z)
+}
+
+#[cfg(not(all(feature = "std", not(all(windows, target_env = "gnu")))))]
+#[inline(always)]
+fn fma(x: f64, y: f64, z: f64) -> f64 {
+    libm::fma(x, y, z)
+}
+
+/// Renormalization ensures that the components of the returned tuple are arranged in such a
+/// way that the absolute value of the last component is no more than half the ULP of the
+/// first.
+#[inline]
+pub fn renorm3(a: f64, b: f64, c: f64) -> TwoFloat {
+    let u = fast_two_sum(a, b);
+    let v = fast_two_sum(c, u.hi);
+    fast_two_sum(v.hi, u.lo + v.lo)
+}
 
 pub(crate) fn fast_two_sum(a: f64, b: f64) -> TwoFloat {
     // Joldes et al. (2017) Algorithm 1
@@ -43,7 +66,7 @@ impl TwoFloat {
         let p = a * b;
         Self {
             hi: p,
-            lo: Math::fma(a, b, -p),
+            lo: fma(a, b, -p),
         }
     }
 
@@ -128,7 +151,7 @@ binary_ops! {
     /// (2017) Algorithm 9.
     fn Mul::mul<'a, 'b>(self: &'a TwoFloat, rhs: &'b f64) -> TwoFloat {
         let (ch, cl1) = TwoFloat::new_mul(self.hi, *rhs).into();
-        let cl3 = Math::fma(self.lo, *rhs, cl1);
+        let cl3 = fma(self.lo, *rhs, cl1);
         fast_two_sum(ch, cl3)
     }
 
@@ -136,7 +159,7 @@ binary_ops! {
     /// (2017) Algorithm 9.
     fn Mul::mul<'a, 'b>(self: &'a f64, rhs: &'b TwoFloat) -> TwoFloat {
         let (ch, cl1) = TwoFloat::new_mul(rhs.hi, *self).into();
-        let cl3 = Math::fma(rhs.lo, *self, cl1);
+        let cl3 = fma(rhs.lo, *self, cl1);
         fast_two_sum(ch, cl3)
     }
 
@@ -145,8 +168,8 @@ binary_ops! {
     fn Mul::mul<'a, 'b>(self: &'a TwoFloat, rhs: &'b TwoFloat) -> TwoFloat {
         let (ch, cl1) = TwoFloat::new_mul(self.hi, rhs.hi).into();
         let tl0 = self.lo * rhs.lo;
-        let tl1 = Math::fma(self.hi, rhs.lo, tl0);
-        let cl2 = Math::fma(self.lo, rhs.hi, tl1);
+        let tl1 = fma(self.hi, rhs.lo, tl0);
+        let cl2 = fma(self.lo, rhs.hi, tl1);
         let cl3 = cl1 + cl2;
         fast_two_sum(ch, cl3)
     }
@@ -163,33 +186,26 @@ binary_ops! {
         fast_two_sum(th, tl)
     }
 
-    /// Implements division of `f64` and `TwoFloat` using Joldes et al. (2017)
-    /// Algorithm 18 modified for the left-hand side having a zero value in
-    /// the low word.
+    /// Former implements division from Joldes et al. (2017) Algorithm 18
+    /// Now taken from qd crate using long division
     fn Div::div<'a, 'b>(self: &'a f64, rhs: &'b TwoFloat) -> TwoFloat {
-        let th = rhs.hi.recip();
-        let rh = 1.0 - rhs.hi * th;
-        let rl = -(rhs.lo * th);
-        let (eh, el) = fast_two_sum(rh, rl).into();
-        let e = TwoFloat { hi: eh, lo: el };
-        let d = e * th;
-        let m = d + th;
-        let (ch, cl1) = TwoFloat::new_mul(m.hi, *self).into();
-        let cl3 = Math::fma(m.lo, *self, cl1);
-        fast_two_sum(ch, cl3)
+                let q1 = self / rhs.hi;
+                let mut r = self - (rhs* q1);
+                let q2 = r.hi / rhs.hi;
+                r -=rhs* q2;
+                let q3 = r.hi / rhs.hi;
+                renorm3(q1, q2, q3)
     }
 
-    /// Implements division of two `TwoFloat` values using Joldes et al.
-    /// (2017) Algorithm 18.
+    /// Former implements division from Joldes et al. (2017) Algorithm 18
+    /// Now taken from qd crate using long division
     fn Div::div<'a, 'b>(self: &'a TwoFloat, rhs: &'b TwoFloat) -> TwoFloat {
-        let th = rhs.hi.recip();
-        let rh = 1.0 - rhs.hi * th;
-        let rl = -(rhs.lo * th);
-        let (eh, el) = fast_two_sum(rh, rl).into();
-        let e = TwoFloat { hi: eh, lo: el };
-        let d = e * th;
-        let m = d + th;
-        self * m
+                let q1 = self.hi / rhs.hi;
+                let mut r = self - (rhs* q1);
+                let q2 = r.hi / rhs.hi;
+                r -=rhs* q2;
+                let q3 = r.hi / rhs.hi;
+                renorm3(q1, q2, q3)
     }
 
     fn Rem::rem<'a, 'b>(self: &'a TwoFloat, rhs: &'b f64) -> TwoFloat {
@@ -253,7 +269,7 @@ assign_ops! {
     /// (2017) Algorithm 9.
     fn MulAssign::mul_assign<'a>(self: &mut TwoFloat, rhs: &'a f64) {
         let (ch, cl1) = TwoFloat::new_mul(self.hi, *rhs).into();
-        let cl3 = Math::fma(self.lo, *rhs, cl1);
+        let cl3 = fma(self.lo, *rhs, cl1);
         *self = fast_two_sum(ch, cl3);
     }
 
@@ -262,8 +278,8 @@ assign_ops! {
     fn MulAssign::mul_assign<'a>(self: &mut TwoFloat, rhs: &'a TwoFloat) {
         let (ch, cl1) = TwoFloat::new_mul(self.hi, rhs.hi).into();
         let tl0 = self.lo * rhs.lo;
-        let tl1 = Math::fma(self.hi, rhs.lo, tl0);
-        let cl2 = Math::fma(self.lo, rhs.hi, tl1);
+        let tl1 = fma(self.hi, rhs.lo, tl0);
+        let cl2 = fma(self.lo, rhs.hi, tl1);
         let cl3 = cl1 + cl2;
         *self = fast_two_sum(ch, cl3)
     }
@@ -280,17 +296,15 @@ assign_ops! {
         *self = fast_two_sum(th, tl)
     }
 
-    /// Implements division of two `TwoFloat` values using Joldes et al.
-    /// (2017) Algorithm 18.
+    /// Former implements division from Joldes et al. (2017) Algorithm 18
+    /// Now taken from qd crate using long division
     fn DivAssign::div_assign<'a>(self: &mut TwoFloat, rhs: &'a TwoFloat) {
-        let th = rhs.hi.recip();
-        let rh = 1.0 - rhs.hi * th;
-        let rl = -(rhs.lo * th);
-        let (eh, el) = fast_two_sum(rh, rl).into();
-        let e = TwoFloat { hi: eh, lo: el };
-        let d = e * th;
-        let m = d + th;
-        *self *= m;
+        let q1 = self.hi / rhs.hi;
+        let mut r = *self - (rhs* q1);
+        let q2 = r.hi / rhs.hi;
+        r -=rhs* q2;
+        let q3 = r.hi / rhs.hi;
+        *self = renorm3(q1, q2, q3)
     }
 
     fn RemAssign::rem_assign<'b>(self: &mut TwoFloat, rhs: &'b f64) {

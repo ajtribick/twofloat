@@ -32,14 +32,19 @@ as preliminary.
 Operations on non-finite values are not supported. At the moment this is not
 automatically checked. The `is_valid()` method is provided for this purpose.
 
+If the `std` feature is enabled (as it is by default), the fused multiply-add
+operation from the standard library is used. This *may* be more performant if
+the target architecture has a dedicated instruction for this. See the
+documentation of [`f64::mul_add`] for details. Otherwise the libm
+implementation is used.
+
 If the `serde` feature is enabled, serialization and deserialization is
 possible through the Serde library.
 
 ## Known issues
 
-This library depends on the `std` implementations of the floating point
-mathematical functions, which in turn depend on the C standard library
-implementation, which may have variations between platforms.
+* The MinGW `fma` implementation appears to give incorrect results in some
+  cases, so the libm function is always used on this platform.
 
 ## References
 
@@ -67,10 +72,6 @@ implementation, which may have variations between platforms.
 
 use core::fmt;
 
-mod math_util;
-mod simba;
-pub(crate) use math_util::Math;
-
 #[macro_use]
 mod ops_util;
 
@@ -91,36 +92,20 @@ mod format;
 mod functions;
 mod num_integration;
 
+#[cfg(feature = "serde")]
+mod serialization;
+
+#[cfg(feature = "simba")]
+mod simba;
+
 pub use base::no_overlap;
 
-#[cfg(feature = "serde")]
-mod serde_helper {
-    use super::{TwoFloat, TwoFloatError};
-
-    #[derive(serde::Deserialize)]
-    #[serde(rename = "TwoFloat")]
-    pub(super) struct TwoFloatDeserializeHelper {
-        hi: f64,
-        lo: f64,
-    }
-
-    impl core::convert::TryFrom<TwoFloatDeserializeHelper> for TwoFloat {
-        type Error = TwoFloatError;
-
-        fn try_from(value: TwoFloatDeserializeHelper) -> Result<Self, Self::Error> {
-            TwoFloat::try_from((value.hi, value.lo))
-        }
-    }
-}
+pub mod iter;
 
 /// Represents a two-word floating point type, represented as the sum of two
 /// non-overlapping f64 values.
 #[derive(Debug, Default, Clone, Copy)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "serde",
-    serde(try_from = "serde_helper::TwoFloatDeserializeHelper")
-)]
+#[repr(C)]
 pub struct TwoFloat {
     pub(crate) hi: f64,
     pub(crate) lo: f64,

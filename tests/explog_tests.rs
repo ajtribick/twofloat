@@ -4,16 +4,13 @@
 pub mod common;
 
 use common::*;
-use hexf::hexf64;
 use rand::Rng;
 use twofloat::TwoFloat;
-
-const EXP_UPPER_LIMIT: f64 = hexf64!("0x1.62e42fefa39efp9"); // ln(0x1.0p1024)
 
 #[test]
 fn exp_test() {
     let mut rng = rand::thread_rng();
-    let src_dist = rand::distributions::Uniform::new(-600.0, EXP_UPPER_LIMIT);
+    let src_dist = rand::distributions::Uniform::new(-600_f64, 600.0);
 
     repeated_test(|| {
         let a = rng.sample(src_dist);
@@ -27,8 +24,8 @@ fn exp_test() {
         let difference = ((exp_b - exp_a) / exp_a).abs();
 
         assert!(
-            difference < 1e-10,
-            "Mismatch in exp({}): {} vs {:?}",
+            difference < 1e-15,
+            "Mismatch in exp({}): {} vs {}",
             a,
             exp_a,
             exp_b
@@ -50,11 +47,11 @@ fn exp_m1_test() {
 
         assert!(exp_b.is_valid(), "exp_m1({}) produced invalid value", a);
 
-        let difference = exp_b - exp_a;
+        let difference = ((exp_b - exp_a) / exp_a).abs();
 
         assert!(
-            difference < 1e-10,
-            "Mismatch in exp({}): {} vs {:?}",
+            difference < 1e-14,
+            "Mismatch in exp({}): {:e} vs {}",
             a,
             exp_a,
             exp_b
@@ -65,7 +62,7 @@ fn exp_m1_test() {
 #[test]
 fn ln_test() {
     let mut rng = rand::thread_rng();
-    let src_dist = rand::distributions::Uniform::new(f64::from_bits(1u64), f64::MAX);
+    let src_dist = rand::distributions::Uniform::new(0f64, 1e300);
 
     repeated_test(|| {
         let a = rng.sample(src_dist);
@@ -74,13 +71,13 @@ fn ln_test() {
         let ln_a = a.ln();
         let ln_b = b.ln();
 
-        assert!(ln_b.is_valid(), "ln({}) produced invalid value", a);
+        assert!(ln_b.is_valid(), "ln({:e}) produced invalid value", a);
 
-        let difference = (ln_b - ln_a).abs();
+        let difference = ((ln_b - ln_a) / ln_a).abs();
 
         assert!(
-            difference < 1e-10,
-            "Mismatch in ln({}): {} vs {:?}",
+            difference < 1e-16,
+            "Mismatch in ln({:e}): {} vs {:?}",
             a,
             ln_a,
             ln_b
@@ -93,14 +90,14 @@ fn ln_negative_test() {
     repeated_test(|| {
         let a = get_valid_twofloat(|x, _| x < 0.0);
         let result = a.ln();
-        assert!(!result.is_valid(), "ln({:?}) produced a valid result", a);
+        assert!(!result.is_valid(), "ln({:e}) produced a valid result", a);
     })
 }
 
 #[test]
 fn ln_1p_test() {
     let mut rng = rand::thread_rng();
-    let src_dist = rand::distributions::Uniform::new(-1.0 + f64::EPSILON, f64::MAX);
+    let src_dist = rand::distributions::Uniform::new(-1.0f64, 1e300);
 
     repeated_test(|| {
         let a = rng.sample(src_dist);
@@ -109,16 +106,49 @@ fn ln_1p_test() {
         let ln_a = a.ln_1p();
         let ln_b = b.ln_1p();
 
-        assert!(ln_b.is_valid(), "ln({}) produced invalid value", a);
+        assert!(ln_b.is_valid(), "ln({:e}) produced invalid value", a);
 
-        let difference = (ln_b - ln_a).abs();
+        let difference = ((ln_b - ln_a) / ln_a).abs();
 
         assert!(
-            difference < 1e-10,
-            "Mismatch in ln({}): {} vs {:?}",
+            difference < 1e-16,
+            "Mismatch in ln({:e}): {} vs {:?}",
             a,
             ln_a,
             ln_b
+        );
+    });
+}
+
+#[test]
+fn ln_exp_test() {
+    let mut rng = rand::thread_rng();
+    let src_dist = rand::distributions::Uniform::new(-600.0, 600.0);
+
+    repeated_test(|| {
+        let expected = TwoFloat::from(rng.sample(src_dist));
+
+        // Compensate for when the original number is small
+        let result = if expected.abs() < 0.25 {
+            expected.exp_m1().ln_1p()
+        } else {
+            expected.exp().ln()
+        };
+
+        assert!(
+            result.is_valid(),
+            "ln(exp({})) produced invalid value",
+            expected
+        );
+
+        let difference = ((result - expected) / expected).abs();
+
+        assert!(
+            difference < 1e-30,
+            "Mismatch {}: {:?} vs {:?}",
+            difference,
+            expected,
+            result,
         );
     });
 }

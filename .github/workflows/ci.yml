@@ -1,76 +1,123 @@
 name: ci
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ main ]
+    branches:
+      - main
+    tags:
+      - "v*"
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
 
 jobs:
-  test:
-    name: Tests
+  format_check:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - uses: actions/checkout@v4
+      - run: cargo fmt -- --check
+
+  lint_check:
+    name: Check clippy warnings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - uses: actions/checkout@v4
+      - run: cargo clippy --all-targets --all-features -- -Dwarnings
+
+  build:
+    name: ${{ matrix.job.target }} (${{ matrix.features.name }})
+    runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
       matrix:
-        rust: [stable, nightly]
-        platform:
-          - target: x86_64-pc-windows-msvc
-            os: windows-latest
-          - target: i686-pc-windows-msvc
-            os: windows-latest
-          - target: x86_64-pc-windows-gnu
-            os: windows-latest
-            host: -x86_64-pc-windows-gnu
-          - target: i686-pc-windows-gnu
-            os: windows-latest
-            host: -i686-pc-windows-gnu
-          - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
-          - target: i686-unknown-linux-gnu
-            os: ubuntu-latest
-          - target: x86_64-apple-darwin
-            os: macos-latest
-
+        job:
+          - { target: aarch64-apple-darwin,      os: macos-latest                    }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-24.04-arm                }
+          - { target: i686-pc-windows-msvc,      os: windows-latest                  }
+          - { target: i686-unknown-linux-gnu,    os: ubuntu-latest,  use-cross: true }
+          - { target: x86_64-apple-darwin,       os: macos-13                        }
+          - { target: x86_64-pc-windows-gnu,     os: windows-latest                  }
+          - { target: x86_64-pc-windows-msvc,    os: windows-latest                  }
+          - { target: x86_64-unknown-linux-gnu,  os: ubuntu-latest                   }
+        features:
+          - { name: "std",    extra_args: "--features serde"                                  }
+          - { name: "no_std", extra_args: "--no-default-features --features math_funcs,serde" }
     env:
-      RUST_BACKTRACE: 1
-      CARGO_INCREMENTAL: 0
-      CARGO_TERM_COLOR: always
-      OPTIONS: --all-features
-      RUSTFLAGS: "-C debuginfo=0 --deny warnings"
-
-    runs-on: ${{ matrix.platform.os }}
+      CARGO_CMD: cargo
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@v1
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: ${{ matrix.rust }}${{ matrix.platform.host }}
-          target: ${{ matrix.platform.target }}
-          components: clippy, rustfmt
+          targets: ${{ matrix.job.target }}
 
-      - name: Install GCC multilib
-        if: (matrix.platform.os == 'ubuntu-latest') && contains(matrix.platform.target, 'i686')
-        run: sudo apt-get update && sudo apt-get install gcc-multilib
+      - name: Install cross
+        if: matrix.job.use-cross
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
 
-      - name: Check formatting
+      - name: Use cross as the cargo command
+        if: matrix.job.use-cross
+        shell: bash
+        run: echo "CARGO_CMD=cross" >> $GITHUB_ENV
+
+      - name: Build
         shell: bash
         run: |
-          cargo fmt -- --check
+          $CARGO_CMD build --release --target=${{ matrix.job.target }} ${{matrix.features.extra_args}}
 
-      - name: Build tests
+      - name: Test
+        shell: bash
+        run: $CARGO_CMD test --target=${{ matrix.job.target }} ${{matrix.features.extra_args}}
+
+  release:
+    name: Publish release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Extract changelog section
+        id: changelog
         shell: bash
         run: |
-          cargo test --no-run --verbose --target ${{ matrix.platform.target }} $OPTIONS
+          CI_WORKDIR=ci-workdir
+          BODY_PATH=${CI_WORKDIR}/body.md
 
-      - name: Run tests
-        shell: bash
-        run: |
-          cargo test --verbose --target ${{ matrix.platform.target }} $OPTIONS
+          mkdir "${CI_WORKDIR}"
+          python3 scripts/changelog.py -o "${BODY_PATH}"
 
-      - name: Run clippy
+          echo "body_path=${BODY_PATH}" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: ${{ steps.changelog.outputs.body_path }}
+
+      - name: Publish crate
         shell: bash
-        run: |
-          cargo clippy --target ${{ matrix.platform.target }} $OPTIONS -- -Dwarnings
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_TOKEN }}
+        run:
+          cargo publish
