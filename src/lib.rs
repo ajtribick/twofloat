@@ -96,7 +96,7 @@ mod num_integration;
 mod serialization;
 
 #[cfg(feature = "simba")]
-mod simba;
+mod simba_integration;
 
 pub use base::no_overlap;
 
