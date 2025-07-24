@@ -97,7 +97,7 @@ fn powi_0_test() {
             "Result of {:?}.powi(0) produced invalid value",
             source
         );
-        assert_eq!(result, expected, "{:?}.powi(0) did not return 1", source);
+        assert_eq!(result, expected, "{source:?}.powi(0) did not return 1");
     })
 }
 
@@ -114,8 +114,7 @@ fn powi_1_test() {
         );
         assert_eq!(
             result, source,
-            "{:?}.powi(1) did not return same number",
-            source
+            "{source:?}.powi(1) did not return same number"
         );
     });
 }
@@ -182,7 +181,7 @@ fn zero_powf_test() {
             assert!(!result.is_valid(), "0^0 returned valid result");
         } else {
             assert!(result.is_valid(), "0^{} produced invalid value", source);
-            assert_eq!(result, 0.0, "0^{} did not return 0", source);
+            assert_eq!(result, 0.0, "0^{source} did not return 0");
         }
     })
 }
@@ -197,7 +196,7 @@ fn powf_zero_test() {
             assert!(!result.is_valid(), "0^0 returned valid result");
         } else {
             assert!(result.is_valid(), "{}^0 returned invalid value", source);
-            assert_eq!(result, 1.0, "{}^0 did not return 1", source);
+            assert_eq!(result, 1.0, "{source}^0 did not return 1");
         }
     });
 }
