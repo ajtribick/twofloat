@@ -31,8 +31,7 @@ fn sin_cos_test() {
         assert_eq!(
             sin,
             source.sin(),
-            "sin_cos({0:?}).0 not equal to sin({0:?})",
-            source
+            "sin_cos({source:?}).0 not equal to sin({source:?})"
         );
 
         assert!(
@@ -43,8 +42,7 @@ fn sin_cos_test() {
         assert_eq!(
             cos,
             source.cos(),
-            "sin_cos({0:?}).1 not equal to cos({0:?})",
-            source
+            "sin_cos({source:?}).1 not equal to cos({source:?})"
         );
 
         let result = cos * cos + sin * sin;

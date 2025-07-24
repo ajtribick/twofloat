@@ -179,20 +179,17 @@ fn check_try_from_result<T>(
     assert_eq!(
         discriminant(expected),
         discriminant(result),
-        "Conversion of {:?} produced unexpected Err/Ok state",
-        source
+        "Conversion of {source:?} produced unexpected Err/Ok state"
     );
     match (expected, result) {
         (Ok(expected_value), Ok(result_value)) => assert_eq!(
             expected_value, result_value,
-            "Conversion of {:?} produced incorrect result",
-            source
+            "Conversion of {source:?} produced incorrect result"
         ),
         (Err(expected_err), Err(result_err)) => assert_eq!(
             discriminant(expected_err),
             discriminant(result_err),
-            "Conversion of {:?} produced mismatched error types",
-            source
+            "Conversion of {source:?} produced mismatched error types"
         ),
         _ => unreachable!(),
     }
@@ -383,14 +380,12 @@ where
         assert_eq!(
             result.hi(),
             source.to_f64().unwrap(),
-            "Conversion of {:?} failed: mismatch in high word",
-            source
+            "Conversion of {source:?} failed: mismatch in high word"
         );
         assert_eq!(
             result.lo(),
             0.0,
-            "Conversion of {:?} failed: non-zero low word",
-            source
+            "Conversion of {source:?} failed: non-zero low word"
         );
     };
 
@@ -712,8 +707,7 @@ where
             assert_eq!(
                 T::from(-result.lo()).unwrap() - one(),
                 T::max_value() - source,
-                "Conversion of {:?} did not produce matching value",
-                source
+                "Conversion of {source:?} did not produce matching value"
             );
         } else if result.hi() == T::min_value().to_f64().unwrap() {
             assert!(
@@ -724,22 +718,19 @@ where
             assert_eq!(
                 T::from(result.lo()).unwrap(),
                 source - T::min_value(),
-                "Conversion of {:?} did not produce matching value",
-                source
+                "Conversion of {source:?} did not produce matching value"
             );
         } else if result.lo() >= 0.0 {
             assert_eq!(
                 T::from(result.hi()).unwrap() + T::from(result.lo()).unwrap(),
                 source,
-                "Conversion of {:?} did not produce matching value",
-                source
+                "Conversion of {source:?} did not produce matching value"
             );
         } else {
             assert_eq!(
                 T::from(result.hi()).unwrap() - T::from(-result.lo()).unwrap(),
                 source,
-                "Conversion of {:?} did not produce matching value",
-                source
+                "Conversion of {source:?} did not produce matching value"
             );
         }
     });
@@ -843,15 +834,13 @@ where
             assert_eq!(
                 T::from(result.hi()).unwrap() + T::from(result.lo()).unwrap(),
                 source,
-                "Conversion of {:?} did not produce matching value",
-                source
+                "Conversion of {source:?} did not produce matching value"
             );
         } else {
             assert_eq!(
                 T::from(result.hi()).unwrap() - T::from(-result.lo()).unwrap(),
                 source,
-                "Conversion of {:?} did not produce matching value",
-                source
+                "Conversion of {source:?} did not produce matching value"
             );
         }
     });
