@@ -12,16 +12,8 @@ use common::*;
 fn equality_f64_test() {
     let a = random_float();
     let a_twofloat = TwoFloat::from(a);
-    assert_eq!(
-        a_twofloat, a,
-        "LHS equality check failed for f64 value {}",
-        a
-    );
-    assert_eq!(
-        a, a_twofloat,
-        "RHS equality check failed for f64 value {}",
-        a
-    );
+    assert_eq!(a_twofloat, a, "LHS equality check failed for f64 value {a}");
+    assert_eq!(a, a_twofloat, "RHS equality check failed for f64 value {a}");
 
     if let Ok(b_twofloat) = try_get_twofloat_with_hi(a) {
         assert_ne!(a_twofloat, b_twofloat);
@@ -211,8 +203,7 @@ fn min_test() {
 
         assert_eq!(
             result, expected,
-            "min({:?}, {:?}) produced unexpected result",
-            a, b
+            "min({a:?}, {b:?}) produced unexpected result"
         );
     })
 }
@@ -227,8 +218,7 @@ fn max_test() {
 
         assert_eq!(
             result, expected,
-            "max({:?}, {:?}) produced unexpected result",
-            a, b
+            "max({a:?}, {b:?}) produced unexpected result"
         );
     });
 }

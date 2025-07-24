@@ -120,33 +120,33 @@ mod test {
     #[test]
     fn display_test() {
         let value = TwoFloat { hi: 1.0, lo: 0.3 };
-        assert_eq!(format!("{}", value), "1 + 0.3");
+        assert_eq!(format!("{value}"), "1 + 0.3");
         assert_eq!(format!("{}", -value), "-1 - 0.3");
-        assert_eq!(format!("{:+}", value), "+1 + 0.3");
-        assert_eq!(format!("{:.2}", value), "1.00 + 0.30");
+        assert_eq!(format!("{value:+}"), "+1 + 0.3");
+        assert_eq!(format!("{value:.2}"), "1.00 + 0.30");
         assert_eq!(format!("{:.2}", -value), "-1.00 - 0.30");
-        assert_eq!(format!("{:+.2}", value), "+1.00 + 0.30");
+        assert_eq!(format!("{value:+.2}"), "+1.00 + 0.30");
     }
 
     #[test]
     fn lowerexp_test() {
         let value = TwoFloat { hi: 1.0, lo: -0.3 };
-        assert_eq!(format!("{:e}", value), "1e0 - 3e-1");
+        assert_eq!(format!("{value:e}"), "1e0 - 3e-1");
         assert_eq!(format!("{:e}", -value), "-1e0 + 3e-1");
-        assert_eq!(format!("{:+e}", value), "+1e0 - 3e-1");
-        assert_eq!(format!("{:.2e}", value), "1.00e0 - 3.00e-1");
+        assert_eq!(format!("{value:+e}"), "+1e0 - 3e-1");
+        assert_eq!(format!("{value:.2e}"), "1.00e0 - 3.00e-1");
         assert_eq!(format!("{:.2e}", -value), "-1.00e0 + 3.00e-1");
-        assert_eq!(format!("{:+.2e}", value), "+1.00e0 - 3.00e-1");
+        assert_eq!(format!("{value:+.2e}"), "+1.00e0 - 3.00e-1");
     }
 
     #[test]
     fn upperexp_test() {
         let value = TwoFloat { hi: 1.0, lo: 0.3 };
-        assert_eq!(format!("{:E}", value), "1E0 + 3E-1");
+        assert_eq!(format!("{value:E}"), "1E0 + 3E-1");
         assert_eq!(format!("{:E}", -value), "-1E0 - 3E-1");
-        assert_eq!(format!("{:+E}", value), "+1E0 + 3E-1");
-        assert_eq!(format!("{:.2E}", value), "1.00E0 + 3.00E-1");
+        assert_eq!(format!("{value:+E}"), "+1E0 + 3E-1");
+        assert_eq!(format!("{value:.2E}"), "1.00E0 + 3.00E-1");
         assert_eq!(format!("{:.2E}", -value), "-1.00E0 - 3.00E-1");
-        assert_eq!(format!("{:+.2E}", value), "+1.00E0 + 3.00E-1");
+        assert_eq!(format!("{value:+.2E}"), "+1.00E0 + 3.00E-1");
     }
 }
