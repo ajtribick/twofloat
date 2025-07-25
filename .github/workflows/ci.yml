@@ -52,8 +52,8 @@ jobs:
           - { target: x86_64-pc-windows-msvc,    os: windows-latest                  }
           - { target: x86_64-unknown-linux-gnu,  os: ubuntu-latest                   }
         features:
-          - { name: "std",    extra_args: "--features serde"                                  }
-          - { name: "no_std", extra_args: "--no-default-features --features math_funcs,serde" }
+          - { name: "std",    extra_args: "--features serde"                         }
+          - { name: "no_std", extra_args: "--no-default-features --features serde"   }
     env:
       CARGO_CMD: cargo
 

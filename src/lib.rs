@@ -25,9 +25,8 @@ let e = TwoFloat::new_div(1.0, 7.0);
 
 Basic arithmetic operators and comparisons are available, together with the
 utility functions `abs()`, `is_positive_sign()` and `is_negative_sign()`.
-Mathematical functions are provided if the `math_funcs` feature is enabled
-(this is enabled by default), though the implementations should be regarded
-as preliminary.
+Most mathematical functions defined on `f64` are provided, though the
+implementations should be regarded as preliminary.
 
 Operations on non-finite values are not supported. At the moment this is not
 automatically checked. The `is_valid()` method is provided for this purpose.

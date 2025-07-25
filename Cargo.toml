@@ -19,8 +19,7 @@ name = "twofloat"
 test = true
 
 [features]
-default = ["std", "math_funcs"]
-math_funcs = []
+default = ["std"]
 std = []
 
 [dependencies]
