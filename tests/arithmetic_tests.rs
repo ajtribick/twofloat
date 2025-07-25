@@ -30,9 +30,7 @@ fn new_add_test() {
         assert_eq!(
             expected,
             result.hi(),
-            "Result of new_add({}, {}) had unexpected high word",
-            a,
-            b
+            "Result of new_add({a}, {b}) had unexpected high word"
         );
     })
 }
@@ -53,9 +51,7 @@ fn new_sub_test() {
         assert_eq!(
             expected,
             result.hi(),
-            "Result of new_sub({}, {}) had unexpected high word",
-            a,
-            b
+            "Result of new_sub({a}, {b}) had unexpected high word"
         );
     })
 }
@@ -75,9 +71,7 @@ fn new_mul_test() {
     assert_eq!(
         expected,
         result.hi(),
-        "Result of new_mul({}, {}) had unexpected high word",
-        a,
-        b
+        "Result of new_mul({a}, {b}) had unexpected high word"
     );
 }
 

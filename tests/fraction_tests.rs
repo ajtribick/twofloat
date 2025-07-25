@@ -97,8 +97,7 @@ fn fract_no_lo_word_test() {
         );
         assert_eq!(
             result, expected,
-            "fract({:?}) produced incorrect value",
-            source
+            "fract({source:?}) produced incorrect value"
         );
     })
 }
@@ -112,8 +111,7 @@ fn fract_no_fract_test() {
         let result = source.fract();
         assert_eq!(
             result, expected,
-            "Non-zero fractional part of integer {:?}",
-            source
+            "Non-zero fractional part of integer {source:?}"
         );
     });
 }
@@ -142,7 +140,7 @@ fn trunc_hi_fract_test() {
             "Fractional part remains in low word after truncating {:?}",
             source
         );
-        assert_eq!(result, expected, "Incorrect value of trunc({:?})", source);
+        assert_eq!(result, expected, "Incorrect value of trunc({source:?})");
     })
 }
 
@@ -174,7 +172,7 @@ fn trunc_lo_fract_test() {
             "Fractional part remains in low word after truncating {:?}",
             source
         );
-        assert_eq!(result, expected, "Incorrect value in trunc({:?})", source);
+        assert_eq!(result, expected, "Incorrect value in trunc({source:?})");
     });
 }
 
@@ -193,8 +191,7 @@ fn trunc_no_lo_word_test() {
         assert_eq!(
             result,
             a.trunc(),
-            "trunc({:?}) produced incorrect value",
-            source
+            "trunc({source:?}) produced incorrect value"
         );
     })
 }
@@ -212,17 +209,11 @@ fn trunc_no_lo_fract_test() {
             "trunc({:?} produced invalid value",
             source
         );
-        assert_eq!(
-            result.lo(),
-            b,
-            "trunc({:?}) changed integer low word",
-            source
-        );
+        assert_eq!(result.lo(), b, "trunc({source:?}) changed integer low word");
         assert_eq!(
             result.hi(),
             a.trunc(),
-            "trunc({:?}) returned incorrect high word",
-            source
+            "trunc({source:?}) returned incorrect high word"
         );
     })
 }
@@ -242,8 +233,7 @@ fn trunc_no_fract_test() {
         );
         assert_eq!(
             result, expected,
-            "trunc({:?}) returned different value",
-            source
+            "trunc({source:?}) returned different value"
         );
     })
 }
@@ -262,7 +252,7 @@ fn ceil_hi_fract_test() {
             "ceil({:?}) produced invalid value",
             source
         );
-        assert_eq!(result, expected, "Incorrect value of ceil({:?})", source);
+        assert_eq!(result, expected, "Incorrect value of ceil({source:?})");
     })
 }
 
@@ -280,7 +270,7 @@ fn ceil_lo_fract_test() {
             "ceil({:?}) produced invalid value",
             source
         );
-        assert_eq!(result, expected, "Incorrect value of ceil({:?})", source);
+        assert_eq!(result, expected, "Incorrect value of ceil({source:?})");
     })
 }
 
@@ -299,8 +289,7 @@ fn ceil_no_lo_word_test() {
         assert_eq!(
             result,
             a.ceil(),
-            "ceil({:?}) produced incorrect value",
-            source
+            "ceil({source:?}) produced incorrect value"
         );
     })
 }
@@ -318,17 +307,11 @@ fn ceil_no_lo_fract_test() {
             "ceil({:?} produced invalid value",
             source
         );
-        assert_eq!(
-            result.lo(),
-            b,
-            "ceil({:?}) changed integer low word",
-            source
-        );
+        assert_eq!(result.lo(), b, "ceil({source:?}) changed integer low word");
         assert_eq!(
             result.hi(),
             a.ceil(),
-            "ceil({:?}) returned incorrect high word",
-            source
+            "ceil({source:?}) returned incorrect high word"
         );
     })
 }
@@ -348,8 +331,7 @@ fn ceil_no_fract_test() {
         );
         assert_eq!(
             result, expected,
-            "Ceil of integer {:?} returned different value",
-            source
+            "Ceil of integer {source:?} returned different value"
         );
     })
 }
@@ -368,7 +350,7 @@ fn floor_hi_fract_test() {
             "floor({:?}) produced invalid value",
             source
         );
-        assert_eq!(result, expected, "Incorrect value of floor({:?})", source);
+        assert_eq!(result, expected, "Incorrect value of floor({source:?})");
     })
 }
 
@@ -385,7 +367,7 @@ fn floor_lo_fract_test() {
             "floor({:?}) produced invalid value",
             source
         );
-        assert_eq!(result, expected, "Incorrect value of floor({:?})", source);
+        assert_eq!(result, expected, "Incorrect value of floor({source:?})");
     });
 }
 
@@ -404,8 +386,7 @@ fn floor_no_lo_word_test() {
         assert_eq!(
             result,
             a.floor(),
-            "ceil({:?}) produced incorrect value",
-            source
+            "ceil({source:?}) produced incorrect value"
         );
     });
 }
@@ -423,17 +404,11 @@ fn floor_no_lo_fract_test() {
             "floor({:?} produced invalid value",
             source
         );
-        assert_eq!(
-            result.lo(),
-            b,
-            "floor({:?}) changed integer low word",
-            source
-        );
+        assert_eq!(result.lo(), b, "floor({source:?}) changed integer low word");
         assert_eq!(
             result.hi(),
             a.floor(),
-            "floor({:?}) returned incorrect high word",
-            source
+            "floor({source:?}) returned incorrect high word"
         );
     })
 }
@@ -452,8 +427,7 @@ fn floor_no_fract_test() {
         );
         assert_eq!(
             result, expected,
-            "floor({:?}) returned different value",
-            source
+            "floor({source:?}) returned different value"
         );
     });
 }
@@ -472,7 +446,7 @@ fn round_hi_fract_test() {
             "round({:?}) produced invalid value",
             source
         );
-        assert_eq!(result, expected, "Incorrect value of round({:?})", source);
+        assert_eq!(result, expected, "Incorrect value of round({source:?})");
     });
 }
 
@@ -496,7 +470,7 @@ fn round_hi_half_test() {
             "round({:?}) produced invalid value",
             source
         );
-        assert_eq!(result, expected, "Incorrect value of round({:?})", source);
+        assert_eq!(result, expected, "Incorrect value of round({source:?})");
     });
 }
 
@@ -515,7 +489,7 @@ fn round_lo_fract_test() {
             "round({:?}) produced invalid value",
             source
         );
-        assert_eq!(result, expected, "Incorrect value of round({:?})", source);
+        assert_eq!(result, expected, "Incorrect value of round({source:?})");
     });
 }
 
@@ -540,7 +514,7 @@ fn round_lo_half_test() {
             "round({:?}) produced invalid value",
             source
         );
-        assert_eq!(result, expected, "Incorrect value of round({:?})", source);
+        assert_eq!(result, expected, "Incorrect value of round({source:?})");
     });
 }
 
@@ -559,8 +533,7 @@ fn round_no_lo_word_test() {
         assert_eq!(
             result,
             a.round(),
-            "round({:?}) produced incorrect value",
-            source
+            "round({source:?}) produced incorrect value"
         );
     })
 }
@@ -578,17 +551,11 @@ fn round_no_lo_fract_test() {
             "round({:?} produced invalid value",
             source
         );
-        assert_eq!(
-            result.lo(),
-            b,
-            "round({:?}) changed integer low word",
-            source
-        );
+        assert_eq!(result.lo(), b, "round({source:?}) changed integer low word");
         assert_eq!(
             result.hi(),
             a.round(),
-            "round({:?}) returned incorrect high word",
-            source
+            "round({source:?}) returned incorrect high word"
         );
     });
 }
@@ -607,8 +574,7 @@ fn round_no_fract_test() {
         );
         assert_eq!(
             result, expected,
-            "round({:?}) returned different value",
-            source
+            "round({source:?}) returned different value"
         );
     })
 }
