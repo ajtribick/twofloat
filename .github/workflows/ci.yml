@@ -4,12 +4,14 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - "main"
+      - "v[0-9]+.[0-9]+.x"
     tags:
       - "v*"
   pull_request:
     branches:
-      - main
+      - "main"
+      - "v[0-9]+.[0-9]+.x"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -44,7 +46,7 @@ jobs:
       matrix:
         job:
           - { target: aarch64-apple-darwin,      os: macos-latest                    }
-          - { target: aarch64-unknown-linux-gnu, os: ubuntu-latest,  use-cross: true }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-24.04-arm                }
           - { target: i686-pc-windows-msvc,      os: windows-latest                  }
           - { target: i686-unknown-linux-gnu,    os: ubuntu-latest,  use-cross: true }
           - { target: x86_64-apple-darwin,       os: macos-13                        }
@@ -52,8 +54,8 @@ jobs:
           - { target: x86_64-pc-windows-msvc,    os: windows-latest                  }
           - { target: x86_64-unknown-linux-gnu,  os: ubuntu-latest                   }
         features:
-          - { name: "std",    extra_args: "--features serde"                                  }
-          - { name: "no_std", extra_args: "--no-default-features --features math_funcs,serde" }
+          - { name: "std",    extra_args: "--features serde"                         }
+          - { name: "no_std", extra_args: "--no-default-features --features serde"   }
     env:
       CARGO_CMD: cargo
 
