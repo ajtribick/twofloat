@@ -795,7 +795,6 @@ binary_ops! {
     }
 }
 
-#[cfg(feature = "math_funcs")]
 binary_ops! {
     fn Pow::pow<'a, 'b>(self: &'a TwoFloat, rhs: &'b f64) -> TwoFloat {
         TwoFloat::powf(*self, (*rhs).into())
