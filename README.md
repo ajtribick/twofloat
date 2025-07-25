@@ -23,7 +23,6 @@ addressed in future releases.
 
 ## Optional features
 
-* `math_funcs` - include mathematical functions (enabled by default)
 * `serde` - enable serialization/deserialization with Serde.
 * `std` - use std mathematical functions instead of libm.
 

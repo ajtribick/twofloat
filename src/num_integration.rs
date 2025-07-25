@@ -242,6 +242,7 @@ impl num_traits::NumCast for TwoFloat {
     }
 }
 
+#[allow(non_snake_case)]
 impl num_traits::FloatConst for TwoFloat {
     #[inline]
     fn E() -> Self {
@@ -795,7 +796,6 @@ binary_ops! {
     }
 }
 
-#[cfg(feature = "math_funcs")]
 binary_ops! {
     fn Pow::pow<'a, 'b>(self: &'a TwoFloat, rhs: &'b f64) -> TwoFloat {
         TwoFloat::powf(*self, (*rhs).into())
