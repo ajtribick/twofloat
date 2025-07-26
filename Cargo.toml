@@ -19,10 +19,9 @@ name = "twofloat"
 test = true
 
 [features]
-default = ["std", "math_funcs"]
-math_funcs = []
+default = ["std"]
 serde = ["dep:serde"]
-simba = ["dep:approx", "dep:simba", "math_funcs"]
+simba = ["dep:approx", "dep:simba"]
 std = []
 
 [dependencies]
@@ -38,4 +37,4 @@ libm = "0.2.6"
 
 [dev-dependencies]
 rand = "0.8"
-serde_test = "1.0" 
+serde_test = "1.0"

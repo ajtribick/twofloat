@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.8.4
+
+* Mathematical functions are always on. Feature `math_funcs` now does nothing,
+  but is left for compatibility purposes. It will be removed in v0.9.
+
 ## Version 0.8.3
 
 * Fix `no_std` builds
