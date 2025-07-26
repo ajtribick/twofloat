@@ -61,7 +61,6 @@ possible through the Serde library.
   28–31.
 */
 
-#![forbid(unsafe_code)]
 // Disable irrelevant lints
 #![allow(clippy::approx_constant)]
 #![allow(clippy::excessive_precision)]
@@ -94,6 +93,9 @@ mod num_integration;
 
 #[cfg(feature = "serde")]
 mod serialization;
+
+#[cfg(feature = "simba")]
+mod simba_integration;
 
 pub use base::no_overlap;
 
