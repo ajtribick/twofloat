@@ -966,7 +966,7 @@ impl TwoFloat {
             // exp(z + y/2) = (1 + expm1(z)) exp(1/2)^y
             let exp_z = z.expm1_quarter() + 1.0;
             let exp_y = exp_half(y as i32);
-            return exp_z * exp_y;
+            exp_z * exp_y
         }
     }
 
