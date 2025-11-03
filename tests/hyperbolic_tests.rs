@@ -8,8 +8,8 @@ use twofloat::TwoFloat;
 
 #[test]
 fn cosh_sinh_test() {
-    let mut rng = rand::thread_rng();
-    let dist = rand::distributions::Uniform::new_inclusive(-20.0, 20.0);
+    let mut rng = rand::rng();
+    let dist = rand::distr::Uniform::new_inclusive(-20.0, 20.0).unwrap();
     repeated_test(|| {
         let source = loop {
             let a = rng.sample(dist);
@@ -45,8 +45,8 @@ fn cosh_sinh_test() {
 
 #[test]
 fn sinh_asinh_test() {
-    let mut rng = rand::thread_rng();
-    let dist = rand::distributions::Uniform::new_inclusive(-20.0, 20.0);
+    let mut rng = rand::rng();
+    let dist = rand::distr::Uniform::new_inclusive(-20.0, 20.0).unwrap();
     repeated_test(|| {
         let source = TwoFloat::from(rng.sample(dist));
         let result = source.sinh().asinh();
@@ -66,8 +66,8 @@ fn sinh_asinh_test() {
 
 #[test]
 fn cosh_acosh_test() {
-    let mut rng = rand::thread_rng();
-    let dist = rand::distributions::Uniform::new_inclusive(0.0, 20.0);
+    let mut rng = rand::rng();
+    let dist = rand::distr::Uniform::new_inclusive(0.0, 20.0).unwrap();
     repeated_test(|| {
         let source = TwoFloat::from(rng.sample(dist));
         let result = source.cosh().acosh();
@@ -87,8 +87,8 @@ fn cosh_acosh_test() {
 
 #[test]
 fn tanh_atanh_test() {
-    let mut rng = rand::thread_rng();
-    let dist = rand::distributions::Uniform::new_inclusive(-10.0, 10.0);
+    let mut rng = rand::rng();
+    let dist = rand::distr::Uniform::new_inclusive(-10.0, 10.0).unwrap();
     repeated_test(|| {
         let source = TwoFloat::from(rng.sample(dist));
         let result = source.tanh().atanh();

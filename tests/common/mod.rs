@@ -7,11 +7,11 @@ use twofloat::{TwoFloat, TwoFloatError};
 const TEST_ITERS: usize = 100_000;
 
 pub fn random_float() -> f64 {
-    let mut engine = rand::thread_rng();
-    let mantissa_dist = rand::distributions::Uniform::new(0, 1u64 << 52);
-    let exponent_dist = rand::distributions::Uniform::new(0, 2047u64);
+    let mut engine = rand::rng();
+    let mantissa_dist = rand::distr::Uniform::new(0, 1u64 << 52).unwrap();
+    let exponent_dist = rand::distr::Uniform::new(0, 2047u64).unwrap();
     let x = f64::from_bits(engine.sample(mantissa_dist) | (engine.sample(exponent_dist) << 52));
-    if engine.gen() {
+    if engine.random() {
         x
     } else {
         -x
@@ -19,15 +19,15 @@ pub fn random_float() -> f64 {
 }
 
 pub fn random_ddouble() -> TwoFloat {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mantissa_bits_hi: u64 =
-        (0..f64::MANTISSA_DIGITS).fold(0u64, |bits, n| bits + (rng.gen_range(0..=1) << n));
+        (0..f64::MANTISSA_DIGITS).fold(0u64, |bits, n| bits + (rng.random_range(0..=1) << n));
     let mantissa_bits_lo: u64 =
-        (0..f64::MANTISSA_DIGITS).fold(0u64, |bits, n| bits + (rng.gen_range(0..=1) << n));
+        (0..f64::MANTISSA_DIGITS).fold(0u64, |bits, n| bits + (rng.random_range(0..=1) << n));
     let exponent_bits: u64 = (0..11)
-        .fold(0u64, |bits, n| bits + (rng.gen_range(0..=1) << n))
+        .fold(0u64, |bits, n| bits + (rng.random_range(0..=1) << n))
         .max(53);
-    let sgn: u64 = rng.gen_range(0..=1);
+    let sgn: u64 = rng.random_range(0..=1);
     let x_hi = f64::from_bits(sgn << 63 | exponent_bits << 52 | mantissa_bits_hi);
     let x_lo = f64::from_bits(sgn << 63 | (exponent_bits - 53) << 52 | mantissa_bits_lo);
     TwoFloat::new_add(x_hi, x_lo)
@@ -57,13 +57,13 @@ where
     }
 }
 
-pub fn get_valid_f64_gen<G, F>(mut gen: G, pred: F) -> f64
+pub fn get_valid_f64_with_generator<G, F>(mut generator: G, pred: F) -> f64
 where
     G: FnMut() -> f64,
     F: Fn(f64) -> bool,
 {
     loop {
-        let a = gen();
+        let a = generator();
         if pred(a) {
             return a;
         }

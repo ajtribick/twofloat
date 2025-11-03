@@ -251,9 +251,9 @@ where
 // Tests for binary operators for TwoFloat and f64
 
 fn f64_twofloat_left(op: Operator) {
-    let mut rng = rand::thread_rng();
-    let high_range = rand::distributions::Uniform::new_inclusive(-1e50, 1e50);
-    let low_range = rand::distributions::Uniform::new_inclusive(-1.0, 1.0);
+    let mut rng = rand::rng();
+    let high_range = rand::distr::Uniform::new_inclusive(-1e50, 1e50).unwrap();
+    let low_range = rand::distr::Uniform::new_inclusive(-1.0, 1.0).unwrap();
 
     repeated_test(|| loop {
         let a = rng.sample(high_range);
@@ -285,9 +285,9 @@ fn f64_twofloat_left(op: Operator) {
 }
 
 fn f64_twofloat_right(op: Operator) {
-    let mut rng = rand::thread_rng();
-    let high_range = rand::distributions::Uniform::new_inclusive(-1e50, 1e50);
-    let low_range = rand::distributions::Uniform::new_inclusive(-1.0, 1.0);
+    let mut rng = rand::rng();
+    let high_range = rand::distr::Uniform::new_inclusive(-1e50, 1e50).unwrap();
+    let low_range = rand::distr::Uniform::new_inclusive(-1.0, 1.0).unwrap();
 
     repeated_test(|| loop {
         let a = rng.sample(high_range);
@@ -323,9 +323,9 @@ fn f64_twofloat_reversible(op: Operator) {
         return;
     }
 
-    let mut rng = rand::thread_rng();
-    let high_range = rand::distributions::Uniform::new_inclusive(-1e50, 1e50);
-    let low_range = rand::distributions::Uniform::new_inclusive(-1.0, 1.0);
+    let mut rng = rand::rng();
+    let high_range = rand::distr::Uniform::new_inclusive(-1e50, 1e50).unwrap();
+    let low_range = rand::distr::Uniform::new_inclusive(-1.0, 1.0).unwrap();
 
     repeated_test(|| loop {
         let a = rng.sample(high_range);
@@ -404,9 +404,9 @@ fn f64_twofloat_assign(op: Operator) {
 // Tests for binary operators for TwoFloat and TwoFloat
 
 fn twofloat_op(op: Operator) {
-    let mut rng = rand::thread_rng();
-    let high_range = rand::distributions::Uniform::new_inclusive(-1e50, 1e50);
-    let low_range = rand::distributions::Uniform::new_inclusive(-1.0, 1.0);
+    let mut rng = rand::rng();
+    let high_range = rand::distr::Uniform::new_inclusive(-1e50, 1e50).unwrap();
+    let low_range = rand::distr::Uniform::new_inclusive(-1.0, 1.0).unwrap();
 
     repeated_test(|| loop {
         let (a, b) = loop {

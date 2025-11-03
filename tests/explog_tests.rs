@@ -7,8 +7,8 @@ use twofloat::TwoFloat;
 
 #[test]
 fn exp_test() {
-    let mut rng = rand::thread_rng();
-    let src_dist = rand::distributions::Uniform::new(-600_f64, 600.0);
+    let mut rng = rand::rng();
+    let src_dist = rand::distr::Uniform::new(-600_f64, 600.0).unwrap();
 
     repeated_test(|| {
         let a = rng.sample(src_dist);
@@ -33,8 +33,8 @@ fn exp_test() {
 
 #[test]
 fn exp_m1_test() {
-    let mut rng = rand::thread_rng();
-    let src_dist = rand::distributions::Uniform::<f64>::new(-10.0, 10.0);
+    let mut rng = rand::rng();
+    let src_dist = rand::distr::Uniform::<f64>::new(-10.0, 10.0).unwrap();
 
     repeated_test(|| {
         let a = rng.sample(src_dist);
@@ -59,8 +59,8 @@ fn exp_m1_test() {
 
 #[test]
 fn ln_test() {
-    let mut rng = rand::thread_rng();
-    let src_dist = rand::distributions::Uniform::new(0f64, 1e300);
+    let mut rng = rand::rng();
+    let src_dist = rand::distr::Uniform::new(0f64, 1e300).unwrap();
 
     repeated_test(|| {
         let a = rng.sample(src_dist);
@@ -94,8 +94,8 @@ fn ln_negative_test() {
 
 #[test]
 fn ln_1p_test() {
-    let mut rng = rand::thread_rng();
-    let src_dist = rand::distributions::Uniform::new(-1.0f64, 1e300);
+    let mut rng = rand::rng();
+    let src_dist = rand::distr::Uniform::new(-1.0f64, 1e300).unwrap();
 
     repeated_test(|| {
         let a = rng.sample(src_dist);
@@ -120,8 +120,8 @@ fn ln_1p_test() {
 
 #[test]
 fn ln_exp_test() {
-    let mut rng = rand::thread_rng();
-    let src_dist = rand::distributions::Uniform::new(-600.0, 600.0);
+    let mut rng = rand::rng();
+    let src_dist = rand::distr::Uniform::new(-600.0, 600.0).unwrap();
 
     repeated_test(|| {
         let expected = TwoFloat::from(rng.sample(src_dist));

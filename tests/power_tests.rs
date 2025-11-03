@@ -120,10 +120,11 @@ fn powi_1_test() {
 
 #[test]
 fn powi_value_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     repeated_test(|| {
-        let source = TwoFloat::new_add(rng.gen_range(-128.0..128.0), rng.gen_range(-1.0..1.0));
-        let exponent = rng.gen_range(1..20);
+        let source =
+            TwoFloat::new_add(rng.random_range(-128.0..128.0), rng.random_range(-1.0..1.0));
+        let exponent = rng.random_range(1..20);
         let mut expected = TwoFloat::from(1.0);
         for _ in 0..exponent {
             expected *= &source;
@@ -149,10 +150,11 @@ fn powi_value_test() {
 
 #[test]
 fn powi_reciprocal_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     repeated_test(|| {
-        let source = TwoFloat::new_add(rng.gen_range(-128.0..128.0), rng.gen_range(-1.0..1.0));
-        let exponent = rng.gen_range(1..20);
+        let source =
+            TwoFloat::new_add(rng.random_range(-128.0..128.0), rng.random_range(-1.0..1.0));
+        let exponent = rng.random_range(1..20);
         let expected = 1.0 / source.powi(exponent);
         let result = source.powi(-exponent);
 
@@ -202,8 +204,8 @@ fn powf_zero_test() {
 
 #[test]
 fn powf_test() {
-    let mut rng = rand::thread_rng();
-    let value_dist = rand::distributions::Uniform::new(1.0f64, 20.0f64);
+    let mut rng = rand::rng();
+    let value_dist = rand::distr::Uniform::new(1.0f64, 20.0f64).unwrap();
     repeated_test(|| {
         let a = rng.sample(value_dist);
         let b = rng.sample(value_dist);
@@ -228,8 +230,8 @@ fn powf_test() {
 
 #[test]
 fn powf_integers_test() {
-    let mut rng = rand::thread_rng();
-    let value_dist = rand::distributions::Uniform::new(-20.0f64, 20.0f64);
+    let mut rng = rand::rng();
+    let value_dist = rand::distr::Uniform::new(-20.0f64, 20.0f64).unwrap();
     repeated_test(|| {
         let a = rng.sample(value_dist);
         let b = rng.sample(value_dist).floor();
@@ -256,8 +258,8 @@ fn powf_integers_test() {
 
 #[test]
 fn powf_negative_test() {
-    let mut rng = rand::thread_rng();
-    let value_dist = rand::distributions::Uniform::new(-20.0f64, 20.0f64);
+    let mut rng = rand::rng();
+    let value_dist = rand::distr::Uniform::new(-20.0f64, 20.0f64).unwrap();
     repeated_test(|| {
         let a = rng.sample(value_dist);
         let b = rng.sample(value_dist);
