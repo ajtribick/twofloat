@@ -8,8 +8,8 @@ use twofloat::TwoFloat;
 
 #[test]
 fn sin_cos_test() {
-    let mut rng = rand::thread_rng();
-    let dist = rand::distributions::Uniform::new_inclusive(-20.0, 20.0);
+    let mut rng = rand::rng();
+    let dist = rand::distr::Uniform::new_inclusive(-20.0, 20.0).unwrap();
 
     repeated_test(|| {
         let source = loop {
@@ -55,11 +55,12 @@ fn sin_cos_test() {
 
 #[test]
 fn sin_asin_test() {
-    let mut rng = rand::thread_rng();
-    let dist = rand::distributions::Uniform::new_inclusive(
+    let mut rng = rand::rng();
+    let dist = rand::distr::Uniform::new_inclusive(
         -core::f64::consts::FRAC_PI_2,
         core::f64::consts::FRAC_PI_2,
-    );
+    )
+    .unwrap();
     repeated_test(|| {
         let source = TwoFloat::from(rng.sample(dist));
         let result = source.sin().asin();
@@ -79,8 +80,8 @@ fn sin_asin_test() {
 
 #[test]
 fn cos_acos_test() {
-    let mut rng = rand::thread_rng();
-    let dist = rand::distributions::Uniform::new_inclusive(0.0, core::f64::consts::PI);
+    let mut rng = rand::rng();
+    let dist = rand::distr::Uniform::new_inclusive(0.0, core::f64::consts::PI).unwrap();
     repeated_test(|| {
         let source = TwoFloat::from(rng.sample(dist));
         let result = source.cos().acos();
@@ -100,11 +101,12 @@ fn cos_acos_test() {
 
 #[test]
 fn tan_atan_test() {
-    let mut rng = rand::thread_rng();
-    let dist = rand::distributions::Uniform::new_inclusive(
+    let mut rng = rand::rng();
+    let dist = rand::distr::Uniform::new_inclusive(
         -core::f64::consts::FRAC_PI_2,
         core::f64::consts::FRAC_PI_2,
-    );
+    )
+    .unwrap();
     repeated_test(|| {
         let source = TwoFloat::from(rng.sample(dist));
         let result = source.tan().atan();
@@ -124,9 +126,9 @@ fn tan_atan_test() {
 
 #[test]
 fn sin_cos_atan2_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let dist =
-        rand::distributions::Uniform::new_inclusive(-core::f64::consts::PI, core::f64::consts::PI);
+        rand::distr::Uniform::new_inclusive(-core::f64::consts::PI, core::f64::consts::PI).unwrap();
     repeated_test(|| {
         let source = TwoFloat::from(rng.sample(dist));
         let (s, c) = source.sin_cos();

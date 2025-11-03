@@ -3,11 +3,11 @@ use rand::Rng;
 const TEST_ITERS: usize = 100000;
 
 pub fn random_float() -> f64 {
-    let mut engine = rand::thread_rng();
-    let mantissa_dist = rand::distributions::Uniform::new(0, 1u64 << 52);
-    let exponent_dist = rand::distributions::Uniform::new(0, 2047u64);
+    let mut engine = rand::rng();
+    let mantissa_dist = rand::distr::Uniform::new(0, 1u64 << 52).unwrap();
+    let exponent_dist = rand::distr::Uniform::new(0, 2047u64).unwrap();
     let x = f64::from_bits(engine.sample(mantissa_dist) | (engine.sample(exponent_dist) << 52));
-    if engine.gen() {
+    if engine.random() {
         x
     } else {
         -x

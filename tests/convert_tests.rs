@@ -3,7 +3,7 @@
 use core::{convert::TryFrom, fmt::Debug, mem::discriminant, ops::Range};
 
 use num_traits::{one, zero, ToPrimitive};
-use rand::{distributions::uniform::SampleUniform, Rng};
+use rand::{distr::uniform::SampleUniform, Rng};
 
 use twofloat::{no_overlap, TwoFloat, TwoFloatError};
 
@@ -296,11 +296,12 @@ fn from_twofloat_split_fract<T>()
 where
     T: ConvertBounds,
 {
-    let mut rng = rand::thread_rng();
-    let valid_dist = rand::distributions::Uniform::new(
+    let mut rng = rand::rng();
+    let valid_dist = rand::distr::Uniform::new(
         f64::from_bits(T::lower_bound().to_bits() - 1),
         T::upper_bound(),
-    );
+    )
+    .unwrap();
 
     repeated_test_enumerate(|i| {
         let (a, b, source) = loop {
@@ -328,11 +329,12 @@ fn from_twofloat_with_fract<T>()
 where
     T: ConvertBounds,
 {
-    let mut rng = rand::thread_rng();
-    let valid_dist = rand::distributions::Uniform::new(
+    let mut rng = rand::rng();
+    let valid_dist = rand::distr::Uniform::new(
         f64::from_bits(T::lower_bound().to_bits() - 1),
         T::upper_bound(),
-    );
+    )
+    .unwrap();
 
     repeated_test_enumerate(|i| {
         let (a, source) = loop {
@@ -400,8 +402,8 @@ where
             source += one();
         }
     } else {
-        let mut rng = rand::thread_rng();
-        let dist = rand::distributions::Uniform::new_inclusive(T::min_value(), T::max_value());
+        let mut rng = rand::rng();
+        let dist = rand::distr::Uniform::new_inclusive(T::min_value(), T::max_value()).unwrap();
         repeated_test(|| test(rng.sample(&dist)));
     }
 }
@@ -459,18 +461,18 @@ int_test! {
 
 fn random_mantissa() -> u64 {
     const MANTISSA_RANGE: u64 = 1 << 52;
-    rand::thread_rng().gen_range(0..MANTISSA_RANGE)
+    rand::rng().random_range(0..MANTISSA_RANGE)
 }
 
 fn random_positive_float_exp_range(exp_range: Range<u64>) -> f64 {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
-    f64::from_bits((rng.gen_range(exp_range.start..exp_range.end) << 52) | random_mantissa())
+    f64::from_bits((rng.random_range(exp_range.start..exp_range.end) << 52) | random_mantissa())
 }
 
 fn random_float_exp_range(exp_range: Range<u64>) -> f64 {
     let x = random_positive_float_exp_range(exp_range);
-    if rand::thread_rng().gen() {
+    if rand::rng().random() {
         x
     } else {
         -x
@@ -531,9 +533,9 @@ fn from_twofloat_high_fract64<T>()
 where
     T: ConvertBounds,
 {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
-    let mut gen_f64 = if T::min_value() == zero() {
+    let mut random_f64 = if T::min_value() == zero() {
         || random_positive_float_exp_range(53..1075)
     } else {
         || random_float_exp_range(53..1075)
@@ -541,18 +543,18 @@ where
 
     repeated_test(|| {
         let (a, b) = loop {
-            let a = get_valid_f64_gen(&mut gen_f64, |x| {
+            let a = get_valid_f64_with_generator(&mut random_f64, |x| {
                 x > T::lower_bound() && x < T::upper_bound() && x.fract() != 0.0
             });
             let rb = right_bit(a).unwrap_or(i16::MIN);
             if rb < -1019 {
                 continue;
             }
-            let b_exponent = (rng.gen_range(-1022..rb) + 1023) as u64;
+            let b_exponent = (rng.random_range(-1022..rb) + 1023) as u64;
             let b_mantissa = random_mantissa();
             let b = f64::from_bits(b_mantissa | (b_exponent << 52));
             if no_overlap(a, b) {
-                break if rng.gen() { (a, b) } else { (a, -b) };
+                break if rng.random() { (a, b) } else { (a, -b) };
             }
         };
 
@@ -568,19 +570,19 @@ fn from_twofloat_split_fract64<T>()
 where
     T: ConvertBounds,
 {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
-    let mut gen_f64 = if T::min_value() == zero() {
+    let mut random_f64 = if T::min_value() == zero() {
         || random_positive_float_exp_range(1023..1087)
     } else {
         || random_float_exp_range(1023..1087)
     };
 
     let fract_dist =
-        rand::distributions::Uniform::new(f64::from_bits((-1.0f64).to_bits() - 1), 1.0);
+        rand::distr::Uniform::new(f64::from_bits((-1.0f64).to_bits() - 1), 1.0).unwrap();
     repeated_test_enumerate(|i| {
         let (a, b) = loop {
-            let a = get_valid_f64_gen(&mut gen_f64, |x| {
+            let a = get_valid_f64_with_generator(&mut random_f64, |x| {
                 x > T::lower_bound() && x < T::upper_bound()
             })
             .trunc();
@@ -611,11 +613,12 @@ fn from_twofloat_large64<T>()
 where
     T: ConvertBounds,
 {
-    let mut rng = rand::thread_rng();
-    let valid_dist = rand::distributions::Uniform::new(
+    let mut rng = rand::rng();
+    let valid_dist = rand::distr::Uniform::new(
         f64::from_bits(T::lower_bound().to_bits() - 1),
         T::upper_bound(),
-    );
+    )
+    .unwrap();
     repeated_test(|| {
         let (a, rb) = loop {
             let a = rng.sample(valid_dist);
@@ -625,9 +628,9 @@ where
             }
         };
         let b = loop {
-            let b = rng.gen_range(1.0..(1 << rb) as f64);
+            let b = rng.random_range(1.0..(1 << rb) as f64);
             if no_overlap(a, b) {
-                if rng.gen() {
+                if rng.random() {
                     break b;
                 } else {
                     break -b;
@@ -674,8 +677,8 @@ fn to_twofloat64<T>()
 where
     T: ConvertBounds,
 {
-    let mut rng = rand::thread_rng();
-    let source_dist = rand::distributions::Uniform::new_inclusive(T::min_value(), T::max_value());
+    let mut rng = rand::rng();
+    let source_dist = rand::distr::Uniform::new_inclusive(T::min_value(), T::max_value()).unwrap();
     repeated_test(|| {
         let source = rng.sample(&source_dist);
         let result: TwoFloat = source.into();
@@ -803,11 +806,12 @@ fn to_twofloat_exact<T>()
 where
     T: ConvertBounds128,
 {
-    let mut rng = rand::thread_rng();
-    let source_dist = rand::distributions::Uniform::new_inclusive(
+    let mut rng = rand::rng();
+    let source_dist = rand::distr::Uniform::new_inclusive(
         T::zero().saturating_sub(T::roundtrip_max()),
         T::roundtrip_max(),
-    );
+    )
+    .unwrap();
     repeated_test(|| {
         let source = rng.sample(&source_dist);
         let result: TwoFloat = source.into();
@@ -850,12 +854,12 @@ fn inexact_roundtrip<T>()
 where
     T: ConvertBounds128,
 {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let source_dist =
-        rand::distributions::Uniform::new_inclusive(T::roundtrip_max(), T::max_value());
+        rand::distr::Uniform::new_inclusive(T::roundtrip_max(), T::max_value()).unwrap();
     repeated_test(|| {
         let source = rng.sample(&source_dist);
-        let source_signed = if T::min_value() == zero() || rng.gen() {
+        let source_signed = if T::min_value() == zero() || rng.random() {
             source
         } else {
             T::zero() - source
