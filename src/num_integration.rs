@@ -13,6 +13,14 @@ impl num_traits::Num for TwoFloat {
     }
 }
 
+impl num_traits::ConstZero for TwoFloat {
+    const ZERO: Self = Self::ZERO;
+}
+
+impl num_traits::ConstOne for TwoFloat {
+    const ONE: Self = Self::ONE;
+}
+
 impl num_traits::Zero for TwoFloat {
     #[inline]
     fn zero() -> Self {

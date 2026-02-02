@@ -64,6 +64,12 @@ impl TwoFloat {
     /// aka the number of significant digits in base 2
     pub const MANTISSA_DIGITS: u32 = 106;
 
+    /// A constant 0.
+    pub const ZERO: Self = Self { hi: 0.0, lo: 0.0 };
+
+    /// A constant 1.
+    pub const ONE: Self = Self { hi: 1.0, lo: 0.0 };
+
     /// Smallest finite `TwoFloat` value.
     pub const MIN: Self = Self {
         hi: f64::MIN,
