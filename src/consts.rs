@@ -2,6 +2,12 @@ use hexf::hexf64;
 
 use crate::TwoFloat;
 
+/// A constant 0.
+pub const ZERO: TwoFloat = TwoFloat { hi: 0.0, lo: 0.0 };
+
+/// A constant 1.
+pub const ONE: TwoFloat = TwoFloat { hi: 1.0, lo: 0.0 };
+
 /// Euler's number (e)
 pub const E: TwoFloat = TwoFloat {
     hi: hexf64!("0x1.5bf0a8b145769p1"),
